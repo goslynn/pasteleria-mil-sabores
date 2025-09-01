@@ -2,110 +2,119 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-    provider = "prisma-client-js"
-    output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
-    provider = "sqlite"
-    url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
 }
 
-model User {
-    idUsuario    Int    @id @default(autoincrement())
-    nombre        String
-    email         String @unique
-    password      String
-    fechaNacimiento   DateTime
-    createdAt   DateTime @default(now())
-    preferencias     PreferenciasUsuario?
-    carrito          CarritoCompras?
-    pedidos          Pedido[]
+model usuario {
+  id_usuario       Int                  @id @default(autoincrement())
+  nombre           String
+  email            String               @unique
+  password         String
+  fecha_nacimiento DateTime
+  createdAt        DateTime             @default(now())
+  preferencias     PreferenciasUsuario?
+  carrito          CarritoCompras?
+  pedidos          Pedido[]
 }
-model PreferenciasUsuario{
-  ioPreferencia Int    @id @default(autoincrement())
-  idUsuarioFk   Int    @unique
+
+model PreferenciasUsuario {
+  ioPreferencia Int     @id @default(autoincrement())
+  idUsuarioFk   Int     @unique
   // Relación con User
-  user User @relation(fields: [idUsuarioFk], references: [idUsuario])
+  user          usuario @relation(fields: [idUsuarioFk], references: [id_usuario])
   diaEntrega    String
   medioPago     String
 }
-model CarritoCompras{
-  idCarrito    Int @id @default(autoincrement())
-  idUsuariFk   Int @unique
-  user User @relation(fields: [idUsuariFk], references: [idUsuario])
+
+model CarritoCompras {
+  idCarrito  Int     @id @default(autoincrement())
+  idUsuariFk Int     @unique
+  user       usuario @relation(fields: [idUsuariFk], references: [id_usuario])
 }
-model Descuento{
-  idDescuento Int @id @default(autoincrement())
+
+model Descuento {
+  idDescuento Int    @id @default(autoincrement())
   descripcion String
   porcentaje  Float
 }
-model Producto{
-  idProducto  Int @id @default(autoincrement())
-  nombre      String
-  descripcion String
-  stock       Float
-  carritoDetalle CarritoDetalle[]
-  precio Precio[]
+
+model Producto {
+  idProducto        Int                 @id @default(autoincrement())
+  nombre            String
+  descripcion       String
+  stock             Float
+  carritoDetalle    CarritoDetalle[]
+  precio            Precio[]
   productoCategoria ProductoCategoria[]
-  detallePedido DetallePedido[]
-}
-model CarritoDetalle{
-  idCarrito Int @id @default(autoincrement())
-  idProducto Int
-  producto Producto @relation(fields: [idProducto], references: [idProducto])
-}
-model ListaPrecios{
-  idLista Int @id @default(autoincrement())
-  nombreLista String
-  precio Precio[]
+  detallePedido     DetallePedido[]
 }
 
-model Precio{
-  idPrecio Int @id @default(autoincrement())
-  idProductoFk Int
-  idListaFk Int
-  producto Producto @relation(fields: [idProductoFk], references: [idProducto])
-  lista ListaPrecios @relation(fields: [idListaFk], references: [idLista])
+model CarritoDetalle {
+  idCarrito  Int      @id @default(autoincrement())
+  idProducto Int
+  producto   Producto @relation(fields: [idProducto], references: [idProducto])
 }
-model Categoria{
-  idCategoria Int @id @default(autoincrement())
-  nombre String
+
+model ListaPrecios {
+  idLista     Int      @id @default(autoincrement())
+  nombreLista String
+  precio      Precio[]
+}
+
+model Precio {
+  idPrecio     Int          @id @default(autoincrement())
+  idProductoFk Int
+  idListaFk    Int
+  producto     Producto     @relation(fields: [idProductoFk], references: [idProducto])
+  lista        ListaPrecios @relation(fields: [idListaFk], references: [idLista])
+}
+
+model Categoria {
+  idCategoria       Int                 @id @default(autoincrement())
+  nombre            String
   productoCategoria ProductoCategoria[]
 }
-model ProductoCategoria{
-  idPc Int @id @default(autoincrement())
+
+model ProductoCategoria {
+  idPc          Int       @id @default(autoincrement())
   idCategoriaFK Int
   idProductoFk  Int
-  categoria Categoria @relation(fields: [idCategoriaFK], references: [idCategoria])
-  producto Producto @relation(fields: [idProductoFk], references: [idProducto])
+  categoria     Categoria @relation(fields: [idCategoriaFK], references: [idCategoria])
+  producto      Producto  @relation(fields: [idProductoFk], references: [idProducto])
 }
-model Pedido{
-  idPedido Int @id @default(autoincrement())
-  idUsuarioFk Int
-  fecha  String
-  estado String
-  total  String
-  usuario User @relation(fields: [idUsuarioFk], references: [idUsuario])
-  envio Envio?
+
+model Pedido {
+  idPedido      Int             @id @default(autoincrement())
+  idUsuarioFk   Int
+  fecha         String
+  estado        String
+  total         String
+  usuario       usuario         @relation(fields: [idUsuarioFk], references: [id_usuario])
+  envio         Envio?
   detallePedido DetallePedido[]
 }
-model Envio{
-    idEnvio Int @id @default(autoincrement())
-    idPedidoFk Int @unique
-    direccion String
-    fechaEnvio String
-    estadoEnvio String
-    pedido Pedido @relation(fields: [idPedidoFk], references: [idPedido])
+
+model Envio {
+  idEnvio     Int    @id @default(autoincrement())
+  idPedidoFk  Int    @unique
+  direccion   String
+  fechaEnvio  String
+  estadoEnvio String
+  pedido      Pedido @relation(fields: [idPedidoFk], references: [idPedido])
 }
-model DetallePedido{
-  idDetalle Int @id  @default(autoincrement())
-  idPedidoFk Int
-  idProductoFk Int @unique
-  cantidad Float
+
+model DetallePedido {
+  idDetalle      Int      @id @default(autoincrement())
+  idPedidoFk     Int
+  idProductoFk   Int      @unique
+  cantidad       Float
   precioUnitario Float
-  pedido Pedido @relation(fields: [idPedidoFk], references: [idPedido])
-  producto Producto @relation(fields: [idProductoFk], references: [idProducto])
+  pedido         Pedido   @relation(fields: [idPedidoFk], references: [idPedido])
+  producto       Producto @relation(fields: [idProductoFk], references: [idProducto])
 }
-
-
