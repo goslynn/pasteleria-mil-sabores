@@ -11,31 +11,31 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model usuario {
-  id_usuario       Int                  @id @default(autoincrement())
-  nombre           String
-  email            String               @unique
-  password         String
-  fecha_nacimiento DateTime
-  createdAt        DateTime             @default(now())
-  preferencias     PreferenciasUsuario?
-  carrito          CarritoCompras?
-  pedidos          Pedido[]
+model Usuario {
+  idUsuario       Int                  @id @default(autoincrement())
+  nombre          String
+  email           String               @unique
+  password        String
+  fechaNacimiento DateTime
+  createdAt       DateTime             @default(now())
+  preferencias    PreferenciasUsuario?
+  carrito         CarritoCompras?
+  pedidos         Pedido[]
 }
 
 model PreferenciasUsuario {
   ioPreferencia Int     @id @default(autoincrement())
   idUsuarioFk   Int     @unique
   // Relación con User
-  user          usuario @relation(fields: [idUsuarioFk], references: [id_usuario])
+  user          Usuario @relation(fields: [idUsuarioFk], references: [idUsuario])
   diaEntrega    String
   medioPago     String
 }
 
 model CarritoCompras {
-  idCarrito  Int     @id @default(autoincrement())
-  idUsuariFk Int     @unique
-  user       usuario @relation(fields: [idUsuariFk], references: [id_usuario])
+  idCarrito   Int     @id @default(autoincrement())
+  idUsuarioFk Int     @unique
+  usuario     Usuario @relation(fields: [idUsuarioFk], references: [idUsuario])
 }
 
 model Descuento {
@@ -95,7 +95,7 @@ model Pedido {
   fecha         String
   estado        String
   total         String
-  usuario       usuario         @relation(fields: [idUsuarioFk], references: [id_usuario])
+  usuario       Usuario         @relation(fields: [idUsuarioFk], references: [idUsuario])
   envio         Envio?
   detallePedido DetallePedido[]
 }

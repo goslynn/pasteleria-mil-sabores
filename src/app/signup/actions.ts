@@ -37,16 +37,16 @@ export async function signup(_prev : SimpleState, formData: FormData) : Promise<
 
   const passwordHash = await hashPassword(data.password);
 
-  const user = await prisma.usuario.create({
+  const user = await prisma.Usuario.create({
     data: {
       nombre: data.nombre,
       email: data.email,
       password: passwordHash,
-      fecha_nacimiento: new Date(data.fechaNacimiento),
+      fechaNacimiento: new Date(data.fechaNacimiento),
     },
-    select: { id_usuario: true },
+    select: { idUsuario: true },
   });
 
-  await createSession(user.id_usuario);
+  await createSession(user.idUsuario);
   redirect("/");
 }
