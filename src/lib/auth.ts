@@ -40,10 +40,7 @@ export async function createSession(userId: number) {
 
 export async function destroySession() {
     const cookieStore = await cookies();
-    // opción A (recomendada):
     cookieStore.delete(COOKIE_NAME);
-    // opción B:
-    // cookieStore.set(COOKIE_NAME, "", { path: "/", maxAge: 0 });
 }
 
 export async function getSessionUserId(): Promise<number | null> {

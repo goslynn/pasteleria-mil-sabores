@@ -7,7 +7,7 @@ import { redirect } from "next/navigation";
 import {SimpleState} from "@/lib/state";
 
 const LoginSchema = z.object({
-  email: z.string().email(),
+  email: z.email(),
   password: z.string().min(8),
 });
 
@@ -22,9 +22,9 @@ export async function login(_prev: SimpleState, formData: FormData) : Promise<Si
     return { ok: false, error: "Credenciales inválidas." };
   }
 
-  const user = await prisma.usuario.findUnique({
+  const user = await prisma.user.findUnique({
     where: { email: data.email },
-    select: { id_usuario: true, password: true },
+    select: { idUsuario: true, password: true },
   });
 
   if (!user) return { ok: false, error: "Email o password incorrectos." };
@@ -32,6 +32,6 @@ export async function login(_prev: SimpleState, formData: FormData) : Promise<Si
   const ok = await verifyPassword(data.password, user.password);
   if (!ok) return { ok: false, error: "Email o password incorrectos." };
 
-  await createSession(user.id_usuario);
+  await createSession(user.idUsuario);
   redirect("/");
 }
