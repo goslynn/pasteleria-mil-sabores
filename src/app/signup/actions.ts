@@ -28,7 +28,7 @@ export async function signup(_prev : SimpleState, formData: FormData) : Promise<
     return { ok: false, error: "Datos inválidos." };
   }
 
-  const existing = await prisma.user.findUnique({
+  const existing = await prisma.usuario.findUnique({
     where: { email: data.email },
   });
   if (existing) {
@@ -37,16 +37,16 @@ export async function signup(_prev : SimpleState, formData: FormData) : Promise<
 
   const passwordHash = await hashPassword(data.password);
 
-  const user = await prisma.user.create({
+  const user = await prisma.usuario.create({
     data: {
       nombre: data.nombre,
       email: data.email,
       password: passwordHash,
-      fechaNacimiento: new Date(data.fechaNacimiento),
+      fecha_nacimiento: new Date(data.fechaNacimiento),
     },
-    select: { idUsuario: true },
+    select: { id_usuario: true },
   });
 
-  await createSession(user.idUsuario);
+  await createSession(user.id_usuario);
   redirect("/");
 }

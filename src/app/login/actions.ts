@@ -22,9 +22,9 @@ export async function login(_prev: SimpleState, formData: FormData) : Promise<Si
     return { ok: false, error: "Credenciales inválidas." };
   }
 
-  const user = await prisma.user.findUnique({
+  const user = await prisma.usuario.findUnique({
     where: { email: data.email },
-    select: { idUsuario: true, password: true },
+    select: { id_usuario: true, password: true },
   });
 
   if (!user) return { ok: false, error: "Email o password incorrectos." };
@@ -32,6 +32,6 @@ export async function login(_prev: SimpleState, formData: FormData) : Promise<Si
   const ok = await verifyPassword(data.password, user.password);
   if (!ok) return { ok: false, error: "Email o password incorrectos." };
 
-  await createSession(user.idUsuario);
+  await createSession(user.id_usuario);
   redirect("/");
 }
