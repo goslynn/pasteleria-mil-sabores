@@ -28,7 +28,7 @@ export async function signup(_prev : SimpleState, formData: FormData) : Promise<
     return { ok: false, error: "Datos inválidos." };
   }
 
-  const existing = await prisma.usuario.findUnique({
+  const existing = await prisma.Usuario.findUnique({
     where: { email: data.email },
   });
   if (existing) {
