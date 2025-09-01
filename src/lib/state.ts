@@ -1,0 +1,1 @@
+export type SimpleState = {ok: boolean, error?: string;};

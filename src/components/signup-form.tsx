@@ -1,34 +1,58 @@
+"use client";
+
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import React, {useActionState} from "react";
+import {SimpleState} from "@/lib/state";
 
-export function RegisterForm({
+
+export function SignupForm({
                                  className,
+                                 action,
                                  ...props
-                             }: React.ComponentProps<"div">) {
+                             }: React.ComponentProps<"div"> & {
+    action: (prev: SimpleState, formData: FormData) => Promise<SimpleState>;
+    }) {
+    const [state, formAction] = useActionState<SimpleState, FormData>(action, {ok: false});
+
     return (
         <div className={cn("flex flex-col gap-6", className)} {...props}>
             <Card className="overflow-hidden p-0">
                 <CardContent className="grid p-0 md:grid-cols-2">
-                    <form className="p-6 md:p-8">
+                    <form className="p-6 md:p-8" action={formAction}>
                         <div className="flex flex-col gap-6">
                             <div className="flex flex-col items-center text-center">
                                 <h1 className="text-2xl font-bold">Crear una cuenta</h1>
                                 <p className="text-muted-foreground text-balance">
-                                    Ingresá tu información para registrarte
+                                    Ingresa tu información para registrarte
                                 </p>
                             </div>
 
+                            {/* mostrar error si la action lo devolvió */}
+                            {state?.error && (
+                                <p className="text-red-600 text-sm" role="alert">
+                                    {state.error}
+                                </p>
+                            )}
+
                             <div className="grid gap-3">
                                 <Label htmlFor="name">Nombre</Label>
-                                <Input id="name" type="text" placeholder="Tu nombre" required />
+                                <Input
+                                    name="nombre"
+                                    id="name"
+                                    type="text"
+                                    placeholder="Tu nombre"
+                                    required
+                                />
                             </div>
 
                             <div className="grid gap-3">
                                 <Label htmlFor="email">Correo electrónico</Label>
                                 <Input
+                                    name="email"
                                     id="email"
                                     type="email"
                                     placeholder="tucorreo@ejemplo.com"
@@ -38,17 +62,27 @@ export function RegisterForm({
 
                             <div className="grid gap-3">
                                 <Label htmlFor="fecha_nacimiento">Fecha de nacimiento</Label>
-                                <Input id="date" type="date" required />
+                                <Input
+                                    name="fecha_nacimiento"
+                                    id="date"
+                                    type="date"
+                                    required
+                                />
                             </div>
 
                             <div className="grid gap-3">
                                 <Label htmlFor="password">Contraseña</Label>
-                                <Input id="password" type="password" required />
+                                <Input
+                                    name="password"
+                                    id="password"
+                                    type="password"
+                                    required
+                                />
                             </div>
 
                             <div className="grid gap-3">
                                 <Label htmlFor="confirm-password">Confirmar contraseña</Label>
-                                <Input id="confirm-password" type="password" required />
+                                <Input id="confirm-password" type="password" required/>
                             </div>
 
                             <Button type="submit" className="w-full">
@@ -56,7 +90,7 @@ export function RegisterForm({
                             </Button>
 
                             <div className="text-center text-sm">
-                                ¿Ya tenés una cuenta?{" "}
+                                ¿Ya tienes una cuenta?{" "}
                                 <a href="/login" className="underline underline-offset-4">
                                     Iniciar sesión
                                 </a>
@@ -74,11 +108,12 @@ export function RegisterForm({
                 </CardContent>
             </Card>
 
-            <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
-                Al hacer clic en continuar, aceptás nuestros{" "}
+            <div
+                className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
+                Al hacer clic en continuar, estaras aceptando nuestros{" "}
                 <a href="#">Términos de servicio</a> y nuestra{" "}
                 <a href="#">Política de privacidad</a>.
             </div>
         </div>
-    )
+    );
 }
