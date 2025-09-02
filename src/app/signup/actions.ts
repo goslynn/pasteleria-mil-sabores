@@ -10,7 +10,7 @@ const SignupSchema = z.object({
   nombre: z.string().min(2),
   email: z.email(),
   password: z.string().min(8),
-  fecha_nacimiento: z.string().refine((val) => !isNaN(Date.parse(val)), {
+  fechaNacimiento: z.string().refine((val) => !isNaN(Date.parse(val)), {
     message: "Fecha inválida",
   }),
 });
@@ -25,10 +25,10 @@ export async function signup(_prev : SimpleState, formData: FormData) : Promise<
 
   const parsed = SignupSchema.safeParse(data);
   if (!parsed.success) {
-    return { ok: false, error: "Datos inválidos." };
+    return { ok: false, error: "Datos inválidos." + parsed.error.message };
   }
 
-  const existing = await prisma.Usuario.findUnique({
+  const existing = await prisma.usuario.findUnique({
     where: { email: data.email },
   });
   if (existing) {
@@ -37,7 +37,7 @@ export async function signup(_prev : SimpleState, formData: FormData) : Promise<
 
   const passwordHash = await hashPassword(data.password);
 
-  const user = await prisma.Usuario.create({
+  const user = await prisma.usuario.create({
     data: {
       nombre: data.nombre,
       email: data.email,

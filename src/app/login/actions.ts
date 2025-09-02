@@ -22,7 +22,7 @@ export async function login(_prev: SimpleState, formData: FormData) : Promise<Si
     return { ok: false, error: "Credenciales inválidas." };
   }
 
-  const user = await prisma.Usuario.findUnique({
+  const user = await prisma.usuario.findUnique({
     where: { email: data.email },
     select: { idUsuario: true, password: true },
   });
