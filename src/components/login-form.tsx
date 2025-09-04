@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import React, { useActionState } from "react";
-import {SimpleState} from "@/lib/state";
+import {SimpleState} from "@/types/state";
 
 
 export function LoginForm(
