@@ -49,6 +49,7 @@ model Producto {
   nombre            String
   descripcion       String
   stock             Float
+  imgURL            String?
   carritoDetalle    CarritoDetalle[]
   precio            Precio[]
   productoCategoria ProductoCategoria[]
