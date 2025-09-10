@@ -69,11 +69,12 @@ model ListaPrecios {
 }
 
 model Precio {
-  idPrecio     Int          @id @default(autoincrement())
-  idProductoFk Int
-  idListaFk    Int
-  producto     Producto     @relation(fields: [idProductoFk], references: [idProducto])
-  lista        ListaPrecios @relation(fields: [idListaFk], references: [idLista])
+  idPrecio       Int          @id @default(autoincrement())
+  idProductoFk   Int
+  idListaFk      Int
+  precioProducto Float
+  producto       Producto     @relation(fields: [idProductoFk], references: [idProducto])
+  lista          ListaPrecios @relation(fields: [idListaFk], references: [idLista])
 }
 
 model Categoria {

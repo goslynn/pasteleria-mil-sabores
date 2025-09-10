@@ -8,15 +8,15 @@ function mapProductoToProductData(producto: any, precio?: any, categoria?: any):
     let discount: Discount | undefined;
 
     // ejemplo simple: si hay descuento
-    if (precio?.descuento) {
+    if (precio?.precioProducto) {
         discount = {
             type: "percentage",
-            value: precio.descuento.porcentaje,
+            value: precio.precioProducto,
         };
     }
 
     const money: Money = {
-        amount: precio?.precioUnitario || 0,
+        amount: precio?.precioProducto || 0,
         currency: "CLP",
         priceInCents: false,
     };
