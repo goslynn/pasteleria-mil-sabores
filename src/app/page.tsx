@@ -36,22 +36,18 @@ export default function HomePage() {
                 <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
                     <div className="flex items-center gap-2 px-4">
                         <SidebarTrigger className="-ml-1" />
-                        <Separator
-                            orientation="vertical"
-                            className="mr-2 data-[orientation=vertical]:h-4"
-                        />
+                        <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4"/>
                         {/* logo con href al home */}
                     </div>
                 </header>
-                <div className="p-4">
-                    <ProductGrid products={products} cols={4} />
+
+                {/* Contenedor visual principal */}
+                <div className="p-6 sm:p-8 md:p-10 flex justify-center">
+                    <div className="w-full max-w-6xl bg-chart-5 rounded-2xl shadow-md ring-1 ring-rose-200/40 p-4 sm:p-6 md:p-8">
+                        {/* Grid responsivo limitado por cols */}
+                        <ProductGrid products={products} cols={3} minCardPx={280} gapPx={24} />
+                    </div>
                 </div>
-                {/*<div className="flex flex-1 flex-col gap-4 p-4 pt-0">*/}
-                {/*    <div className="grid auto-rows-min gap-4 md:grid-cols-3">*/}
-                {/*        <ProductGrid products={products} cols={3} />*/}
-                {/*    </div>*/}
-                {/*    <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min" />*/}
-                {/*</div>*/}
             </SidebarInset>
         </SidebarProvider>
     )
