@@ -1,13 +1,11 @@
-import {ProductData} from "@/types/product";
-import {ProductCard} from "@/components/ui/product-card";
+import { ProductData } from "@/types/product";
+import { ProductCard } from "@/components/ui/product-card";
 import React from "react";
-
-
 
 type ProductGridProps = {
     products: ProductData[]
-    cols?: number
-    minCardPx?: number
+    cols?: number       // máximo de columnas
+    minCardPx?: number  // ancho mínimo de cada tarjeta
     gapPx?: number
 }
 
@@ -17,18 +15,28 @@ export function ProductGrid({
                                 minCardPx = 280,
                                 gapPx = 24,
                             }: ProductGridProps) {
-    // Cálculo para que en pantallas grandes nunca supere "cols" columnas:
-    //   maxWidth = cols * minCardPx + (cols-1) * gap
     const maxWidth = `calc(${cols} * ${minCardPx}px + ${(cols - 1)} * ${gapPx}px)`
 
     return (
         <div
-            className="grid mx-auto place-content-center"
-            style={{ gridTemplateColumns: `repeat(auto-fit, minmax(${minCardPx}px, 1fr))`, gap: gapPx }}
+            className="grid mx-auto justify-items-center"
+            style={{
+                gridTemplateColumns: `repeat(auto-fit, minmax(${minCardPx}px, 1fr))`,
+                gap: gapPx,
+                maxWidth,
+                width: "100%",
+            }}
         >
-            {products.map(p => <ProductCard key={p.id} product={p} className={"mx-auto place-content-center"} />)}
+            {products.map((p) => (
+                <ProductCard
+                    key={p.id}
+                    product={p}
+                    className="w-full max-w-[280px]"
+                />
+            ))}
         </div>
     )
 }
 
-export default ProductGrid
+
+export default ProductGrid;
