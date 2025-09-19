@@ -1,0 +1,51 @@
+{
+  "kind": "collectionType",
+  "collectionName": "disscounts",
+  "info": {
+    "singularName": "disscount",
+    "pluralName": "disscounts",
+    "displayName": "Disscount"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "code": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    },
+    "requiresCode": {
+      "type": "boolean",
+      "default": false
+    },
+    "priority": {
+      "type": "integer",
+      "default": 100
+    },
+    "stackable": {
+      "type": "boolean",
+      "default": false
+    },
+    "startsAt": {
+      "type": "datetime",
+      "required": false
+    },
+    "endsAt": {
+      "type": "datetime"
+    },
+    "payload": {
+      "type": "json",
+      "required": true
+    }
+  }
+}
