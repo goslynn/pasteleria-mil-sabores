@@ -1,4 +1,5 @@
 import "server-only";
+
 import { cookies } from "next/headers";
 import { SignJWT, jwtVerify } from "jose";
 import bcrypt from "bcryptjs";
@@ -33,7 +34,6 @@ export async function createSession(userId: number) {
         .setExpirationTime("7d")
         .sign(secret);
 
-    // Next 15: cookies() es async; aquí sí puedes escribir cookies (Server Action/Route Handler)
     const cookieStore = await cookies();
     cookieStore.set(COOKIE_NAME, token, COOKIE_OPTIONS);
 }

@@ -9,6 +9,9 @@ import {
 } from "@/components/ui/sidebar"
 import {ProductData} from "@/types/product";
 import {ProductGrid} from "@/components/ui/product-grid";
+import {fetchUserById} from "@/lib/datamapping";
+import {useEffect} from "react";
+import {nextFetch} from "@/lib/fetching";
 
 
 const base: ProductData = {
@@ -29,6 +32,29 @@ const products: ProductData[] = Array.from({ length: 9 }).map((_, i) => ({
 
 
 export default function HomePage() {
+    useEffect(() => {
+        let canceled = false;
+
+        (async () => {
+            try {
+
+                const { userId } = await nextFetch<{ userId: number | null }>("/api/session");
+
+                if (!userId) {
+                    console.log("[Home] Sin sesión.");
+                    return;
+                }
+
+                const u = await fetchUserById(userId);
+                if (!canceled) console.log("[Home] Usuario:", u);
+            } catch (e) {
+                if (!canceled) console.error("[Home] Error usuario:", e);
+            }
+        })();
+
+        return () => { canceled = true; };
+    }, []);
+
     return (
         <SidebarProvider>
             <AppSidebar />
