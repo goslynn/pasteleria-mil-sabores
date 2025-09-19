@@ -54,13 +54,13 @@ export async function nextFetch<T = unknown>(
         (opts.baseUrl ?? process.env.NEXT_PUBLIC_SITE_URL ?? "").replace(/\/$/, "");
     const url = joinUrl(base, path);
     const res = await fetch(url, { cache: "no-store", ...opts });
-    console.log("fetch response: " + res);
+    console.log(res);
 
     const body = await parseJsonOrText(res);
     if (!res.ok) {
         throw new Error(extractErrorMessage(body) ?? `HTTP ${res.status}`);
     }
-    console.log("fetch body: " +body);
+    console.log(body);
     return body as T;
 }
 
@@ -88,12 +88,12 @@ export async function strapiFetch<T = unknown>(
             Authorization: `Bearer ${process.env.STRAPI_TOKEN ?? ""}`,
         },
     });
-    console.log("fetch response: " + res);
+    console.log(res);
 
     const body = await parseJsonOrText(res);
     if (!res.ok) {
         throw new Error(extractErrorMessage(body) ?? `HTTP ${res.status}`);
     }
-    console.log("fetch body: " +body);
+    console.log(body);
     return body as T;
 }

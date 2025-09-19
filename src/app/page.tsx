@@ -1,17 +1,12 @@
 "use client";
 
-import { AppSidebar } from "@/components/app-sidebar"
-import { Separator } from "@/components/ui/separator"
-import {
-    SidebarInset,
-    SidebarProvider,
-    SidebarTrigger,
-} from "@/components/ui/sidebar"
 import {ProductData} from "@/types/product";
 import {ProductGrid} from "@/components/ui/product-grid";
 import {fetchUserById} from "@/lib/datamapping";
 import {useEffect} from "react";
 import {nextFetch} from "@/lib/fetching";
+import {Navbar08} from "@/components/ui/navbar";
+
 
 
 const base: ProductData = {
@@ -56,25 +51,18 @@ export default function HomePage() {
     }, []);
 
     return (
-        <SidebarProvider>
-            <AppSidebar />
-            <SidebarInset>
-                <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
-                    <div className="flex items-center gap-2 px-4">
-                        <SidebarTrigger className="-ml-1" />
-                        <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4"/>
-                        {/* logo con href al home */}
-                    </div>
-                </header>
+        <Navbar08/>
+        <main className="mx-auto max-w-6xl px-4 py-6 md:py-10">
+            {/* Título / Hero simple opcional */}
+            <section className="mb-6">
+                <h1 className="text-2xl font-bold tracking-tight">Nuestros productos</h1>
+                <p className="text-muted-foreground">
+                    Endúlzate con nuestras tortas, postres y clásicos de la casa.
+                </p>
+            </section>
 
-                {/* Contenedor visual principal */}
-                <div className="p-6 sm:p-8 md:p-10 flex justify-center">
-                    <div className="w-full max-w-6xl bg-chart-5 rounded-2xl shadow-md ring-1 ring-rose-200/40 p-4 sm:p-6 md:p-8">
-                        {/* Grid responsivo limitado por cols */}
-                        <ProductGrid products={products} cols={3} minCardPx={280} gapPx={24} />
-                    </div>
-                </div>
-            </SidebarInset>
-        </SidebarProvider>
+            {/* Tu grilla de productos existente */}
+            <ProductGrid products={products} cols={3} minCardPx={280} gapPx={24} />
+        </main>
     )
 }

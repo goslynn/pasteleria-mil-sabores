@@ -4,12 +4,14 @@ import { cookies } from "next/headers";
 import { SignJWT, jwtVerify } from "jose";
 import bcrypt from "bcryptjs";
 
-const rawSecret = process.env.AUTH_SECRET;
-if (!rawSecret) {
+const {AUTH_SECRET, SESSION_COOKIE_NAME} = process.env;
+if (!AUTH_SECRET) {
     throw new Error("AUTH_SECRET no definido o demasiado corto. Define uno fuerte en .env(.local).");
 }
-const secret = new TextEncoder().encode(rawSecret);
-const COOKIE_NAME = "session";
+
+const secret = new TextEncoder().encode(AUTH_SECRET);
+const cookieName = SESSION_COOKIE_NAME ?? "session";
+
 
 const COOKIE_OPTIONS = {
     httpOnly: true,
@@ -35,17 +37,17 @@ export async function createSession(userId: number) {
         .sign(secret);
 
     const cookieStore = await cookies();
-    cookieStore.set(COOKIE_NAME, token, COOKIE_OPTIONS);
+    cookieStore.set(cookieName, token, COOKIE_OPTIONS);
 }
 
 export async function destroySession() {
     const cookieStore = await cookies();
-    cookieStore.delete(COOKIE_NAME);
+    cookieStore.delete(cookieName);
 }
 
 export async function getSessionUserId(): Promise<number | null> {
     const cookieStore = await cookies();
-    const token = cookieStore.get(COOKIE_NAME)?.value;
+    const token = cookieStore.get(cookieName)?.value;
     if (!token) return null;
 
     try {

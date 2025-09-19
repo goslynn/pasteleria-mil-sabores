@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { jwtVerify } from "jose";
+import {destroySession} from "@/lib/auth";
 
-const COOKIE_NAME = process.env.COOKIE_NAME ?? "session";
-const secret = new TextEncoder().encode(process.env.JWT_SECRET!);
+const COOKIE_NAME = process.env.SESSION_COOKIE_NAME ?? "session";
+const secret = new TextEncoder().encode(process.env.AUTH_SECRET!);
 
 export async function GET() {
     const token = (await cookies()).get(COOKIE_NAME)?.value;
@@ -16,4 +17,8 @@ export async function GET() {
     } catch {
         return NextResponse.json({ userId: null });
     }
+}
+
+export async function DELETE() {
+    await destroySession();
 }
