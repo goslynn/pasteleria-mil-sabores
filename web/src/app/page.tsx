@@ -5,7 +5,7 @@ import {ProductGrid} from "@/components/ui/product-grid";
 import {fetchUserById} from "@/lib/datamapping";
 import {useEffect} from "react";
 import {nextFetch, strapiFetch} from "@/lib/fetching";
-import {Navbar08} from "@/components/ui/navbar";
+import {Navbar} from "@/components/ui/navbar";
 
 const base: ProductData = {
     id: 1,
@@ -58,7 +58,7 @@ export default function HomePage() {
 
     return (
         <>
-            <Navbar08/>
+            <Navbar />
             <main className="mx-auto max-w-6xl px-4 py-6 md:py-10">
                 {/* Título / Hero simple opcional */}
                 <section className="mb-6">

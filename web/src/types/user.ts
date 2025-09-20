@@ -1,3 +1,5 @@
+import { getInitials } from "@/lib/utils";
+
 export interface UsuarioDTO {
     idUsuario: number,
     nombre: string,
@@ -67,6 +69,10 @@ export class Usuario {
     /** ¿Cumple una edad mínima? (por ejemplo, ≥ 50) */
     isAtLeastAge(min: number, on: Date = new Date()): boolean {
         return this.age(on) >= min;
+    }
+
+    getInitials() {
+        return getInitials(this.u.nombre);
     }
 
     /** Devuelve el DTO original. */
