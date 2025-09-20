@@ -1,0 +1,38 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+    environment:
+      # Next leerá esto en runtime
+      NEXT_PUBLIC_API_URL: "http://cms:1337"
+      NODE_ENV: "production"
+      PORT: "3000"
+    depends_on:
+      - cms
+    ports:
+      - "3000:3000"
+
+  cms:
+    build:
+      context: .
+      dockerfile: cms/Dockerfile
+    environment:
+      NODE_ENV: "production"
+      HOST: "0.0.0.0"
+      PORT: "1337"
+      # Variables mínimas Strapi (ajusta a tus valores reales)
+      APP_KEYS: "prod1,prod2,prod3,prod4"
+      API_TOKEN_SALT: "prod-salt"
+      ADMIN_JWT_SECRET: "prod-admin"
+      JWT_SECRET: "prod-jwt"
+    volumes:
+      # Persistencia DB/file uploads si usas SQLite o upload local
+      - cms-data:/app/.tmp
+      - cms-uploads:/app/public/uploads
+    ports:
+      - "1337:1337"
+
+volumes:
+  cms-data:
+  cms-uploads:

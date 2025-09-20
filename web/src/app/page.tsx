@@ -7,8 +7,6 @@ import {useEffect} from "react";
 import {nextFetch} from "@/lib/fetching";
 import {Navbar08} from "@/components/ui/navbar";
 
-
-
 const base: ProductData = {
     id: 1,
     name: 'pastelito',
