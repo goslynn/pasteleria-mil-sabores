@@ -1,0 +1,11 @@
+# si vas a mover este archivo recuerda actualizar la ruta del http-client.env.json en .gitignore
+
+#categorias de productos
+GET {{host}}/api/categories
+Authorization: Bearer {{token}}
+
+###
+
+# listado de productos
+GET {{host}}/api/products
+Authorization: Bearer {{token}}

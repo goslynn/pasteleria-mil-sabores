@@ -130,3 +130,20 @@ build
 .strapi-updater.json
 .strapi-cloud.json
 types/generated/*
+
+
+############################
+# IDE
+############################
+.idea/
+.vscode/
+*.sublime-workspace
+*.sublime-project
+*.code-workspace
+*.sw?
+
+############################
+# Extras
+############################
+
+/api-ref/http-client.env.json

@@ -4,7 +4,7 @@ import {ProductData} from "@/types/product";
 import {ProductGrid} from "@/components/ui/product-grid";
 import {fetchUserById} from "@/lib/datamapping";
 import {useEffect} from "react";
-import {nextFetch} from "@/lib/fetching";
+import {nextFetch, strapiFetch} from "@/lib/fetching";
 import {Navbar08} from "@/components/ui/navbar";
 
 const base: ProductData = {
@@ -42,6 +42,14 @@ export default function HomePage() {
                 if (!canceled) console.log("[Home] Usuario:", u);
             } catch (e) {
                 if (!canceled) console.error("[Home] Error usuario:", e);
+            }
+            try {
+
+                const { cat } = await strapiFetch<any>("/api/categories?populate=*");
+
+                console.log(cat);
+            } catch (e) {
+                console.log(e);
             }
         })();
 
