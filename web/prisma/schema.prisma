@@ -23,6 +23,7 @@ model Usuario {
   preferencias    PreferenciasUsuario?
   carrito         CarritoCompras?
   pedidos         Pedido[]
+  direccion       Direccion[]
 }
 
 model PreferenciasUsuario {
@@ -135,11 +136,13 @@ model Comuna {
 }
 
 model Direccion {
-  idDireccion  Int     @id @default(autoincrement())
-  calle        String
-  numero       String
-  departamento String?
-  idComunaFk   Int
-  comuna       Comuna  @relation(fields: [idComunaFk], references: [idComuna])
-  envios       Envio[]
+  idDireccion      Int      @id @default(autoincrement())
+  calle            String
+  numero           String
+  departamento     String?
+  idComunaFk       Int
+  comuna           Comuna   @relation(fields: [idComunaFk], references: [idComuna])
+  envios           Envio[]
+  Usuario          Usuario? @relation(fields: [usuarioIdUsuario], references: [idUsuario])
+  usuarioIdUsuario Int?
 }
