@@ -41,21 +41,17 @@ model CarritoCompras {
 }
 
 model Descuento {
-  idDescuento Int    @id @default(autoincrement())
-  descripcion String
-  porcentaje  Float
+  idDescuento Int @id @default(autoincrement())
+  referencia  Int
 }
 
 model Producto {
-  idProducto        Int                 @id @default(autoincrement())
-  nombre            String
-  descripcion       String
-  stock             Float
-  imgURL            String?
-  carritoDetalle    CarritoDetalle[]
-  precio            Precio[]
-  productoCategoria ProductoCategoria[]
-  detallePedido     DetallePedido[]
+  idProducto          Int              @id @default(autoincrement())
+  referenciaProductos Int
+  carritoDetalle      CarritoDetalle[]
+  precio              Precio[]
+  //productoCategoria   ProductoCategoria[]
+  detallePedido       DetallePedido[]
 }
 
 model CarritoDetalle {
@@ -64,35 +60,27 @@ model CarritoDetalle {
   producto   Producto @relation(fields: [idProducto], references: [idProducto])
 }
 
-model ListaPrecios {
-  idLista     Int      @id @default(autoincrement())
-  nombreLista String
-  precio      Precio[]
-}
-
 model Precio {
-  idPrecio       Int          @id @default(autoincrement())
-  idProductoFk   Int
-  idListaFk      Int
-  precioProducto Float
-  producto       Producto     @relation(fields: [idProductoFk], references: [idProducto])
-  lista          ListaPrecios @relation(fields: [idListaFk], references: [idLista])
+  idPrecio         Int      @id @default(autoincrement())
+  idProductoFk     Int
+  referenciaPrecio Int
+  producto         Producto @relation(fields: [idProductoFk], references: [idProducto])
 }
 
-model Categoria {
-  idCategoria       Int                 @id @default(autoincrement())
-  nombre            String
-  productoCategoria ProductoCategoria[]
-}
-
-model ProductoCategoria {
-  idPc          Int       @id @default(autoincrement())
-  idCategoriaFK Int
-  idProductoFk  Int
-  categoria     Categoria @relation(fields: [idCategoriaFK], references: [idCategoria])
-  producto      Producto  @relation(fields: [idProductoFk], references: [idProducto])
-}
-
+/**
+ * model Categoria {
+ * idCategoria       Int                 @id @default(autoincrement())
+ * nombre            String
+ * productoCategoria ProductoCategoria[]
+ * }
+ * model ProductoCategoria {
+ * idPc          Int       @id @default(autoincrement())
+ * idCategoriaFK Int
+ * idProductoFk  Int
+ * categoria     Categoria @relation(fields: [idCategoriaFK], references: [idCategoria])
+ * producto      Producto  @relation(fields: [idProductoFk], references: [idProducto])
+ * }
+ */
 model Pedido {
   idPedido      Int             @id @default(autoincrement())
   idUsuarioFk   Int
@@ -105,12 +93,13 @@ model Pedido {
 }
 
 model Envio {
-  idEnvio     Int    @id @default(autoincrement())
-  idPedidoFk  Int    @unique
-  direccion   String
-  fechaEnvio  String
-  estadoEnvio String
-  pedido      Pedido @relation(fields: [idPedidoFk], references: [idPedido])
+  idEnvio       Int       @id @default(autoincrement())
+  idPedidoFk    Int       @unique
+  idDireccionFk Int
+  fechaEnvio    String
+  estadoEnvio   String
+  pedido        Pedido    @relation(fields: [idPedidoFk], references: [idPedido])
+  direccion     Direccion @relation(fields: [idDireccionFk], references: [idDireccion])
 }
 
 model DetallePedido {
@@ -121,4 +110,36 @@ model DetallePedido {
   precioUnitario Float
   pedido         Pedido   @relation(fields: [idPedidoFk], references: [idPedido])
   producto       Producto @relation(fields: [idProductoFk], references: [idProducto])
+}
+
+model Pais {
+  idPais   Int      @id @default(autoincrement())
+  nombre   String   @unique
+  regiones Region[]
+}
+
+model Region {
+  idRegion Int      @id @default(autoincrement())
+  nombre   String
+  idPaisFk Int
+  pais     Pais     @relation(fields: [idPaisFk], references: [idPais])
+  comunas  Comuna[]
+}
+
+model Comuna {
+  idComuna    Int         @id @default(autoincrement())
+  nombre      String
+  idRegionFk  Int
+  region      Region      @relation(fields: [idRegionFk], references: [idRegion])
+  direcciones Direccion[]
+}
+
+model Direccion {
+  idDireccion  Int     @id @default(autoincrement())
+  calle        String
+  numero       String
+  departamento String?
+  idComunaFk   Int
+  comuna       Comuna  @relation(fields: [idComunaFk], references: [idComuna])
+  envios       Envio[]
 }
