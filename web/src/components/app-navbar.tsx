@@ -2,14 +2,17 @@ import { Navbar } from '@/components/ui/navbar'
 import type { NavbarProps } from '@/components/ui/navbar'
 import { CakeSlice } from 'lucide-react'
 import {UsuarioDTO} from "@/types/user";
+import {getCurrentUser} from "@/lib/datamapping";
 
-export function AppNavbar({ user }: { user: UsuarioDTO | null }) {
+export async function AppNavbar() {
+    const user: UsuarioDTO | null = await getCurrentUser();
     const NAVBAR_PROPS: NavbarProps = {
         homeLogo: { icon: <CakeSlice/>, label: 'Mil Sabores' },
         userMenu: {
             userName: user?.nombre,
             userEmail: user?.email,
             loginHref: 'auth/login',
+            items: [{ key: "config", label: "Ajustes", href: "/config" }],
         },
         navigationLinks: [
             { href: '/', label: 'Inicio' },
