@@ -82,7 +82,11 @@ export function SignupForm({
 
                             <div className="grid gap-3">
                                 <Label htmlFor="confirm-password">Confirmar contraseña</Label>
-                                <Input id="confirm-password" type="password" required/>
+                                <Input
+                                    name="confirm-password"
+                                    id="confirm-password"
+                                    type="password"
+                                    required/>
                             </div>
 
                             <Button type="submit" className="w-full">
