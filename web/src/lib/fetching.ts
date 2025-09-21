@@ -1,15 +1,28 @@
+import "server-only";
+
+const {STRAPI_HOST, STRAPI_TOKEN} = process.env;
+if (!STRAPI_HOST) throw new Error("Falta variable de entorno STRAPI_HOST");
+if (!STRAPI_TOKEN) throw new Error("Falta variable de entorno STRAPI_TOKEN");
+
+
 export type FetchOpts = Omit<RequestInit, "cache"> & {
     /** Base absoluta (ej. https://mi-sitio.com). Si no se pasa, usamos ruta relativa. */
     baseUrl?: string;
-
     /** Reponemos 'cache' porque Omit<RequestInit,"cache"> lo quitó arriba */
     cache?: RequestCache;
-
     /** Extensiones de Next.js para ISR y tagging */
     next?: {
-        revalidate?: number;    // segundos para ISR
-        tags?: string[];        // etiquetas para revalidateTag()
+        revalidate?: number; // segundos para ISR
+        tags?: string[];     // etiquetas para revalidateTag()
     };
+};
+
+/** Opciones extra SOLO para Strapi (no rompe nextFetch) */
+export type StrapiFetchOpts = FetchOpts & {
+    /** Parámetros de consulta (populate, filters, etc.) */
+    query?: Record<string, string | number | boolean | string[]>;
+    /** Timeout opcional en ms */
+    timeoutMs?: number;
 };
 
 function joinUrl(base: string | undefined, path: string): string {
@@ -41,6 +54,16 @@ function extractErrorMessage(body: unknown): string | undefined {
     return undefined;
 }
 
+function toSearchParams(q?: StrapiFetchOpts["query"]) {
+    if (!q) return "";
+    const usp = new URLSearchParams();
+    for (const [k, v] of Object.entries(q)) {
+        if (Array.isArray(v)) v.forEach(x => usp.append(k, String(x)));
+        else usp.set(k, String(v));
+    }
+    return usp.toString();
+}
+
 /**
  * Fetch contra nextjs, usable en cliente/servidor
  * @param path path que consultamos
@@ -54,13 +77,11 @@ export async function nextFetch<T = unknown>(
         (opts.baseUrl ?? process.env.NEXT_PUBLIC_SITE_URL ?? "").replace(/\/$/, "");
     const url = joinUrl(base, path);
     const res = await fetch(url, { cache: "no-store", ...opts });
-    console.log(res);
 
     const body = await parseJsonOrText(res);
     if (!res.ok) {
         throw new Error(extractErrorMessage(body) ?? `HTTP ${res.status}`);
     }
-    console.log(body);
     return body as T;
 }
 
@@ -71,29 +92,45 @@ export async function nextFetch<T = unknown>(
  */
 export async function strapiFetch<T = unknown>(
     path: string,
-    opts: FetchOpts = {}
+    opts: StrapiFetchOpts = {}
 ): Promise<T> {
     if (typeof window !== "undefined") {
         throw new Error("strapiFetch solo debe usarse en el servidor.");
     }
 
-    const base = (opts.baseUrl ?? process.env.STRAPI_HOST ?? "http://localhost:1337").replace(/\/$/, "");
-    const url = joinUrl(base, `/api/${path.replace(/^\/+/, "")}`);
+    const base = (opts.baseUrl ?? STRAPI_HOST as string).replace(/\/$/, "");
+    const apiPath = `/api/${path.replace(/^\/+/, "")}`;
+    const qs = toSearchParams(opts.query);
+    const url = joinUrl(base, qs ? `${apiPath}?${qs}` : apiPath);
 
-    const res = await fetch(url, {
-        cache: "no-store",
-        ...opts,
-        headers: {
-            ...(opts.headers ?? {}),
-            Authorization: `Bearer ${process.env.STRAPI_TOKEN ?? ""}`,
-        },
-    });
-    console.log(res);
+    // Timeout opcional
+    const controller = new AbortController();
+    const timeout =
+        opts.timeoutMs && opts.timeoutMs > 0
+            ? setTimeout(() => controller.abort(), opts.timeoutMs)
+            : undefined;
 
-    const body = await parseJsonOrText(res);
-    if (!res.ok) {
-        throw new Error(extractErrorMessage(body) ?? `HTTP ${res.status}`);
+    try {
+        const res = await fetch(url, {
+            cache: opts.cache ?? "no-store",
+            next: opts.next,
+            ...opts,
+            signal: opts.signal ?? controller.signal,
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${STRAPI_TOKEN}`,
+                ...(opts.headers ?? {}),
+            },
+        });
+
+        const body = await parseJsonOrText(res);
+        if (!res.ok) {
+            throw new Error(
+                extractErrorMessage(body) ?? `HTTP ${res.status} ${res.statusText} @ ${url}`
+            );
+        }
+        return body as T;
+    } finally {
+        if (timeout) clearTimeout(timeout);
     }
-    console.log(body);
-    return body as T;
 }

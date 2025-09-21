@@ -1,52 +1,30 @@
-'use client'
-
-import { usePathname } from 'next/navigation'
 import { Navbar } from '@/components/ui/navbar'
 import type { NavbarProps } from '@/components/ui/navbar'
 import { CakeSlice } from 'lucide-react'
+import {UsuarioDTO} from "@/types/user";
+import {getCurrentUser} from "@/lib/datamapping";
 
-type HidePattern = string | RegExp
-
-export interface AppNavbarProps {
-    /** Rutas donde NO quieres mostrar el navbar.
-     *  - string: coincidencia exacta
-     *  - RegExp: patrón (p.ej. /^\/auth(\/|$)/ )
-     *  Si es undefined, null o [], NO se oculta. */
-    hideOn?: HidePattern | HidePattern[] | null
-}
+const user : UsuarioDTO | null = null; //await getCurrentUser();
 
 // Props canónicas (sin defaults de ocultado)
-const NAVBAR_PROPS_GUEST: NavbarProps = {
+const NAVBAR_PROPS: NavbarProps = {
     homeLogo: {
         icon: <CakeSlice />,
         label: 'Mil Sabores'
     },
     userMenu: {
-        loginHref: '/login'
+        // userName: user?.nombre,
+        // userEmail: user?.email,
+        loginHref: 'auth/login'
     },
     navigationLinks: [
-        { href: '/', label: 'Inicio', active: true },
+        { href: '/', label: 'Inicio'},
         { href: '/categories', label: 'Categorias' },
         { href: '/about', label: 'Sobre nosotros' },
         { href: '/contact', label: 'Contacto' },
-    ],
-    onNavItemClick: (href) => console.log('Ir a:', href),
-    onSearchSubmit: (q) => console.log('Buscar:', q),
+    ]
 }
 
-export function AppNavbar({ hideOn }: AppNavbarProps) {
-    const pathname = usePathname()
-
-    // normaliza: undefined/null => [], string => [string]
-    const patterns: HidePattern[] =
-        hideOn == null ? [] : Array.isArray(hideOn) ? hideOn : [hideOn]
-
-    const shouldHide =
-        patterns.length > 0 &&
-        patterns.some((p) =>
-            typeof p === 'string' ? p === pathname : p.test(pathname)
-        )
-
-    if (shouldHide) return null
-    return <Navbar {...NAVBAR_PROPS_GUEST} />
+export function AppNavbar() {
+    return <Navbar {...NAVBAR_PROPS} />
 }

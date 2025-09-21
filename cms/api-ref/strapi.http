@@ -7,5 +7,6 @@ Authorization: Bearer {{token}}
 ###
 
 # listado de productos
-GET {{host}}/api/products
+GET {{host}}/api/products?fields[0]=code&fields[1]=name&fields[2]=price&fields[3]=description&populate[images][fields][0]=url&pagination[pageSize]=100&publicationState=live
 Authorization: Bearer {{token}}
+Accept: application/json

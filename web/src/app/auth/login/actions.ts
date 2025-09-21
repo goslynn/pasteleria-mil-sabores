@@ -1,4 +1,4 @@
-"use server";
+'use server';
 
 import { prisma } from "@/lib/db";
 import { verifyPassword, createSession } from "@/lib/auth";

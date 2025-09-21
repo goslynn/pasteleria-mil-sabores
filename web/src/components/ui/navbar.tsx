@@ -2,11 +2,11 @@
 
 import * as React from 'react'
 import { useEffect, useState, useRef, useCallback } from 'react'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import {
     NavigationMenu,
     NavigationMenuItem,
-    NavigationMenuLink,
     NavigationMenuList,
 } from '@/components/ui/navigation-menu'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -16,24 +16,18 @@ import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { DEFAULT_USER_MENU, UserMenu, type UserMenuProps } from '@/components/ui/user-menu'
 import { DEFAULT_HOME_LOGO, HomeLogo, type HomeLogoProps } from '@/components/ui/home-logo'
 import { SearchBar } from '@/components/ui/search-bar'
+import {usePathname} from "next/navigation";
 
 export interface NavbarNavItem {
     href?: string
     label: string
-    active?: boolean
 }
 
 export interface NavbarProps extends React.HTMLAttributes<HTMLElement> {
-    /** Props para el logo (usa HomeLogo). Puedes pasar solo lo que quieras sobreescribir */
     homeLogo?: Partial<HomeLogoProps>
-    /** Props para el menú de usuario (usa UserMenu). Puedes pasar solo lo que quieras sobreescribir */
     userMenu?: Partial<UserMenuProps>
-    /** Links de navegación principales */
     navigationLinks?: NavbarNavItem[]
-    /** Placeholder del buscador */
     searchPlaceholder?: string
-    /** Callbacks de interacción */
-    onNavItemClick?: (href: string) => void
     onSearchSubmit?: (query: string) => void
 }
 
@@ -58,17 +52,19 @@ export function Navbar({
                            userMenu,
                            navigationLinks = [],
                            searchPlaceholder = 'Buscar...',
-                           onNavItemClick,
                            onSearchSubmit,
                            className,
                            ...props
                        }: NavbarProps) {
-    // defaults seguros
     const mergedHomeLogo: HomeLogoProps = { ...DEFAULT_HOME_LOGO, ...(homeLogo ?? {}) }
     const mergedUserMenu: UserMenuProps = { ...DEFAULT_USER_MENU, ...(userMenu ?? {}) }
 
     const containerRef = useRef<HTMLElement | null>(null)
     const isMobile = useIsMobile(containerRef)
+    const [mounted, setMounted] = useState(false)
+    useEffect(() => setMounted(true), [])
+
+    const pathname = usePathname()
 
     const handleSearchSubmit = useCallback(
         (q: string) => {
@@ -102,33 +98,39 @@ export function Navbar({
                                         aria-label="Abrir menú"
                                         type="button"
                                     >
-                                        <HamburgerIcon/>
+                                        <HamburgerIcon />
                                     </Button>
                                 </PopoverTrigger>
 
                                 <PopoverContent align="start" className="w-64 p-1">
                                     <NavigationMenu className="max-w-none">
                                         <NavigationMenuList className="flex-col items-start gap-0">
-                                            {navigationLinks.map((link, idx) => (
-                                                <NavigationMenuItem
-                                                    key={link.href ?? `${link.label}-${idx}`}
-                                                    className="w-full"
-                                                >
-                                                    <button
-                                                        type="button"
-                                                        onClick={(e) => {
-                                                            e.preventDefault()
-                                                            if (link.href) onNavItemClick?.(link.href)
-                                                        }}
-                                                        className={cn(
-                                                            'flex w-full items-center rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground cursor-pointer',
-                                                            link.active && 'bg-accent text-accent-foreground'
-                                                        )}
-                                                    >
-                                                        {link.label}
-                                                    </button>
-                                                </NavigationMenuItem>
-                                            ))}
+
+                                            {navigationLinks.map((link, idx) => {
+                                                const isActive = mounted && !!link.href && pathname === link.href
+                                                const mobileBtn =
+                                                    'flex w-full justify-start rounded-md px-3 py-2 text-sm font-medium ' +
+                                                    'bg-transparent text-muted-foreground hover:text-foreground transition-colors ' +
+                                                    'focus:bg-transparent focus-visible:outline-none'
+
+                                                return (
+                                                    <NavigationMenuItem key={link.href ?? `${link.label}-${idx}`} className="w-full">
+                                                        <Button
+                                                            asChild
+                                                            variant="ghost"
+                                                            className={`${mobileBtn} ${isActive ? 'text-foreground font-semibold' : ''}`}
+                                                        >
+                                                            <Link
+                                                                href={link.href ?? '#'}
+                                                                prefetch={false}
+                                                                aria-current={isActive ? 'page' : undefined}
+                                                            >
+                                                                {link.label}
+                                                            </Link>
+                                                        </Button>
+                                                    </NavigationMenuItem>
+                                                )
+                                            })}
                                         </NavigationMenuList>
                                     </NavigationMenu>
                                 </PopoverContent>
@@ -146,12 +148,11 @@ export function Navbar({
 
                     {/* Centro: búsqueda */}
                     <div className="grow">
-                        <SearchBar placeholder={searchPlaceholder} onSubmit={handleSearchSubmit}/>
+                        <SearchBar placeholder={searchPlaceholder} onSubmit={handleSearchSubmit} />
                     </div>
 
-                    {/* Derecha: Carro (TODO) + Usuario + Tema */}
+                    {/* Derecha: Usuario + Tema */}
                     <div className="flex flex-1 items-center justify-end gap-2">
-                        {/* TODO: Cart */}
                         <UserMenu
                             userName={mergedUserMenu.userName}
                             userEmail={mergedUserMenu.userEmail}
@@ -159,38 +160,46 @@ export function Navbar({
                             items={mergedUserMenu.items}
                             loginHref={mergedUserMenu.loginHref}
                         />
-                        <ThemeToggle/>
+                        <ThemeToggle />
                     </div>
                 </div>
 
-                {/* Navegación inferior (desktop) */}
+                {/* DESKTOP */}
+
                 {!isMobile && (
                     <div className="py-2">
                         <NavigationMenu>
                             <NavigationMenuList className="gap-2">
-                                {navigationLinks.map((link, idx) => (
-                                    <NavigationMenuItem key={link.href ?? `${link.label}-${idx}`}>
-                                        <NavigationMenuLink
-                                            href={link.href}
-                                            onClick={(e) => {
-                                                e.preventDefault()
-                                                if (link.href) onNavItemClick?.(link.href)
-                                            }}
-                                            className={cn(
-                                                'text-muted-foreground hover:text-primary py-1.5 font-medium transition-colors cursor-pointer group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 text-sm focus:bg-accent focus:text-accent-foreground focus:outline-none',
-                                                link.active && 'text-primary'
-                                            )}
-                                            data-active={link.active}
-                                        >
-                                            {link.label}
-                                        </NavigationMenuLink>
-                                    </NavigationMenuItem>
-                                ))}
+                                {navigationLinks.map((link, idx) => {
+                                    const isActive = mounted && !!link.href && pathname === link.href
+                                    const desktopBtn =
+                                        'inline-flex h-10 w-max items-center justify-center rounded-md px-4 py-1.5 text-sm font-medium ' +
+                                        'bg-transparent text-muted-foreground hover:text-foreground transition-colors ' +
+                                        'focus:bg-transparent focus-visible:outline-none'
+
+                                    return (
+                                        <NavigationMenuItem key={link.href ?? `${link.label}-${idx}`}>
+                                            <Button
+                                                asChild
+                                                variant="ghost"
+                                                className={`${desktopBtn} ${isActive ? 'text-foreground font-semibold' : ''}`}
+                                            >
+                                                <Link
+                                                    href={link.href ?? '#'}
+                                                    prefetch={false}
+                                                    aria-current={isActive ? 'page' : undefined}
+                                                >
+                                                    {link.label}
+                                                </Link>
+                                            </Button>
+                                        </NavigationMenuItem>
+                                    )
+                                })}
                             </NavigationMenuList>
                         </NavigationMenu>
                     </div>
                 )}
             </div>
         </header>
-    );
+    )
 }
