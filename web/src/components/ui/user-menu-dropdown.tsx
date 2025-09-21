@@ -8,19 +8,35 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
-export function UserDropdownMenu({
-                                       trigger,
-                                       userName,
-                                       userEmail,
-                                       userAvatar,
-                                       items,
-                                   }: {
+type BaseProps = {
     trigger?: React.ReactNode
     userName?: string
     userEmail?: string
     userAvatar?: string
     items: { key: string; label: string; href?: string; destructive?: boolean; separatorAbove?: boolean }[]
-}) {
+}
+
+type EmptyVariant = BaseProps & {
+    variant?: "empty"
+    onLogoutClick?: never
+}
+
+type WithLogoutVariant = BaseProps & {
+    variant: "withlogout"
+    onLogoutClick: () => void | Promise<void>
+}
+
+type UserMenuDropdownProps = EmptyVariant | WithLogoutVariant
+
+export function UserMenuDropdown({
+                                     trigger,
+                                     userName,
+                                     userEmail,
+                                     userAvatar,
+                                     items,
+                                     variant = "empty",
+                                     onLogoutClick,
+                                 }: UserMenuDropdownProps) {
     const initials = (userName ?? "")
         .trim().split(/\s+/).map(p => p[0]?.toUpperCase() ?? "").join("").slice(0, 2)
 
@@ -67,10 +83,24 @@ export function UserDropdownMenu({
                             asChild={!!it.href}
                             className={it.destructive ? "text-destructive focus:text-destructive focus:bg-destructive/10" : undefined}
                         >
-                            {it.href ? <Link href={it.href} prefetch={false}>{it.label}</Link> : <span>{it.label}</span>}
+                            {it.href
+                                ? <Link href={it.href} prefetch={false}>{it.label}</Link>
+                                : <span>{it.label}</span>}
                         </DropdownMenuItem>
                     </React.Fragment>
                 ))}
+
+                {variant === "withlogout" && (
+                    <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                            onClick={onLogoutClick}
+                            className="text-destructive focus:text-destructive focus:bg-destructive/10"
+                        >
+                            Cerrar sesión
+                        </DropdownMenuItem>
+                    </>
+                )}
             </DropdownMenuContent>
         </DropdownMenu>
     )

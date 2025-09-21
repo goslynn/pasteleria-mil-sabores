@@ -1,12 +1,10 @@
 import React from "react";
 import {AppNavbar} from "@/components/app-navbar";
-import {getCurrentUser} from "@/lib/datamapping";
 
-export default async function SiteLayout({ children }: { children: React.ReactNode }) {
-    const user = await getCurrentUser();
+export default function SiteLayout({ children }: { children: React.ReactNode }) {
     return (
         <>
-            <AppNavbar user={user}/>
+            <AppNavbar/>
             <main className="min-h-dvh">{children}</main>
         </>
     );

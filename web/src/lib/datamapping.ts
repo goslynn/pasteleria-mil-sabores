@@ -1,7 +1,7 @@
 import {UsuarioDTO} from "@/types/user";
 
 import {Discount, Money, ProductData} from "@/types/product";
-import {apiFetch, cmsFetch} from "@/lib/fetching";
+import {apiFetch, cmsFetch, HttpError} from "@/lib/fetching";
 
 // Devuelve el usuario de la sesión actual o null si no hay sesión
 export async function getCurrentUser(): Promise<UsuarioDTO | null> {
@@ -11,15 +11,35 @@ export async function getCurrentUser(): Promise<UsuarioDTO | null> {
     });
     console.log("Fetched session id, userId:", userId);
     if (!userId) return null;
-    return fetchUserById(userId);
+
+    try {
+        return await getUserById(userId);
+    } catch (e) {
+        const isHttpError = e instanceof HttpError || (
+            typeof e === "object" && e !== null &&
+            "status" in e && "response" in e
+        );
+
+        if (isHttpError && e?.status === 404) {
+            try {
+                console.log("User not found, logging out...", e);
+                const res = await apiFetch('/api/session', {method: 'DELETE'})
+                console.log("response logout: ",res)
+            } catch (e) {
+                console.error("Error cerrando sesion : ",e)
+            }
+        } else {
+            console.error("Error fetching /api/session:", e);
+        }
+        return null;
+    }
 }
 
 // Devuelve un usuario por id (lanza si el endpoint falla)
-export async function fetchUserById(id: number): Promise<UsuarioDTO> {
+export async function getUserById(id: number): Promise<UsuarioDTO> {
     const { data } = await apiFetch<{ data: UsuarioDTO }>(`/api/user/${id}`);
     return data;
 }
-
 
 export async function fetchProducts(): Promise<ProductData[]> {
     type StrapiImg = { data: { attributes: { url: string; alternativeText?: string | null } } | null };

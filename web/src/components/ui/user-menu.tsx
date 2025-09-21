@@ -1,8 +1,9 @@
-// components/user-menu-server.tsx  (Server Component - sin "use client")
-import Link from "next/link"
-import {UserDropdownMenu} from "@/components/ui/user-dropdown-menu";
-import {Button} from "@/components/ui/button";
+'use client'
 
+import Link from "next/link"
+import {UserMenuDropdown} from "@/components/ui/user-menu-dropdown";
+import {Button} from "@/components/ui/button";
+import {apiFetch} from "@/lib/fetching";
 
 export type UserMenuItem = {
     key: string
@@ -57,14 +58,24 @@ export function UserMenu({
 
     // Caso con sesion mostramos icono de usuario con menu.
     return (
-        <UserDropdownMenu
+        <UserMenuDropdown
             userName={userName}
             userEmail={userEmail}
             userAvatar={userAvatar}
-            items={[
-                ...items,
-                { key: "logout", label: "Cerrar sesión", href: "/logout", destructive: true }
-            ]}
+            items={items}
+            variant={"withlogout"}
+            onLogoutClick={async () => {
+                try {
+                    const res = await apiFetch('/api/session', {method: 'DELETE'})
+                    console.log("response logout: ",res)
+                    window.location.href = "/auth/login"
+                } catch (e) {
+                    console.error("Error cerrando sesion : ",e)
+                    alert("Error cerrando sesión")
+                }
+
+            }
+            }
         />
-    )
+    );
 }
