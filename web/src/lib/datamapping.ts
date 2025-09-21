@@ -9,8 +9,8 @@ export async function getCurrentUser(): Promise<UsuarioDTO | null> {
         cache: "no-store",
         next: { revalidate: 0 },
     });
-    console.log("Fetched session, userId:", userId);
-    if (typeof userId !== "number") return null;
+    console.log("Fetched session id, userId:", userId);
+    if (!userId) return null;
     return fetchUserById(userId);
 }
 

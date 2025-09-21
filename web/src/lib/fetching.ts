@@ -206,12 +206,20 @@ export async function apiFetch<T = unknown>(path: string, opts: FetchOptions = {
 
     let headersFinal: HeadersInit | undefined = hdrs;
 
-    // En SSR, si es same-origin y forwardCookies=true, inyectar Cookie header
-    if (isServer && forwardCookies && !isAbsolute(url)) {
+    // En SSR, si es same-origin y forwardCookies=true, inyectar Cookie (aunque la URL sea absoluta)
+    if (isServer && forwardCookies) {
         try {
             const h = await getReadonlyHeaders();
-            const cookie = h.get("cookie");
-            if (cookie) headersFinal = mergeHeaders(headersFinal, { cookie });
+            const proto = h.get("x-forwarded-proto") ?? "http";
+            const host = h.get("x-forwarded-host") ?? h.get("host") ?? "";
+            if (host) {
+                const currentOrigin = `${proto}://${host}`;
+                const targetOrigin = isAbsolute(url) ? new URL(url).origin : currentOrigin;
+                if (targetOrigin === currentOrigin) {
+                    const cookie = h.get("cookie");
+                    if (cookie) headersFinal = mergeHeaders(headersFinal, { cookie });
+                }
+            }
         } catch {
             // ignore
         }

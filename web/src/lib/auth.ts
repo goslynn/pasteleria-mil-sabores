@@ -36,24 +36,28 @@ export async function createSession(userId: number) {
         .setExpirationTime("7d")
         .sign(secret);
 
-    const cookieStore = await cookies();
-    cookieStore.set(cookieName, token, COOKIE_OPTIONS);
+    const jar = await cookies();
+    jar.set(cookieName, token, COOKIE_OPTIONS);
 }
 
 export async function destroySession() {
-    const cookieStore = await cookies();
-    cookieStore.delete(cookieName);
+    const jar = await cookies();
+    jar.delete(cookieName);
 }
 
 export async function getSessionUserId(): Promise<number | null> {
-    const cookieStore = await cookies();
-    const token = cookieStore.get(cookieName)?.value;
+    const jar = await cookies();
+    const token = jar.get(cookieName)?.value;
+
+    console.log("session token:", token);
+
     if (!token) return null;
 
     try {
         const { payload } = await jwtVerify(token, secret);
         const sub = payload.sub;
-        return sub ? parseInt(String(sub), 10) : null;
+        const userId = typeof sub === "string" ? Number(sub) : Number(sub as unknown);
+        return Number.isFinite(userId) ? userId : null;
     } catch {
         return null;
     }
