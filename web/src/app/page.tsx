@@ -5,7 +5,7 @@ import {ProductGrid} from "@/components/ui/product-grid";
 import {fetchUserById} from "@/lib/datamapping";
 import {useEffect} from "react";
 import {nextFetch, strapiFetch} from "@/lib/fetching";
-import {Navbar} from "@/components/ui/navbar";
+import {AppNavbar} from "@/components/app-navbar";
 
 const base: ProductData = {
     id: 1,
@@ -22,7 +22,6 @@ const products: ProductData[] = Array.from({ length: 9 }).map((_, i) => ({
     imageUrl: `https://picsum.photos/seed/${i + 1}/640/480`,
     discount: i % 3 === 0 ? { type: 'percentage', value: 20 } : undefined,
 }))
-
 
 export default function HomePage() {
     useEffect(() => {
@@ -58,7 +57,6 @@ export default function HomePage() {
 
     return (
         <>
-            <Navbar />
             <main className="mx-auto max-w-6xl px-4 py-6 md:py-10">
                 {/* Título / Hero simple opcional */}
                 <section className="mb-6">

@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import React from "react";
 import {ThemeProvider} from "next-themes";
+import {AppNavbar} from "@/components/app-navbar";
 
 
 const geistSans = Geist({
@@ -42,6 +43,7 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
         >
+            <AppNavbar hideOn={['/login', '/signup']}/>
             {children}
         </ThemeProvider>
         </body>

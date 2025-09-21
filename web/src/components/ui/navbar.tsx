@@ -1,43 +1,37 @@
-import * as React from 'react';
-import { useEffect, useState, useRef, useCallback } from 'react';
-import { Button } from '@/components/ui/button';
+'use client'
+
+import * as React from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
+import { Button } from '@/components/ui/button'
 import {
     NavigationMenu,
     NavigationMenuItem,
     NavigationMenuLink,
     NavigationMenuList,
-} from '@/components/ui/navigation-menu';
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from '@/components/ui/popover';
-import {cn} from '@/lib/utils';
-import {HamburgerIcon} from "@/components/ui/hamburger-icon";
-import {ThemeToggle} from "@/components/ui/theme-toggle";
-import {DEFAULT_USER_MENU, UserMenu, UserMenuProps} from "@/components/ui/user-menu";
-import {DEFAULT_HOME_LOGO, HomeLogo, HomeLogoProps} from "@/components/ui/home-logo";
-import {SearchBar} from "@/components/ui/search-bar";
+} from '@/components/ui/navigation-menu'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { cn } from '@/lib/utils'
+import { HamburgerIcon } from '@/components/ui/hamburger-icon'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
+import { DEFAULT_USER_MENU, UserMenu, type UserMenuProps } from '@/components/ui/user-menu'
+import { DEFAULT_HOME_LOGO, HomeLogo, type HomeLogoProps } from '@/components/ui/home-logo'
+import { SearchBar } from '@/components/ui/search-bar'
 
 export interface NavbarNavItem {
-    href?: string;
-    label: string;
-    active?: boolean;
+    href?: string
+    label: string
+    active?: boolean
 }
 
 export interface NavbarProps extends React.HTMLAttributes<HTMLElement> {
-    /** Props para el logo (usa HomeLogo) */
+    /** Props para el logo (usa HomeLogo). Puedes pasar solo lo que quieras sobreescribir */
     homeLogo?: Partial<HomeLogoProps>
-
-    /** Props para el menú de usuario (usa UserMenu) */
-    userMenu: Partial<UserMenuProps>
-
+    /** Props para el menú de usuario (usa UserMenu). Puedes pasar solo lo que quieras sobreescribir */
+    userMenu?: Partial<UserMenuProps>
     /** Links de navegación principales */
     navigationLinks?: NavbarNavItem[]
-
     /** Placeholder del buscador */
     searchPlaceholder?: string
-
     /** Callbacks de interacción */
     onNavItemClick?: (href: string) => void
     onSearchSubmit?: (query: string) => void
@@ -45,20 +39,17 @@ export interface NavbarProps extends React.HTMLAttributes<HTMLElement> {
 
 function useIsMobile(ref: React.RefObject<HTMLElement | null>, breakpoint = 768) {
     const [isMobile, setIsMobile] = useState(false)
-
     useEffect(() => {
         const check = () => {
             const w = ref.current?.offsetWidth ?? 0
             setIsMobile(w < breakpoint)
         }
         check()
-
         const ro = new ResizeObserver(check)
         const el = ref.current
         if (el) ro.observe(el)
         return () => ro.disconnect()
     }, [ref, breakpoint])
-
     return isMobile
 }
 
@@ -72,11 +63,11 @@ export function Navbar({
                            className,
                            ...props
                        }: NavbarProps) {
+    // defaults seguros
     const mergedHomeLogo: HomeLogoProps = { ...DEFAULT_HOME_LOGO, ...(homeLogo ?? {}) }
     const mergedUserMenu: UserMenuProps = { ...DEFAULT_USER_MENU, ...(userMenu ?? {}) }
 
     const containerRef = useRef<HTMLElement | null>(null)
-
     const isMobile = useIsMobile(containerRef)
 
     const handleSearchSubmit = useCallback(
@@ -111,7 +102,7 @@ export function Navbar({
                                         aria-label="Abrir menú"
                                         type="button"
                                     >
-                                        <HamburgerIcon />
+                                        <HamburgerIcon/>
                                     </Button>
                                 </PopoverTrigger>
 
@@ -119,7 +110,10 @@ export function Navbar({
                                     <NavigationMenu className="max-w-none">
                                         <NavigationMenuList className="flex-col items-start gap-0">
                                             {navigationLinks.map((link, idx) => (
-                                                <NavigationMenuItem key={link.href ?? `${link.label}-${idx}`} className="w-full">
+                                                <NavigationMenuItem
+                                                    key={link.href ?? `${link.label}-${idx}`}
+                                                    className="w-full"
+                                                >
                                                     <button
                                                         type="button"
                                                         onClick={(e) => {
@@ -152,7 +146,7 @@ export function Navbar({
 
                     {/* Centro: búsqueda */}
                     <div className="grow">
-                        <SearchBar placeholder={searchPlaceholder} onSubmit={handleSearchSubmit} />
+                        <SearchBar placeholder={searchPlaceholder} onSubmit={handleSearchSubmit}/>
                     </div>
 
                     {/* Derecha: Carro (TODO) + Usuario + Tema */}
@@ -163,10 +157,9 @@ export function Navbar({
                             userEmail={mergedUserMenu.userEmail}
                             userAvatar={mergedUserMenu.userAvatar}
                             items={mergedUserMenu.items}
-                            loginHref={mergedUserMenu.loginHref ?? '/login'}
-                            registerHref={mergedUserMenu.registerHref ?? '/signup'}
+                            loginHref={mergedUserMenu.loginHref}
                         />
-                        <ThemeToggle />
+                        <ThemeToggle/>
                     </div>
                 </div>
 
@@ -199,5 +192,5 @@ export function Navbar({
                 )}
             </div>
         </header>
-    )
+    );
 }
