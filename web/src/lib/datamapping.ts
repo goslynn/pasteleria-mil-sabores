@@ -1,17 +1,22 @@
 import {UsuarioDTO} from "@/types/user";
-import {nextFetch, strapiFetch} from "@/lib/fetching";
+
 import {Discount, Money, ProductData} from "@/types/product";
+import {apiFetch, cmsFetch} from "@/lib/fetching";
 
 // Devuelve el usuario de la sesión actual o null si no hay sesión
 export async function getCurrentUser(): Promise<UsuarioDTO | null> {
-    const { userId } = await nextFetch<{ userId?: number }>("/api/session");
+    const { userId } = await apiFetch<{ userId?: number }>("/api/session", {
+        cache: "no-store",
+        next: { revalidate: 0 },
+    });
+    console.log("Fetched session, userId:", userId);
     if (typeof userId !== "number") return null;
     return fetchUserById(userId);
 }
 
 // Devuelve un usuario por id (lanza si el endpoint falla)
 export async function fetchUserById(id: number): Promise<UsuarioDTO> {
-    const { data } = await nextFetch<{ data: UsuarioDTO }>(`/api/user/${id}`);
+    const { data } = await apiFetch<{ data: UsuarioDTO }>(`/api/user/${id}`);
     return data;
 }
 
@@ -44,7 +49,7 @@ export async function fetchProducts(): Promise<ProductData[]> {
     const base = process.env.NEXT_PUBLIC_STRAPI_URL?.replace(/\/+$/, "") ?? "";
     const abs = (u?: string | null) => (!u ? "" : u.startsWith("http") ? u : `${base}${u}`);
 
-    const res = await strapiFetch<{ data: Array<StrapiEntity<Producto>> }>("/products", {
+    const res = await cmsFetch<{ data: Array<StrapiEntity<Producto>> }>("/products", {
             query: {
                 // Campos del producto
                 "fields[0]": "code",

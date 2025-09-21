@@ -4,17 +4,16 @@ import { CakeSlice } from 'lucide-react'
 import {UsuarioDTO} from "@/types/user";
 import {getCurrentUser} from "@/lib/datamapping";
 
-const user : UsuarioDTO | null = null; //await getCurrentUser();
+const user : UsuarioDTO | null = await getCurrentUser();
 
-// Props canónicas (sin defaults de ocultado)
 const NAVBAR_PROPS: NavbarProps = {
     homeLogo: {
         icon: <CakeSlice />,
         label: 'Mil Sabores'
     },
     userMenu: {
-        // userName: user?.nombre,
-        // userEmail: user?.email,
+        userName: user?.nombre,
+        userEmail: user?.email,
         loginHref: 'auth/login'
     },
     navigationLinks: [
@@ -26,5 +25,9 @@ const NAVBAR_PROPS: NavbarProps = {
 }
 
 export function AppNavbar() {
+    console.log("User in Navbar:");
+    console.log(user);
+    console.log("NAVBAR_PROPS:");
+    console.log(NAVBAR_PROPS);
     return <Navbar {...NAVBAR_PROPS} />
 }
