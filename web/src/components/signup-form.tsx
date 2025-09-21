@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import React, {useActionState} from "react";
 import {SimpleState} from "@/types/state";
+import {PasswordInput} from "@/components/ui/PasswordInput";
 
 
 export function SignupForm({
@@ -39,7 +40,7 @@ export function SignupForm({
                             )}
 
                             <div className="grid gap-3">
-                                <Label htmlFor="name">Nombre</Label>
+                                <Label htmlFor="name">Nombre *</Label>
                                 <Input
                                     name="nombre"
                                     id="name"
@@ -50,7 +51,7 @@ export function SignupForm({
                             </div>
 
                             <div className="grid gap-3">
-                                <Label htmlFor="email">Correo electrónico</Label>
+                                <Label htmlFor="email">Correo electrónico *</Label>
                                 <Input
                                     name="email"
                                     id="email"
@@ -61,7 +62,7 @@ export function SignupForm({
                             </div>
 
                             <div className="grid gap-3">
-                                <Label htmlFor="fecha_nacimiento">Fecha de nacimiento</Label>
+                                <Label htmlFor="fecha_nacimiento">Fecha de nacimiento *</Label>
                                 <Input
                                     name="fecha_nacimiento"
                                     id="date"
@@ -71,21 +72,19 @@ export function SignupForm({
                             </div>
 
                             <div className="grid gap-3">
-                                <Label htmlFor="password">Contraseña</Label>
-                                <Input
+                                <Label htmlFor="password">Contraseña *</Label>
+                                <PasswordInput
                                     name="password"
                                     id="password"
-                                    type="password"
                                     required
                                 />
                             </div>
 
                             <div className="grid gap-3">
-                                <Label htmlFor="confirm-password">Confirmar contraseña</Label>
-                                <Input
+                                <Label htmlFor="confirm-password">Confirmar contraseña *</Label>
+                                <PasswordInput
                                     name="confirm-password"
                                     id="confirm-password"
-                                    type="password"
                                     required/>
                             </div>
 

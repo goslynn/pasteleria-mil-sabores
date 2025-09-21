@@ -11,7 +11,7 @@ const SignupSchema = z.object({
   email: z.email(),
   password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres")
       .regex(/[A-Z]/, "La contraseña debe tener al menos una letra mayúscula")
-      .regex(/[!@#$%^&*(),.?":{}|<>]/, "La contraseña debe tener al menos un símbolo"),
+      .regex(/[!@#$%^&*(),.?":{}|<>_-]/, "La contraseña debe tener al menos un símbolo"),
   confirmPassword: z.string(),
   fechaNacimiento: z.string().refine((val) => !isNaN(Date.parse(val)), {
     message: "Fecha inválida",

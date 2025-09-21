@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import React, { useActionState } from "react";
 import {SimpleState} from "@/types/state";
+import {PasswordInput} from "@/components/ui/PasswordInput";
 
 
 export function LoginForm(
@@ -59,7 +60,7 @@ export function LoginForm(
                                         ¿Olvidaste tu contraseña?
                                     </a>
                                 </div>
-                                <Input id="password" type="password" name="password" required/>
+                                <PasswordInput id="password" name="password" required/>
                             </div>
                             <Button type="submit" className="w-full">
                                 Iniciar sesión
