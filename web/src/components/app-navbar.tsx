@@ -12,7 +12,7 @@ export async function AppNavbar() {
             userName: user?.nombre,
             userEmail: user?.email,
             loginHref: 'auth/login',
-            items: [{key: "config", label: "Ajustes", href: "/config"},
+            items: [{key: "config", label: "Ajustes", href: "/site/config"},
                 {key: "logout", label: "Cerrar sesion", href: "/auth/logout", destructive: true, separatorAbove: true}],
         },
         navigationLinks: [
