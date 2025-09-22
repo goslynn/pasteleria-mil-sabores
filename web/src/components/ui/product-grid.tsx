@@ -1,9 +1,8 @@
-import { ProductData } from "@/types/product";
-import { ProductCard } from "@/components/ui/product-card";
+import {ProductCard, ProductCardProps} from "@/components/ui/product-card";
 import React from "react";
 
 type ProductGridProps = {
-    products: ProductData[]
+    products: ProductCardProps[]
     cols?: number       // máximo de columnas
     minCardPx?: number  // ancho mínimo de cada tarjeta
     gapPx?: number
@@ -29,8 +28,8 @@ export function ProductGrid({
         >
             {products.map((p) => (
                 <ProductCard
-                    key={p.id}
-                    product={p}
+                    key={p.product.id}
+                    product={p.product}
                     className="w-full max-w-[280px]"
                 />
             ))}

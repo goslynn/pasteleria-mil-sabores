@@ -1,4 +1,3 @@
-// ===== Utilidades comunes =====
 export type ISODateString = string;
 
 /** Strapi RichText (editor) muy básico y extensible */
@@ -63,13 +62,33 @@ export interface ApiMeta {
 }
 
 /** Listado paginado típico de Strapi */
-export interface StrapiList<T> {
+export interface StrapiCollection<T> {
     data: T[];
     meta?: ApiMeta;
 }
 
 /** Recurso individual típico de Strapi */
-export interface StrapiSingular<T> {
+export interface StrapiObject<T> {
     data: T;
     meta?: ApiMeta;
+}
+
+export function validateUrl(url?: string): string {
+    const host = process.env.STRAPI_HOST;
+    if (!host) {
+        throw new Error("STRAPI_HOST no está definido en las variables de entorno");
+    }
+
+    if (!url) return host;
+
+    // Si ya es URL absoluta, la devolvemos intacta
+    try {
+        const parsed = new URL(url);
+        return parsed.href;
+    } catch {
+        // no era URL absoluta → seguimos
+    }
+
+    // Concatenamos con el host, evitando dobles slash
+    return `${host.replace(/\/+$/, "")}/${url.replace(/^\/+/, "")}`;
 }

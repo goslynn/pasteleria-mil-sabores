@@ -1,4 +1,4 @@
-import {RichTextNode, StrapiBase} from "@/types/strapi/common";
+import {RichTextNode, StrapiBase, MediaImage} from "@/types/strapi/common";
 
 export type Money = {
     amount: number; // base price in minor units or decimal (see `priceInCents`)
@@ -26,8 +26,8 @@ export interface ProductData {
 }
 
 export interface ProductDTO extends StrapiBase {
-    code?: string;
-    name?: string;
+    code: string;
+    name: string;
     description?: RichTextNode[];
     price?: number;
     images?: MediaImage[];

@@ -1,11 +1,29 @@
 import ProductGrid from "@/components/ui/product-grid";
 import {ProductCardDTO} from "@/types/product";
 import {fetchProducts} from "@/lib/datamapping";
+import {ProductCardProps} from "@/components/ui/product-card";
+import {validateUrl} from "@/types/strapi/common";
 
 
 export async function HomePage() {
-    const products: ProductCardDTO[] = await fetchProducts();
-    console.log("fetched strapi products", products);
+    const productsDTO: ProductCardDTO[] = await fetchProducts();
+
+    const p: ProductCardProps[] = productsDTO.map(dto => ({
+        product: {
+            id: dto.code,
+            name: dto.name,
+            category: dto.category?.name ?? "",
+            imageUrl: validateUrl(dto.images?.[0]?.url),
+            price: {
+                amount: dto.price ?? 0,
+                priceInCents: false,
+                currency: "CLP",
+                locale: "es-CL"
+            }
+        },
+    }));
+
+
     return (
         <>
             <main className="mx-auto max-w-6xl px-4 py-6 md:py-10">
@@ -18,7 +36,7 @@ export async function HomePage() {
                 </section>
 
                 {/* Tu grilla de productos existente */}
-                <ProductGrid products={[]} cols={3} minCardPx={280} gapPx={24}/>
+                <ProductGrid products={p} cols={3} minCardPx={280} gapPx={24}/>
             </main>
         </>
     )

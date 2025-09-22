@@ -2,7 +2,7 @@ import {UsuarioDTO} from "@/types/user";
 
 import {ProductCardDTO, ProductDTO} from "@/types/product";
 import {apiFetch, cmsFetch, HttpError, QueryValue} from "@/lib/fetching";
-import {StrapiList} from "@/types/strapi/common";
+import {StrapiCollection} from "@/types/strapi/common";
 
 // Devuelve el usuario de la sesión actual o null si no hay sesión
 export async function getCurrentUser(): Promise<UsuarioDTO | null> {
@@ -54,27 +54,31 @@ export async function fetchProducts(): Promise<ProductCardDTO[]> {
         "publicationState": "live",
     };
 
-    let data: { data: StrapiList<ProductDTO> };
+    let resp: StrapiCollection<ProductDTO>;
+
     try {
-        data = await cmsFetch<{ data: StrapiList<ProductDTO> }>('/api/products', {
-            query: q
-        })
+        resp = await cmsFetch<StrapiCollection<ProductDTO>>("/api/products", { query: q });
     } catch (e) {
         console.log("error fetching products: ", e);
         return [];
     }
 
-    console.log("raw data products: ", data);
 
-    //TODO: Fix desde aqui en adelante...
+    const isCollection = <T>(x: unknown): x is StrapiCollection<T> =>
+        typeof x === "object" && x !== null && Array.isArray((x as StrapiCollection<T>).data);
+
+    const extractProducts = (x: StrapiCollection<ProductDTO>): ProductDTO[] => {
+        if (isCollection<ProductDTO>(x)) {
+            return (x as StrapiCollection<ProductDTO>).data;
+        }
+        return [];
+    };
 
     const toCard = (p: ProductDTO): ProductCardDTO => {
-        const { documentId, code, name, price, images, category } = p ?? {};
+        const { documentId, code, name, price, images, category } = p;
         return { documentId, code, name, price, images, category };
     };
 
-    const toCardList = (list?: StrapiList<ProductDTO>): ProductCardDTO[] =>
-        (list?.data ?? []).map(toCard);
-
-    return data ?? { data: [] }.data ? toCardList(data.data) : [];
+    const list = extractProducts(resp);
+    return list.map(toCard);
 }
