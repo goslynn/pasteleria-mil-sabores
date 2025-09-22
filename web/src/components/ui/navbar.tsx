@@ -13,10 +13,11 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { cn } from '@/lib/utils'
 import { HamburgerIcon } from '@/components/ui/hamburger-icon'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
-import { DEFAULT_USER_MENU, UserMenu, type UserMenuProps } from '@/components/ui/user-menu'
+import { DEFAULT_USER_MENU, AppUserMenu } from '@/components/ui/app-user-menu'
 import { DEFAULT_HOME_LOGO, HomeLogo, type HomeLogoProps } from '@/components/ui/home-logo'
 import { SearchBar } from '@/components/ui/search-bar'
 import {usePathname} from "next/navigation";
+import {UserMenuProps} from "@/components/ui/user-menu";
 
 export interface NavbarNavItem {
     href?: string
@@ -153,7 +154,7 @@ export function Navbar({
 
                     {/* Derecha: Usuario + Tema */}
                     <div className="flex flex-1 items-center justify-end gap-2">
-                        <UserMenu
+                        <AppUserMenu
                             userName={mergedUserMenu.userName}
                             userEmail={mergedUserMenu.userEmail}
                             userAvatar={mergedUserMenu.userAvatar}
