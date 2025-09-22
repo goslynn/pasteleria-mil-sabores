@@ -1,3 +1,5 @@
+import {RichTextNode, StrapiBase} from "@/types/strapi/common";
+
 export type Money = {
     amount: number; // base price in minor units or decimal (see `priceInCents`)
     currency?: string; // ISO 4217 e.g. "USD", "CLP"
@@ -22,3 +24,23 @@ export interface ProductData {
     price: Money; // base price
     discount?: Discount; // optional discount
 }
+
+export interface ProductDTO extends StrapiBase {
+    code?: string;
+    name?: string;
+    description?: RichTextNode[];
+    price?: number;
+    images?: MediaImage[];
+    category?: CategoryDTO;
+}
+
+export interface CategoryDTO extends StrapiBase {
+    name?: string;
+    slug?: string;
+    description?: RichTextNode[];
+}
+
+export type ProductCardDTO = Pick<
+    ProductDTO,
+    'documentId' | 'code' | 'name' | 'price' | 'images' | 'category'
+>;

@@ -26,7 +26,7 @@ export function cx(...classes: Array<string | false | null | undefined>) {
     return classes.filter(Boolean).join(' ')
 }
 
-
+//TODO : No usar ProductData, usar props interno.
 export function ProductCard({ product, className }: { product: ProductData; className?: string }) {
     const base = toNumber(product.price)
     const finalPrice = applyDiscount(base, product.discount)
