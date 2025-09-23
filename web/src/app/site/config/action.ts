@@ -1,6 +1,9 @@
 "use server";
-
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
+import { hashPassword } from "@/lib/auth";
+import { DireccionForm } from "@/types/direccionDTO";
+import {UsuarioDTO} from "@/types/user";
 
 export async function getRegiones() {
     return prisma.region.findMany({
@@ -14,6 +17,35 @@ export async function getComunasByRegion(idRegion: number) {
         select: { idComuna: true, nombre: true },
     });
 }
+
+export async function getDireccionesByUsuario(usuarioId: number): Promise<DireccionForm[]> {
+    const result = await prisma.direccion.findMany({
+        where: { usuarioIdUsuario: usuarioId },
+        select: {
+            idDireccion: true,
+            calle: true,
+            numero: true,
+            departamento: true,
+            comuna: {
+                select: {
+                    idComuna: true,
+                    nombre: true,
+                    region: { select: { idRegion: true, nombre: true } },
+                },
+            },
+        },
+    });
+
+    return result.map((d) => ({
+        idDireccion: d.idDireccion,
+        calle: d.calle,
+        numero: d.numero,
+        departamento: d.departamento ?? "",
+        region: d.comuna.region.idRegion,
+        comuna: d.comuna.idComuna,
+    }));
+}
+
 export async function addDireccion(data: {
     calle: string;
     numero: string;
@@ -21,52 +53,54 @@ export async function addDireccion(data: {
     idComunaFk: number;
     usuarioIdUsuario: number;
 }) {
-    const exists = await prisma.direccion.findFirst({
+    return prisma.direccion.create({ data });
+}
+export async function updateDireccion(direccion: DireccionForm) {
+    const dirNueva: Prisma.DireccionUpdateInput = {
+        calle: direccion.calle,
+        numero: direccion.numero,
+        departamento: direccion.departamento,
+        comuna: {
+            connect: { idComuna: direccion.comuna }
+        }
+    };
+
+    await prisma.direccion.update({
+        where: { idDireccion: direccion.idDireccion },
+        data: dirNueva
+    });
+}
+
+export async function direccionExiste(us: UsuarioDTO ,dir : DireccionForm) {
+    const existing = await prisma.direccion.findFirst({
         where: {
-            calle: data.calle,
-            numero: data.numero,
-            departamento: data.departamento || null,
-            idComunaFk: data.idComunaFk,
-            usuarioIdUsuario: data.usuarioIdUsuario,
-        },
+            usuarioIdUsuario: us.idUsuario,
+            calle: dir.calle,
+            numero : dir.numero,
+            departamento: dir.departamento,
+            idComunaFk: dir.comuna,
+        }
     });
-
-    if (exists) return exists;
-
-    return prisma.direccion.create({
-        data: {
-            calle: data.calle,
-            numero: data.numero,
-            departamento: data.departamento || null,
-            idComunaFk: data.idComunaFk,
-            usuarioIdUsuario: data.usuarioIdUsuario,
-        },
-    });
+    return !!existing;
 }
-export async function getDireccionesByUsuario(usuarioId: number | undefined  ) {
-    return prisma.direccion.findMany({
-        where: { usuarioIdUsuario: usuarioId },
-        select: {
-            idDireccion: true,
-            calle: true,
-            numero: true,
-            departamento: true,
-            idComunaFk: true,
-            comuna: { select: { nombre: true, idRegionFk: true } },
-        },
-    });
-}
-// actions.ts (server)
+
 export async function deleteDireccion(idDireccion: number) {
-    try {
-        await prisma.direccion.delete({
-            where: { idDireccion },
-        });
-        return { success: true };
-    } catch (err) {
-        console.error("Error al eliminar dirección:", err);
-        throw new Error("No se pudo eliminar la dirección");
-    }
+    return prisma.direccion.delete({ where: { idDireccion } });
 }
 
+export async function updateUsuario(us: UsuarioDTO) {
+    const updateData: Prisma.UsuarioUpdateInput = {
+        nombre: us.nombre,
+        email: us.email,
+        fechaNacimiento: new Date(us.fechaNacimiento),
+    };
 
+    if (us.password?.trim()) {
+        updateData.password = await hashPassword(us.password);
+    }
+
+    return await prisma.usuario.update({
+        where: { idUsuario: us.idUsuario },
+        data: updateData,
+    });
+}
