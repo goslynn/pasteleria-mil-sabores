@@ -18,6 +18,7 @@ import { DEFAULT_HOME_LOGO, HomeLogo, type HomeLogoProps } from '@/components/ui
 import { SearchBar } from '@/components/ui/search-bar'
 import {usePathname} from "next/navigation";
 import {UserMenuProps} from "@/components/ui/user-menu";
+import {CartButton} from "@/components/ui/carrito-theme";
 
 export interface NavbarNavItem {
     href?: string
@@ -162,6 +163,7 @@ export function Navbar({
                             loginHref={mergedUserMenu.loginHref}
                         />
                         <ThemeToggle />
+                        <CartButton/>
                     </div>
                 </div>
 
