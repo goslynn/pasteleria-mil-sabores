@@ -7,8 +7,8 @@ export type RichTextNode =
 
 /** Atributos base repetidos en Strapi */
 export interface StrapiBase {
-    id?: number;
-    documentId?: string;
+    id: number;
+    documentId: string;
     createdAt?: ISODateString;
     updatedAt?: ISODateString;
     publishedAt?: ISODateString;
@@ -31,7 +31,7 @@ export interface MediaFormatInfo {
 /** `formats` es un diccionario (thumbnail, small, medium, large, etc.) */
 export type MediaFormats = Record<string, MediaFormatInfo | undefined>;
 
-export interface MediaImage extends StrapiBase {
+export interface StrapiMedia extends StrapiBase {
     name?: string;
     alternativeText?: string | null;
     caption?: string | null;

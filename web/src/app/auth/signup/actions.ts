@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db";
 import { hashPassword, createSession } from "@/lib/auth";
 import { z } from "zod";
 import { redirect } from "next/navigation";
-import {SimpleState} from "@/types/state";
+import {SimpleState} from "@/types/general";
 
 const SignupSchema = z.object({
   nombre: z.string().min(2),

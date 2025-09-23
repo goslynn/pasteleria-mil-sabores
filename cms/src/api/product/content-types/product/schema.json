@@ -17,6 +17,7 @@
     },
     "name": {
       "type": "string",
+      "maxLength": 20,
       "required": true,
       "unique": false
     },

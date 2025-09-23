@@ -36,3 +36,12 @@ GET {{host}}/api/products?fields[0]=code&fields[1]=name&fields[2]=price&fields[3
 Authorization: Bearer {{token}}
 Accept: application/json
 
+
+###
+# footer
+GET {{host}}/api/footer
+    ?fields[0]=social_links
+    &fields[1]=footer_sections
+    &populate=*
+Authorization: Bearer {{token}}
+Accept: application/json

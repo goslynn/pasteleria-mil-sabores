@@ -3,23 +3,19 @@ import {ProductDTO} from "@/types/product";
 import {fetchProducts} from "@/lib/datamapping";
 import {ProductCardProps} from "@/components/ui/product-card";
 import {normalizeStrapiUrl} from "@/types/strapi/common";
+import {Footer, FooterProps} from "@/components/ui/footer";
+import {FOOTER_ID} from "@/components/app-navbar";
 
 
 export async function HomePage() {
     const toProductCard = (dto: ProductDTO): ProductCardProps => {
         return {
-            product: {
-                id: dto.code,
-                name: dto.name,
-                category: dto.category?.name ?? "",
-                imageUrl: normalizeStrapiUrl(dto.images?.[0]?.url),
-                price: {
-                    amount: dto.price ?? 0,
-                    priceInCents: false,
-                    currency: "CLP",
-                    locale: "es-CL"
-                }
-            }
+            category: dto?.category?.name,
+            id: dto.documentId,
+            imageUrl: normalizeStrapiUrl(dto.images?.[0]?.url || ""),
+            name: dto.name,
+            price: dto.price,
+            href: "#"
         }
     }
 
@@ -28,14 +24,33 @@ export async function HomePage() {
         "fields[1]": "name",
         "fields[2]": "price",
         "fields[3]": "description",
+        "populate[category][fields][0]": "name",
         "populate[images][fields][0]": "url",
         "populate[images][fields][1]": "formats",
         "pagination[pageSize]": "100",
         "publicationState": "live"
     }, toProductCard);
 
+    const footOps: FooterProps = {
+        id: FOOTER_ID,
+        copyright: {
+            owner: "Pasteleria Mil Sabores",
+        },
+        sections: [
+            {
+                title: "Contacto",
+                links: [{ label: "Escríbenos", href: "mailto:vct.gonzaleza@gmail.com" },
+                { label: "Llámanos", href: "tel:+56949724151" }]
+
+            },
+            {
+                links: [], title: ""
+
+            }
+        ],
 
 
+    };
 
     return (
         <>
@@ -47,9 +62,15 @@ export async function HomePage() {
                         Endúlzate con nuestras tortas, postres y clásicos de la casa.
                     </p>
                 </section>
-
-                <ProductGrid products={cards} cols={3} minCardPx={280} gapPx={24}/>
+                <div className="p-6 sm:p-8 md:p-10 flex justify-center">
+                    <div className="w-full max-w-6xl bg-muted rounded-2xl shadow-md ring-1 ring-border p-4 sm:p-6 md:p-8">
+                        <ProductGrid products={cards} cols={3} minCardPx={280} gapPx={24} className={"brand-scope"}/>
+                    </div>
+                </div>
             </main>
+            <div className="bg-primary text-primary-foreground w-full">
+                <Footer {...footOps} />
+            </div>
         </>
     )
 }

@@ -4,8 +4,11 @@ import { CakeSlice } from 'lucide-react'
 import {UsuarioDTO} from "@/types/user";
 import {getCurrentUser} from "@/lib/datamapping";
 
+export const FOOTER_ID = 'site-footer';
+
 export async function AppNavbar() {
     const user: UsuarioDTO | null = await getCurrentUser();
+    const footerRef = `#${FOOTER_ID}`;
     const NAVBAR_PROPS: NavbarProps = {
         homeLogo: { icon: <CakeSlice/>, label: 'Mil Sabores' },
         userMenu: {
@@ -19,7 +22,7 @@ export async function AppNavbar() {
             { href: '/', label: 'Inicio' },
             { href: '/categories', label: 'Categorias' },
             { href: '/about', label: 'Sobre nosotros' },
-            { href: '/contact', label: 'Contacto' },
+            { href: footerRef , label: 'Contacto' },
         ],
     };
 

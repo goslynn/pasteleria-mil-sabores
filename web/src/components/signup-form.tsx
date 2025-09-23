@@ -6,8 +6,8 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import React, {useActionState} from "react";
-import {SimpleState} from "@/types/state";
-import {PasswordInput} from "@/components/ui/PasswordInput";
+import {SimpleState} from "@/types/general";
+import {PasswInput} from "@/components/ui/passw-input";
 
 
 export function SignupForm({
@@ -73,7 +73,7 @@ export function SignupForm({
 
                             <div className="grid gap-3">
                                 <Label htmlFor="password">Contraseña *</Label>
-                                <PasswordInput
+                                <PasswInput
                                     name="password"
                                     id="password"
                                     required
@@ -82,7 +82,7 @@ export function SignupForm({
 
                             <div className="grid gap-3">
                                 <Label htmlFor="confirm-password">Confirmar contraseña *</Label>
-                                <PasswordInput
+                                <PasswInput
                                     name="confirm-password"
                                     id="confirm-password"
                                     required/>

@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 type PasswordInputProps = React.ComponentProps<typeof Input>;
 
 
-export function PasswordInput({ className, ...props }: PasswordInputProps) {
+export function PasswInput({ className, ...props }: PasswordInputProps) {
     const [showPassword, setShowPassword] = useState(false);
 
     return (

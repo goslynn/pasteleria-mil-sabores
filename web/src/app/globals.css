@@ -1,136 +1,201 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Habilita variante dark con clase .dark en <html> o <body> */
 @custom-variant dark (&:is(.dark *));
 
+/* Mapea tokens tailwind v4 a tus CSS vars existentes (sin romper nombres) */
 @theme inline {
     --color-background: var(--background);
     --color-foreground: var(--foreground);
-    --color-sidebar-ring: var(--sidebar-ring);
-    --color-sidebar-border: var(--sidebar-border);
-    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-    --color-sidebar-accent: var(--sidebar-accent);
-    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-    --color-sidebar-primary: var(--sidebar-primary);
-    --color-sidebar-foreground: var(--sidebar-foreground);
-    --color-sidebar: var(--sidebar);
-    --color-chart-5: var(--chart-5);
-    --color-chart-4: var(--chart-4);
-    --color-chart-3: var(--chart-3);
-    --color-chart-2: var(--chart-2);
-    --color-chart-1: var(--chart-1);
-    --color-ring: var(--ring);
-    --color-input: var(--input);
-    --color-border: var(--border);
-    --color-destructive: var(--destructive);
-    --color-accent-foreground: var(--accent-foreground);
-    --color-accent: var(--accent);
-    --color-muted-foreground: var(--muted-foreground);
-    --color-muted: var(--muted);
-    --color-secondary-foreground: var(--secondary-foreground);
-    --color-secondary: var(--secondary);
-    --color-primary-foreground: var(--primary-foreground);
-    --color-primary: var(--primary);
-    --color-popover-foreground: var(--popover-foreground);
-    --color-popover: var(--popover);
-    --color-card-foreground: var(--card-foreground);
+
     --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+
+    --color-destructive: var(--destructive);
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+
+    --color-sidebar: var(--sidebar);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-ring: var(--sidebar-ring);
+
+    --color-chart-1: var(--chart-1);
+    --color-chart-2: var(--chart-2);
+    --color-chart-3: var(--chart-3);
+    --color-chart-4: var(--chart-4);
+    --color-chart-5: var(--chart-5);
+
     --radius-sm: calc(var(--radius) - 4px);
     --radius-md: calc(var(--radius) - 2px);
     --radius-lg: var(--radius);
     --radius-xl: calc(var(--radius) + 4px);
 }
 
+/* =========================================================
+   BASE NEUTRAL (sobria) — LIGHT
+   ========================================================= */
 :root {
     --radius: 0.625rem;
 
-    /* === PALETA LIGHT === */
-    --background: #fbfefbff;               /* Baby powder, muy claro */
-    --foreground: #231910ff;               /* Licorice, buen contraste para texto */
+    /* Grises tipo “slate/neutral” (sobrios, accesibles) */
+    --background: #f8fafc;              /* slate-50 */
+    --foreground: #0f172a;              /* slate-900 */
 
-    --card: #ffffffff;                     /* Blanco limpio */
-    --card-foreground: #231910ff;
+    --card: #ffffff;                    /* blanco */
+    --card-foreground: #0f172a;
 
-    --popover: #efe5dcff;                  /* Linen, sutil */
-    --popover-foreground: #231910ff;
+    --popover: #ffffff;
+    --popover-foreground: #0f172a;
 
-    --primary: #d0b8acff;                  /* Pale dogwood, acento principal */
-    --primary-foreground: #231910ff;
+    /* Primario neutro (no de marca) */
+    --primary: #334155;                 /* slate-700 */
+    --primary-foreground: #f8fafc;      /* texto sobre primario */
 
-    --secondary: #f3d8c7ff;                /* Champagne pink */
-    --secondary-foreground: #231910ff;
+    --secondary: #e5e7eb;               /* gray-200 */
+    --secondary-foreground: #111827;    /* gray-900 */
 
-    --muted: #efe5dcff;                    /* Linen */
-    --muted-foreground: #523a2eff;         /* Van Dyke */
+    --muted: #eef2f7;                   /* gris muy claro */
+    --muted-foreground: #475569;        /* slate-600 */
 
-    --accent: #f3d8c7ff;                   /* Champagne pink */
-    --accent-foreground: #231910ff;
+    --accent: #e2e8f0;                  /* slate-200 */
+    --accent-foreground: #0f172a;
 
-    --destructive: #8b0000;                /* Rojo vino para errores */
-    --border: #d0b8acff;                   /* Pale dogwood */
-    --input: #d0b8acff;
-    --ring: #d0b8acff;
+    --destructive: #dc2626;             /* red-600 */
+    --border: #e5e7eb;                  /* gray-200 */
+    --input: #e5e7eb;
+    --ring: #94a3b8;                    /* slate-400 */
 
-    --chart-1: #d0b8acff;
-    --chart-2: #f3d8c7ff;
-    --chart-3: #efe5dcff;
-    --chart-4: #fbfefbff;
-    --chart-5: #ffffffff;
+    /* Paleta para gráficos neutros */
+    --chart-1: #334155;
+    --chart-2: #64748b;
+    --chart-3: #94a3b8;
+    --chart-4: #cbd5e1;
+    --chart-5: #e2e8f0;
 
-    --sidebar: #fbfefbff;
-    --sidebar-foreground: #231910ff;
-    --sidebar-primary: #d0b8acff;
-    --sidebar-primary-foreground: #231910ff;
-    --sidebar-accent: #f3d8c7ff;
-    --sidebar-accent-foreground: #231910ff;
-    --sidebar-border: #d0b8acff;
-    --sidebar-ring: #d0b8acff;
+    /* Sidebar neutra */
+    --sidebar: #ffffff;
+    --sidebar-foreground: #0f172a;
+    --sidebar-primary: #334155;
+    --sidebar-primary-foreground: #f8fafc;
+    --sidebar-accent: #e2e8f0;
+    --sidebar-accent-foreground: #0f172a;
+    --sidebar-border: #e5e7eb;
+    --sidebar-ring: #94a3b8;
+
+    /* === BRAND (empresa) — SOLO EXPOSICIÓN, NO APLICADA POR DEFECTO === */
+    --brand-cream: #f3e5cf;             /* crema del anillo */
+    --brand-red: #b64a46;               /* rojo pastel del relleno */
+    --brand-red-deep: #9f3d3a;          /* rojo más profundo */
+    --brand-biscuit: #e8c79d;           /* beige de fondo */
+    --brand-ink: #2b1a13;               /* marrón/ink para textos con marca */
+
+    /* Alias de marca “listos” si quieres usarlos en componentes */
+    --brand-primary: var(--brand-red);
+    --brand-primary-foreground: #fff;
+    --brand-accent: var(--brand-cream);
+    --brand-accent-foreground: var(--brand-ink);
 }
 
+/* =========================================================
+   BASE NEUTRAL (sobria) — DARK
+   ========================================================= */
 .dark {
-    /* === PALETA DARK === */
-    --background: #010401ff;               /* Negro suave */
-    --foreground: #fbfefbff;               /* Baby powder para contraste */
+    --background: #0b1220;              /* ~slate-950/blue-gray */
+    --foreground: #e5e7eb;              /* gray-200 */
 
-    --card: #231910ff;                     /* Licorice */
-    --card-foreground: #fbfefbff;
+    --card: #0f172a;                    /* slate-900 */
+    --card-foreground: #e5e7eb;
 
-    --popover: #371c0cff;                  /* Bistre */
-    --popover-foreground: #fbfefbff;
+    --popover: #0f172a;
+    --popover-foreground: #e5e7eb;
 
-    --primary: #523a2eff;                  /* Van Dyke */
-    --primary-foreground: #fbfefbff;
+    --primary: #93c5fd;                 /* blue-300 como primario sobrio en dark */
+    --primary-foreground: #0b1220;
 
-    --secondary: #371c0cff;                /* Bistre */
-    --secondary-foreground: #fbfefbff;
+    --secondary: #1f2937;               /* gray-800 */
+    --secondary-foreground: #e5e7eb;
 
-    --muted: #231910ff;                    /* Licorice */
-    --muted-foreground: #d0b8acff;
+    --muted: #111827;                   /* gray-900 */
+    --muted-foreground: #9ca3af;        /* gray-400 */
 
-    --accent: #523a2eff;                   /* Van Dyke */
-    --accent-foreground: #fbfefbff;
+    --accent: #1f2937;
+    --accent-foreground: #e5e7eb;
 
-    --destructive: #ff6b6b;                /* Rojo pastel claro para alertas */
-    --border: #523a2eff;
-    --input: #523a2eff;
-    --ring: #d0b8acff;
+    --destructive: #f87171;             /* red-400 */
+    --border: #1f2937;                  /* gray-800 */
+    --input: #1f2937;
+    --ring: #475569;                    /* slate-600 */
 
-    --chart-1: #523a2eff;
-    --chart-2: #371c0cff;
-    --chart-3: #231910ff;
-    --chart-4: #010401ff;
-    --chart-5: #000000ff;
+    --chart-1: #93c5fd;
+    --chart-2: #60a5fa;
+    --chart-3: #3b82f6;
+    --chart-4: #1d4ed8;
+    --chart-5: #172554;
 
-    --sidebar: #231910ff;
-    --sidebar-foreground: #fbfefbff;
-    --sidebar-primary: #523a2eff;
-    --sidebar-primary-foreground: #fbfefbff;
-    --sidebar-accent: #371c0cff;
-    --sidebar-accent-foreground: #fbfefbff;
-    --sidebar-border: #523a2eff;
-    --sidebar-ring: #d0b8acff;
+    --sidebar: #0f172a;
+    --sidebar-foreground: #e5e7eb;
+    --sidebar-primary: #93c5fd;
+    --sidebar-primary-foreground: #0b1220;
+    --sidebar-accent: #1f2937;
+    --sidebar-accent-foreground: #e5e7eb;
+    --sidebar-border: #1f2937;
+    --sidebar-ring: #475569;
+
+    /* Marca (misma que en :root, por claridad) */
+    --brand-cream: #f3e5cf;
+    --brand-red: #b64a46;
+    --brand-red-deep: #e28b86;          /* una versión que contraste en dark */
+    --brand-biscuit: #b39267;
+    --brand-ink: #f5efe9;
+
+    --brand-primary: var(--brand-red-deep);
+    --brand-primary-foreground: #0b1220;
+    --brand-accent: var(--brand-cream);
+    --brand-accent-foreground: #0b1220;
 }
 
+/* =========================================================
+   OPT-IN a colores de marca sin romper la base
+   Aplica .brand-scope en cualquier contenedor para “re-mapear”
+   tokens UI -> paleta de marca
+   ========================================================= */
+.brand-scope {
+    --primary: var(--brand-primary);
+    --primary-foreground: var(--brand-primary-foreground);
+
+    --accent: var(--brand-accent);
+    --accent-foreground: var(--brand-accent-foreground);
+
+    /* Opcional: borde y ring un poquito “brand” */
+    --border: color-mix(in oklab, var(--brand-cream) 55%, #e5e7eb);
+    --ring: color-mix(in oklab, var(--brand-red) 45%, #94a3b8);
+}
+
+/* =========================================================
+   Base tailwind
+   ========================================================= */
 @layer base {
     * {
         @apply border-border outline-ring/50;
@@ -142,6 +207,7 @@
         @apply cursor-pointer;
     }
 
+    /* Reseteo de adornos en <input type="search"> */
     input[type="search"]::-webkit-search-decoration,
     input[type="search"]::-webkit-search-cancel-button,
     input[type="search"]::-webkit-search-results-button,
@@ -151,4 +217,3 @@
         display: none;
     }
 }
-

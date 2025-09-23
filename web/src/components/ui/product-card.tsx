@@ -1,116 +1,158 @@
-import * as React from 'react'
-import { Plus } from 'lucide-react'
-import {cn} from "@/lib/utils";
-import {Discount, Price} from "@/types/product";
+'use client'
+
+import * as React from "react"
+import Link from "next/link"
+import Image from "next/image"
+import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { cn } from "@/lib/utils"
+import { Plus, Heart } from "lucide-react"
+
+export interface Discount {
+    type: "percentage" | "fixed"
+    value: number
+}
 
 export interface ProductCardProps {
-    product: {
-        id: string | number
-        name: string
-        category?: string
-        imageUrl: string
-        price: Price
-        discount?: Discount
-    }
+    id: string | number
+    name: string
+    price: number
+    category?: string
+    imageUrl: string
+    discount?: Discount
+    href: string
     className?: string
+    aspect?: "4/3" | "1/1" | "16/9"
+    onToggleFavorite?: () => void
+    onAddToCart?: () => void
 }
 
-function toNumber(p: Price) {
-    return p.priceInCents ? Math.round(p.amount) / 100 : p.amount
-}
+export function ProductCard({
+                                name,
+                                price,
+                                category,
+                                imageUrl,
+                                discount,
+                                href,
+                                className,
+                                aspect = "4/3",
+                                onToggleFavorite,
+                                onAddToCart,
+                            }: ProductCardProps) {
+    const finalPrice = discount
+        ? discount.type === "percentage"
+            ? Math.max(0, Math.round(price * (1 - discount.value / 100)))
+            : Math.max(0, price - discount.value)
+        : price
 
-function applyDiscount(base: number, d?: Discount) {
-    if (!d) return base
-    return d.type === 'percentage'
-        ? Math.max(0, base * (1 - d.value / 100))
-        : Math.max(0, base - d.value)
-}
-
-function fmt(p: Price, x?: number) {
-    const n = x ?? toNumber(p)
-    const currency = p.currency ?? 'USD'
-    const locale = p.locale ?? (currency === 'CLP' ? 'es-CL' : 'en-US')
-    return new Intl.NumberFormat(locale, {
-        style: 'currency',
-        currency,
-        minimumFractionDigits: currency === 'CLP' ? 0 : 2,
-        maximumFractionDigits: currency === 'CLP' ? 0 : 2,
-    }).format(n)
-}
-
-export function ProductCard({ product, className }: ProductCardProps) {
-    const base = toNumber(product.price)
-    const finalPrice = applyDiscount(base, product.discount)
-    const hasDiscount = finalPrice !== base
+    const aspectClass =
+        aspect === "1/1" ? "aspect-square"
+            : aspect === "16/9" ? "aspect-video"
+                : "aspect-[4/3]"
 
     return (
-        <div
+        <Card
             className={cn(
-                'group relative w-80 rounded-2xl border bg-card p-4 text-card-foreground shadow-sm ring-1 ring-border',
+                // asegura tokens del tema
+                "group flex h-full flex-col overflow-hidden rounded-xl bg-card text-card-foreground border border-border",
+                "shadow-sm transition-transform duration-150 hover:scale-[1.015] hover:shadow-md",
+                "cursor-pointer",
                 className
             )}
         >
-            {/* Imagen */}
-            <div className="mb-4 aspect-[4/3] overflow-hidden rounded-xl bg-muted">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                    src={product.imageUrl}
-                    alt={product.name}
-                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-                    loading="lazy"
-                />
-            </div>
-
-            {/* Título + Precio */}
-            <div className="mb-1 flex items-start gap-2">
-                <div className="min-w-0 flex-1">
-                    <h3 className="truncate text-lg font-medium leading-tight">
-                        {product.name}
-                    </h3>
-                    <p className="mt-0.5 text-sm text-muted-foreground">
-                        {product.category}
-                    </p>
-                </div>
-                <div className="text-right">
-                    {hasDiscount ? (
-                        <div className="flex flex-col items-end">
-              <span className="text-sm text-muted-foreground line-through">
-                {fmt(product.price, base)}
-              </span>
-                            <span className="-mt-0.5 text-lg font-semibold">
-                {fmt(product.price, finalPrice)}
-              </span>
-                        </div>
-                    ) : (
-                        <span className="text-lg font-semibold">
-              {fmt(product.price, base)}
-            </span>
-                    )}
-                </div>
-            </div>
-
-            {/* Acciones */}
-            <div className="mt-4">
-                <form className="flex-1">
-                    <input type="hidden" name="id" value={String(product.id)} />
-                    <button
-                        type="submit"
-                        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-muted px-4 py-2.5 text-sm font-medium ring-1 ring-border transition hover:brightness-95 active:scale-95"
+            {/* Clic a la ficha: imagen + texto */}
+            <Link href={href} className="flex flex-col flex-1">
+                <CardHeader className="p-4 pb-2">
+                    {/* Marco con ratio fijo y ring del tema */}
+                    <div
+                        className={cn(
+                            "relative w-full overflow-hidden rounded-lg border border-border bg-card",
+                            aspectClass
+                        )}
                     >
-                        <Plus className="h-4 w-4" />
-                        <span>Añadir al carrito</span>
-                    </button>
-                </form>
-            </div>
+                        {/* etiqueta de descuento si es porcentaje */}
+                        {discount?.type === "percentage" && (
+                            <Badge variant="destructive" className="absolute left-2 top-2 z-10">
+                                -{discount.value}%
+                            </Badge>
+                        )}
 
-            {/* Badge de descuento */}
-            {hasDiscount && (
-                <div className="absolute left-4 top-4 rounded-full bg-primary px-2.5 py-1 text-xs font-semibold text-primary-foreground shadow">
-                    {product.discount?.type === 'percentage'
-                        ? `-${product.discount?.value}%`
-                        : `-${fmt(product.price, product.discount?.value ?? 0)}`}
-                </div>
-            )}
-        </div>
+                        {/* Imagen contenida (no se deforma) */}
+                        <Image
+                            src={imageUrl}
+                            alt={name}
+                            fill
+                            className="object-cover pointer-events-none"
+                            sizes="(max-width: 768px) 100vw, 400px"
+                            priority={false}
+                        />
+                    </div>
+                </CardHeader>
+
+                <CardContent className="flex flex-col gap-2 px-4 pb-2">
+                    {/* Título 1 línea + precio a la derecha */}
+                    <div className="flex items-start justify-between gap-3">
+                        <h3 className="truncate text-base font-semibold leading-tight">{name}</h3>
+
+                        {discount ? (
+                            <div className="text-right leading-none">
+                                <div className="text-xs text-muted-foreground line-through">{monetize(price)}</div>
+                                <div className="text-lg font-bold text-primary">{monetize(finalPrice)}</div>
+                            </div>
+                        ) : (
+                            <div className="text-right leading-none">
+                                <div className="text-lg font-bold text-primary">{monetize(price)}</div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Categoría */}
+                    {category && (
+                        <Badge variant="secondary" className="w-fit">
+                            {category}
+                        </Badge>
+                    )}
+                </CardContent>
+            </Link>
+
+            {/* Acciones (no navegan) */}
+            <CardFooter className="flex items-center gap-3 px-4 pb-4 pt-0">
+                {onToggleFavorite && (
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={(e) => {
+                            e.preventDefault()
+                            onToggleFavorite?.()
+                        }}
+                        aria-label="Agregar a favoritos"
+                    >
+                        <Heart className="size-4" />
+                    </Button>
+                )}
+
+                <Button
+                    type="button"
+                    className="flex-1"
+                    onClick={(e) => {
+                        e.preventDefault()
+                        onAddToCart?.()
+                    }}
+                >
+                    <Plus className="mr-2 size-4" />
+                    Agregar al carrito
+                </Button>
+            </CardFooter>
+        </Card>
     )
+}
+
+function monetize(price: number): string {
+    return new Intl.NumberFormat("es-CL", {
+        style: "currency",
+        currency: "CLP",
+        maximumFractionDigits: 0,
+    }).format(price)
 }

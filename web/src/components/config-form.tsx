@@ -1,10 +1,10 @@
 // config-form.tsx
 "use client";
 
-import { ConfigPageProps, DireccionForm } from "@/types/direccionDTO";
+import { ConfigPageProps } from "@/types/direccionDTO";
 import { useDirecciones } from "@/app/site/config/useDirecciones";
 import { FaTrash } from "react-icons/fa";
-import { PasswordInput } from "@/components/ui/PasswordInput";
+import { PasswInput } from "@/components/ui/passw-input";
 
 export function ConfigPage({
                                usuario,
@@ -58,7 +58,7 @@ export function ConfigPage({
                             onChange={e => handleUsuarioChange("email", e.target.value)}
                             className="border rounded p-2 w-full"
                         />
-                        <PasswordInput
+                        <PasswInput
                             placeholder="Nueva contraseña"
                             value={usuarioState.password ?? ""}
                             onChange={e => handleUsuarioChange("password", e.target.value)}
