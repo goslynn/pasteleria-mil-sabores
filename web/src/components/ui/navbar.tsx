@@ -18,7 +18,7 @@ import { DEFAULT_HOME_LOGO, HomeLogo, type HomeLogoProps } from '@/components/ui
 import { SearchBar } from '@/components/ui/search-bar'
 import {usePathname} from "next/navigation";
 import {UserMenuProps} from "@/components/ui/user-menu";
-import {CartButton} from "@/components/ui/carrito-theme";
+import {CartButton, CartButtonProps} from "@/components/ui/carrito-theme";
 
 export interface NavbarNavItem {
     href?: string
@@ -31,6 +31,7 @@ export interface NavbarProps extends React.HTMLAttributes<HTMLElement> {
     navigationLinks?: NavbarNavItem[]
     searchPlaceholder?: string
     onSearchSubmit?: (query: string) => void
+    cart: CartButtonProps;
 }
 
 function useIsMobile(ref: React.RefObject<HTMLElement | null>, breakpoint = 768) {
@@ -55,11 +56,13 @@ export function Navbar({
                            navigationLinks = [],
                            searchPlaceholder = 'Buscar...',
                            onSearchSubmit,
+                           cart,
                            className,
                            ...props
                        }: NavbarProps) {
-    const mergedHomeLogo: HomeLogoProps = { ...DEFAULT_HOME_LOGO, ...(homeLogo ?? {}) }
-    const mergedUserMenu: UserMenuProps = { ...DEFAULT_USER_MENU, ...(userMenu ?? {}) }
+
+    const mergedHomeLogo: HomeLogoProps = {...DEFAULT_HOME_LOGO, ...(homeLogo ?? {})}
+    const mergedUserMenu: UserMenuProps = {...DEFAULT_USER_MENU, ...(userMenu ?? {})}
 
     const containerRef = useRef<HTMLElement | null>(null)
     const isMobile = useIsMobile(containerRef)
@@ -100,7 +103,7 @@ export function Navbar({
                                         aria-label="Abrir menú"
                                         type="button"
                                     >
-                                        <HamburgerIcon />
+                                        <HamburgerIcon/>
                                     </Button>
                                 </PopoverTrigger>
 
@@ -116,7 +119,8 @@ export function Navbar({
                                                     'focus:bg-transparent focus-visible:outline-none'
 
                                                 return (
-                                                    <NavigationMenuItem key={link.href ?? `${link.label}-${idx}`} className="w-full">
+                                                    <NavigationMenuItem key={link.href ?? `${link.label}-${idx}`}
+                                                                        className="w-full">
                                                         <Button
                                                             asChild
                                                             variant="ghost"
@@ -150,7 +154,7 @@ export function Navbar({
 
                     {/* Centro: búsqueda */}
                     <div className="grow">
-                        <SearchBar placeholder={searchPlaceholder} onSubmit={handleSearchSubmit} />
+                        <SearchBar placeholder={searchPlaceholder} onSubmit={handleSearchSubmit}/>
                     </div>
 
                     {/* Derecha: Usuario + Tema */}
@@ -162,8 +166,8 @@ export function Navbar({
                             items={mergedUserMenu.items}
                             loginHref={mergedUserMenu.loginHref}
                         />
-                        <ThemeToggle />
-                        <CartButton/>
+                        <ThemeToggle/>
+                        <CartButton {...cart}/>
                     </div>
                 </div>
 

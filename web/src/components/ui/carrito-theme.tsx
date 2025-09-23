@@ -1,25 +1,28 @@
-"use client"
+import { Button } from "@/components/ui/button";
+import { ShoppingCart } from "lucide-react";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
 
-import { Button } from "@/components/ui/button"
-import { ShoppingCart } from "lucide-react"
+export interface CartButtonProps {
+    link: string;
+    className?: string;
+}
 
-export function CartButton() {
-    function handleClick() {
-        // Aquí no haces nada todavía,
-        // solo queda el hook para cuando quieras abrir un Drawer/Modal/etc.
-        console.log("Carrito presionado")
-    }
-
+export function CartButton({ link, className  }: CartButtonProps) {
     return (
-        <Button
-            variant="ghost"
-            size="icon"
-            aria-label="Abrir carrito de compras"
-            title="Abrir carrito de compras"
-            onClick={handleClick}
-            className="active:scale-95 transition-transform duration-150"
-        >
-            <ShoppingCart className="h-5 w-5" />
-        </Button>
-    )
+        <Link href={link} className="flex justify-center">
+            <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Abrir carrito de compras"
+                title="Abrir carrito de compras"
+                className={cn(
+                    "active:scale-95 transition-transform duration-150",
+                    className
+                )}
+            >
+                <ShoppingCart className="h-5 w-5" />
+            </Button>
+        </Link>
+    );
 }
