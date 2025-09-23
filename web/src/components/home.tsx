@@ -1,27 +1,40 @@
 import ProductGrid from "@/components/ui/product-grid";
-import {ProductCardDTO} from "@/types/product";
+import {ProductDTO} from "@/types/product";
 import {fetchProducts} from "@/lib/datamapping";
 import {ProductCardProps} from "@/components/ui/product-card";
-import {validateUrl} from "@/types/strapi/common";
+import {normalizeStrapiUrl} from "@/types/strapi/common";
 
 
 export async function HomePage() {
-    const productsDTO: ProductCardDTO[] = await fetchProducts();
-
-    const p: ProductCardProps[] = productsDTO.map(dto => ({
-        product: {
-            id: dto.code,
-            name: dto.name,
-            category: dto.category?.name ?? "",
-            imageUrl: validateUrl(dto.images?.[0]?.url),
-            price: {
-                amount: dto.price ?? 0,
-                priceInCents: false,
-                currency: "CLP",
-                locale: "es-CL"
+    const toProductCard = (dto: ProductDTO): ProductCardProps => {
+        return {
+            product: {
+                id: dto.code,
+                name: dto.name,
+                category: dto.category?.name ?? "",
+                imageUrl: normalizeStrapiUrl(dto.images?.[0]?.url),
+                price: {
+                    amount: dto.price ?? 0,
+                    priceInCents: false,
+                    currency: "CLP",
+                    locale: "es-CL"
+                }
             }
-        },
-    }));
+        }
+    }
+
+    const cards = await fetchProducts( {
+        "fields[0]": "code",
+        "fields[1]": "name",
+        "fields[2]": "price",
+        "fields[3]": "description",
+        "populate[images][fields][0]": "url",
+        "populate[images][fields][1]": "formats",
+        "pagination[pageSize]": "100",
+        "publicationState": "live"
+    }, toProductCard);
+
+
 
 
     return (
@@ -35,8 +48,7 @@ export async function HomePage() {
                     </p>
                 </section>
 
-                {/* Tu grilla de productos existente */}
-                <ProductGrid products={p} cols={3} minCardPx={280} gapPx={24}/>
+                <ProductGrid products={cards} cols={3} minCardPx={280} gapPx={24}/>
             </main>
         </>
     )

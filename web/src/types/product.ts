@@ -1,6 +1,6 @@
 import {RichTextNode, StrapiBase, MediaImage} from "@/types/strapi/common";
 
-export type Money = {
+export type Price = {
     amount: number; // base price in minor units or decimal (see `priceInCents`)
     currency?: string; // ISO 4217 e.g. "USD", "CLP"
     locale?: string; // e.g. "en-US", "es-CL"
@@ -14,16 +14,6 @@ export type Money = {
 export type Discount =
     | { type: "percentage"; value: number }
     | { type: "amount"; value: number };
-
-export interface ProductData {
-    id: number;
-    name: string;
-    description: string;
-    category: string;
-    imageUrl: string;
-    price: Money; // base price
-    discount?: Discount; // optional discount
-}
 
 export interface ProductDTO extends StrapiBase {
     code: string;

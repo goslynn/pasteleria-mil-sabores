@@ -1,18 +1,7 @@
 import * as React from 'react'
 import { Plus } from 'lucide-react'
 import {cn} from "@/lib/utils";
-
-/** Tipos internos */
-export interface Price {
-    amount: number
-    priceInCents?: boolean
-    currency?: string
-    locale?: string
-}
-
-export type Discount =
-    | { type: 'percentage'; value: number }
-    | { type: 'absolute'; value: number }
+import {Discount, Price} from "@/types/product";
 
 export interface ProductCardProps {
     product: {

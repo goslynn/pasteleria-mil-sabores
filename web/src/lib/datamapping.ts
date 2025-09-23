@@ -1,7 +1,7 @@
 import {UsuarioDTO} from "@/types/user";
 
 import {ProductCardDTO, ProductDTO} from "@/types/product";
-import {apiFetch, cmsFetch, HttpError, QueryValue} from "@/lib/fetching";
+import {apiFetch, cmsFetch, HttpError, QueryValue, strapi} from "@/lib/fetching";
 import {StrapiCollection} from "@/types/strapi/common";
 
 // Devuelve el usuario de la sesión actual o null si no hay sesión
@@ -42,7 +42,7 @@ export async function getUserById(id: number): Promise<UsuarioDTO> {
     return data;
 }
 
-export async function fetchProducts(): Promise<ProductCardDTO[]> {
+// export async function fetchProducts(): Promise<ProductCardDTO[]> {
     const q: Record<string, QueryValue> = {
         "fields[0]": "code",
         "fields[1]": "name",
@@ -53,32 +53,44 @@ export async function fetchProducts(): Promise<ProductCardDTO[]> {
         "pagination[pageSize]": "100",
         "publicationState": "live",
     };
+//
+//     let resp: StrapiCollection<ProductDTO>;
+//
+//     try {
+//         resp = await cmsFetch<StrapiCollection<ProductDTO>>("/api/products", { query: q });
+//     } catch (e) {
+//         console.log("error fetching products: ", e);
+//         return [];
+//     }
+//
+//
+//     // const isCollection = <T>(x: unknown): x is StrapiCollection<T> =>
+//     //     typeof x === "object" && x !== null && Array.isArray((x as StrapiCollection<T>).data);
+//     //
+//     // const extractProducts = (x: StrapiCollection<ProductDTO>): ProductDTO[] => {
+//     //     if (isCollection<ProductDTO>(x)) {
+//     //         return (x as StrapiCollection<ProductDTO>).data;
+//     //     }
+//     //     return [];
+//     // };
+//
+//     const toCard = (p: ProductDTO): ProductCardDTO => {
+//         const { documentId, code, name, price, images, category } = p;
+//         return { documentId, code, name, price, images, category };
+//     };
+//
+//
+//     return resp.data.map(toCard);
+// }
 
+export async function fetchProducts<T>(q : Record<string, QueryValue>, mapper : (e : ProductDTO) => T) : Promise<T[]> {
     let resp: StrapiCollection<ProductDTO>;
-
     try {
-        resp = await cmsFetch<StrapiCollection<ProductDTO>>("/api/products", { query: q });
+        resp = await strapi.get<StrapiCollection<ProductDTO>>("/api/products", { query: q });
     } catch (e) {
-        console.log("error fetching products: ", e);
+        console.error("error fetching products: ", e);
         return [];
     }
 
-
-    const isCollection = <T>(x: unknown): x is StrapiCollection<T> =>
-        typeof x === "object" && x !== null && Array.isArray((x as StrapiCollection<T>).data);
-
-    const extractProducts = (x: StrapiCollection<ProductDTO>): ProductDTO[] => {
-        if (isCollection<ProductDTO>(x)) {
-            return (x as StrapiCollection<ProductDTO>).data;
-        }
-        return [];
-    };
-
-    const toCard = (p: ProductDTO): ProductCardDTO => {
-        const { documentId, code, name, price, images, category } = p;
-        return { documentId, code, name, price, images, category };
-    };
-
-    const list = extractProducts(resp);
-    return list.map(toCard);
+    return resp.data.map(mapper);
 }

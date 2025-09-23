@@ -73,7 +73,7 @@ export interface StrapiObject<T> {
     meta?: ApiMeta;
 }
 
-export function validateUrl(url?: string): string {
+export function normalizeStrapiUrl(url?: string): string {
     const host = process.env.STRAPI_HOST;
     if (!host) {
         throw new Error("STRAPI_HOST no está definido en las variables de entorno");
