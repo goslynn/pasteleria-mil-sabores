@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { DireccionForm } from "@/types/direccionDTO";
+import { DireccionForm } from "@/types/direccion";
 import {addDireccion, deleteDireccion, direccionExiste, updateDireccion, updateUsuario} from "@/app/site/config/action";
 import { UsuarioDTO } from "@/types/user";
 

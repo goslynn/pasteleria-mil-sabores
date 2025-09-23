@@ -40,8 +40,13 @@ Accept: application/json
 ###
 # footer
 GET {{host}}/api/footer
-    ?fields[0]=social_links
-    &fields[1]=footer_sections
-    &populate=*
+    ?fields[0]=id
+    &fields[1]=documentId
+    &populate[socials][fields][0]=kind
+    &populate[socials][fields][1]=link
+    &populate[footer_sections][fields][0]=title
+    &populate[footer_sections][populate][links][fields][0]=label
+    &populate[footer_sections][populate][links][fields][1]=link
+    &populate[footer_sections][populate][links][fields][2]=external
 Authorization: Bearer {{token}}
 Accept: application/json

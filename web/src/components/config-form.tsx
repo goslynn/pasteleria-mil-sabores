@@ -1,7 +1,7 @@
 // config-form.tsx
 "use client";
 
-import { ConfigPageProps } from "@/types/direccionDTO";
+import { ConfigPageProps } from "@/types/direccion";
 import { useDirecciones } from "@/app/site/config/useDirecciones";
 import { FaTrash } from "react-icons/fa";
 import { PasswInput } from "@/components/ui/passw-input";

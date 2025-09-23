@@ -2,9 +2,9 @@ import {StrapiBase, StrapiMedia} from "@/types/strapi/common";
 import {SocialLink} from "@/types/general";
 import {FooterSection} from "@/components/ui/footer";
 
-export type FooterDTO = StrapiBase & {
+export type FooterDTO = {
     socials: SocialLink[];
-    sections: FooterSection[];
+    footer_sections: FooterSection[];
 }
 
 export interface BrandDTO extends StrapiBase {

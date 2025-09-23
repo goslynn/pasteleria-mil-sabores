@@ -2,7 +2,7 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { hashPassword } from "@/lib/auth";
-import { DireccionForm } from "@/types/direccionDTO";
+import { DireccionForm } from "@/types/direccion";
 import {UsuarioDTO} from "@/types/user";
 
 export async function getRegiones() {
