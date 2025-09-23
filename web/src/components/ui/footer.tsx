@@ -146,13 +146,13 @@ export function Footer({
                         {sections.map((section, idx) => (
                             <div key={section.title ?? `sec-${idx}`}>
                                 {section.title ? (
-                                    <h2 className="mb-3 text-sm font-semibold tracking-wide opacity-80">
+                                    <h2 className="mb-3 text-sm font-semibold tracking-wide">
                                         {section.title}
                                     </h2>
                                 ) : null}
                                 <ul className="space-y-2">
                                     {section.links.map(({ label, link, external }, i) => (
-                                        <li key={`${label}-${i}`}>
+                                        <li key={`${label}-${i}`} className="pl-2">
                                             <a
                                                 href={link}
                                                 className="text-sm hover:underline underline-offset-4"

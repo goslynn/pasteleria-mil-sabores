@@ -71,11 +71,20 @@ export async function fetchFooter<T>(
 
     try {
         const resp = await strapi.get<StrapiObject<FooterDTO>>("/api/footer", { query: q })
-        console.log("footer fetch", resp)
         if (!resp?.data) return null
         return mapper(resp.data)
     } catch (e) {
         console.error("error fetching footer:", e)
         return null
+    }
+}
+
+export async function fetchAboutPage() {
+    try {
+        //TODO: crear tipado para la about page, usarlo directamente en el componente react respectivo.
+        return strapi.get<any>("/api/about-page", {query : {"populate": "*"}});
+    } catch (e) {
+        console.error("error fetching about page:", e);
+        return null;
     }
 }

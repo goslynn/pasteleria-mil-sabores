@@ -1,10 +1,10 @@
 import ProductGrid from "@/components/ui/product-grid";
 import {ProductDTO} from "@/types/product";
-import {fetchFooter, fetchProducts} from "@/lib/datamapping";
+import {fetchAboutPage, fetchFooter, fetchProducts} from "@/lib/datamapping";
 import {ProductCardProps} from "@/components/ui/product-card";
 import {normalizeStrapiUrl} from "@/types/strapi/common";
 import {Footer, FooterProps} from "@/components/ui/footer";
-import {FOOTER_ID} from "@/components/app-navbar";
+import {FALLBACK_IMG, FOOTER_ID} from "@/app/const";
 import {FooterDTO} from "@/types/page-types";
 
 // const footerDemo: FooterProps = {
@@ -63,10 +63,16 @@ import {FooterDTO} from "@/types/page-types";
 
 export async function HomePage() {
     const toProductCard = (dto: ProductDTO): ProductCardProps => {
+        let img : string;
+        if (!dto.images?.[0]?.url) {
+            img = FALLBACK_IMG;
+        } else {
+            img = normalizeStrapiUrl(dto.images?.[0]?.url);
+        }
         return {
             category: dto?.category?.name,
             id: dto.documentId,
-            imageUrl: normalizeStrapiUrl(dto.images?.[0]?.url || ""),
+            imageUrl: img,
             name: dto.name,
             price: dto.price,
             href: "#"
@@ -111,6 +117,9 @@ export async function HomePage() {
         ...footerDefaults,
         ...(footerFetched ?? {})
     }
+
+    const aboutPage = await fetchAboutPage();
+    console.log("about", aboutPage);
 
 
 

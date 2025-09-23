@@ -3,8 +3,9 @@ import type { NavbarProps } from '@/components/ui/navbar'
 import { CakeSlice } from 'lucide-react'
 import {UsuarioDTO} from "@/types/user";
 import {getCurrentUser} from "@/lib/datamapping";
+import {FOOTER_ID} from "@/app/const";
 
-export const FOOTER_ID = 'site-footer';
+
 
 export async function AppNavbar() {
     const user: UsuarioDTO | null = await getCurrentUser();
