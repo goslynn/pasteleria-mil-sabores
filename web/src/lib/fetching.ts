@@ -291,7 +291,7 @@ export async function cmsFetch<T = unknown>(
 /**
  * Convenience helpers (optional)
  */
-export const http = {
+export const api = {
     get: async <T>(url: string, opts?: FetchOptions) =>
         apiFetch<T>(url, { ...opts, method: "GET" }),
 

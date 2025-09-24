@@ -25,10 +25,10 @@
         "files"
       ]
     },
-    "about_sections": {
+    "article_sections": {
       "type": "relation",
       "relation": "oneToMany",
-      "target": "api::about-section.about-section"
+      "target": "api::article-section.article-section"
     }
   }
 }

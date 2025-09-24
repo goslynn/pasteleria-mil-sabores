@@ -55,6 +55,12 @@ Accept: application/json
 
 ###
 # about
-GET http://localhost:1337/api/about-page?populate[background][fields][0]=url&populate=about_sections
+GET {{host}}/api/about-page?populate[background][fields][0]=url&populate=article_sections
+Authorization: Bearer {{token}}
+Accept: application/json
+
+###
+# about 2
+GET {{host}}/api/about-page?populate=*
 Authorization: Bearer {{token}}
 Accept: application/json

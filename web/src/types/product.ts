@@ -1,4 +1,7 @@
-import {RichTextNode, StrapiBase, StrapiMedia} from "@/types/strapi/common";
+import {StrapiBase, StrapiMedia} from "@/types/strapi/common";
+import {BlocksContent} from "@strapi/blocks-react-renderer"
+
+
 
 export type Price = {
     amount: number; // base price in minor units or decimal (see `priceInCents`)
@@ -18,7 +21,7 @@ export type Discount =
 export interface ProductDTO extends StrapiBase {
     code: string;
     name: string;
-    description?: RichTextNode[];
+    description?: BlocksContent
     price: number;
     images?: StrapiMedia[];
     category?: CategoryDTO;
@@ -27,7 +30,7 @@ export interface ProductDTO extends StrapiBase {
 export interface CategoryDTO extends StrapiBase {
     name?: string;
     slug?: string;
-    description?: RichTextNode[];
+    description?: BlocksContent
 }
 
 export type ProductCardDTO = Pick<

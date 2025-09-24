@@ -1,9 +1,5 @@
 export type ISODateString = string;
 
-/** Strapi RichText (editor) muy básico y extensible */
-export type RichTextNode =
-    | { type: 'text'; text?: string }
-    | { type: 'paragraph'; children?: RichTextNode[] };
 
 /** Atributos base repetidos en Strapi */
 export interface StrapiBase {
@@ -69,7 +65,7 @@ export interface StrapiCollection<T> {
 
 /** Recurso individual típico de Strapi */
 export interface StrapiObject<T> {
-    data: T;
+    data: StrapiBase & T;
     meta?: ApiMeta;
 }
 

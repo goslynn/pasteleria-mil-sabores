@@ -1,5 +1,6 @@
 import Image from "next/image"
 import {cn} from "@/lib/utils";
+import { BlocksRenderer } from "@strapi/blocks-react-renderer"
 
 export type AboutSection = {
     title: string,
