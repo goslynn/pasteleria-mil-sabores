@@ -21,27 +21,56 @@ export interface StrapiImageProps
 }
 
 /* --- helpers --- */
-const FORMAT_PRIORITY = ['large', 'medium', 'small', 'thumbnail'];
-
 function pickFormat(media?: StrapiMedia, formatName?: string): MediaFormatInfo | undefined {
     const formats = media?.formats;
     if (!formats) return;
-    if (formatName && formats[formatName]) return formats[formatName];
-    for (const name of FORMAT_PRIORITY) if (formats[name]) return formats[name];
+
+    // Solo buscar si se pidió un formato explícito
+    if (formatName && formats[formatName]) {
+        return formats[formatName];
+    }
+    return undefined;
 }
 
 function computeUrl(input: StrapiImageSource, format?: string): string | undefined {
     if (!input) return;
-    if (typeof input === 'string') {
+    if (typeof input === "string") {
         const trimmed = input.trim();
         if (!trimmed) return;
         return normalizeStrapiUrl(trimmed);
     }
+
     const media = input as StrapiMedia;
+
+    // Si no hay format -> usa url base
+    if (!format) {
+        return media.url ? normalizeStrapiUrl(media.url) : undefined;
+    }
+
+    // Si hay format, intenta buscarlo
     const chosen = pickFormat(media, format);
     const candidate = chosen?.url ?? media.url ?? media.previewUrl ?? undefined;
     return candidate ? normalizeStrapiUrl(candidate) : undefined;
 }
+
+function inferDimensions(media?: StrapiMedia, format?: string): { width?: number; height?: number } {
+    if (!media) return {};
+
+    // Igual que computeUrl: si no hay format, devolver dimensiones de la base
+    if (!format) {
+        return {
+            width: media.width ?? undefined,
+            height: media.height ?? undefined,
+        };
+    }
+
+    const chosen = pickFormat(media, format);
+    return {
+        width: chosen?.width ?? media.width ?? undefined,
+        height: chosen?.height ?? media.height ?? undefined,
+    };
+}
+
 
 function inferSeo(
     media?: StrapiMedia,
@@ -58,17 +87,6 @@ function inferSeo(
     return { alt, title };
 }
 
-function inferDimensions(
-    media?: StrapiMedia,
-    format?: string
-): { width?: number; height?: number } {
-    if (!media) return {};
-    const chosen = pickFormat(media, format);
-    return {
-        width: chosen?.width ?? media.width ?? undefined,
-        height: chosen?.height ?? media.height ?? undefined,
-    };
-}
 
 export function StrapiImage(props: StrapiImageProps) {
     const {

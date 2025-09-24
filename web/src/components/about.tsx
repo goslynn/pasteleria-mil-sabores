@@ -9,6 +9,7 @@ export function About(
     { header, background, article_sections }: AboutPageDTO,
     className?: string
 ) {
+    console.log('background', background);
     return (
         <main className={cn("min-h-screen", className)}>
             {/* HERO: imagen “pegada” que se va revelando al hacer scroll */}
@@ -19,7 +20,6 @@ export function About(
                         <StrapiImage
                             src={background}
                             alt={header}
-                            format="large"
                             fill
                             priority
                             sizes="100vw"
@@ -29,8 +29,8 @@ export function About(
                         <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-background/50 to-background" />
                     </div>
 
-                    {/* Título por delante de la imagen */}
-                    <div className="relative z-10 flex h-full items-end">
+                    {/* CENTRADO PERFECTO */}
+                    <div className="relative z-10 grid h-full place-items-center text-center">
                         <h1 className="mx-auto max-w-5xl px-4 md:px-6 text-4xl md:text-6xl font-extrabold tracking-tight leading-tight drop-shadow">
                             {header}
                         </h1>

@@ -20,7 +20,6 @@ export async function AppNavbar() {
                 {key: "logout", label: "Cerrar sesion", href: "/auth/logout", destructive: true, separatorAbove: true}],
         },
         navigationLinks: [
-            { href: '/', label: 'Inicio' },
             { href: '/categories', label: 'Categorias' },
             { href: '/site/about', label: 'Sobre nosotros' },
             { href: footerRef , label: 'Contacto' },
