@@ -6,7 +6,7 @@ import { ArticleRenderer } from "@/components/ui/article-renderer";
 import type { AboutPageDTO } from "@/types/page-types";
 
 export function About(
-    { header, background, article_sections }: AboutPageDTO,
+    { header, background, about_sections }: AboutPageDTO,
     className?: string
 ) {
     console.log('background', background);
@@ -40,10 +40,10 @@ export function About(
 
             {/* Contenido debajo: todas las secciones del artículo */}
             <section className="mx-auto w-full max-w-5xl px-4 md:px-6 py-8 md:py-12 space-y-12 md:space-y-16">
-                {article_sections?.map((sec, i) => (
+                {about_sections?.map((sec, i) => (
                     <ArticleRenderer
                         key={i}
-                        {...sec}
+                        content={sec}
                         headingLevel={2}
                     />
                 ))}

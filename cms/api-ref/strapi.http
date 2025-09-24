@@ -64,3 +64,9 @@ Accept: application/json
 GET {{host}}/api/about-page?populate=*
 Authorization: Bearer {{token}}
 Accept: application/json
+
+###
+# terms and conditions
+GET {{host}}/api/article-sections?filters[slug][$eq]=terms
+Authorization: Bearer {{token}}
+Accept: application/json

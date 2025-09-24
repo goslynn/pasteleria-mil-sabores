@@ -16,14 +16,6 @@ export interface BrandDTO extends StrapiBase {
     logo?: StrapiMedia
 }
 
-export interface ArticleImage {
-    url: string;
-    alt?: string;
-    width?: number;
-    height?: number;
-}
-
-
 export interface ArticleSection {
     title: string;
     /** Rich text (Blocks) de Strapi */
@@ -34,8 +26,20 @@ export interface ArticleSection {
     image?: Image;
 }
 
+export interface ArticleSectionDTO {
+    title: string;
+    /** Rich text (Blocks) de Strapi */
+    paragraph: BlocksContent;
+    /** Variante de presentación (imageLeft, imageRight, centered) */
+    variant: ArticleSectionVariant;
+    /** Imagen (en centered normalmente no viene desde Strapi) */
+    image?: Image;
+    active?: boolean;
+    slug?: string;
+}
+
 export interface AboutPageDTO {
     header: string;
     background: Image
-    article_sections: ArticleSection[];
+    about_sections: ArticleSection[];
 }

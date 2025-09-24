@@ -60,9 +60,8 @@ export function Navbar({
                            className,
                            ...props
                        }: NavbarProps) {
-
-    const mergedHomeLogo: HomeLogoProps = {...DEFAULT_HOME_LOGO, ...(homeLogo ?? {})}
-    const mergedUserMenu: UserMenuProps = {...DEFAULT_USER_MENU, ...(userMenu ?? {})}
+    const mergedHomeLogo: HomeLogoProps = { ...DEFAULT_HOME_LOGO, ...(homeLogo ?? {}) }
+    const mergedUserMenu: UserMenuProps = { ...DEFAULT_USER_MENU, ...(userMenu ?? {}) }
 
     const containerRef = useRef<HTMLElement | null>(null)
     const isMobile = useIsMobile(containerRef)
@@ -78,12 +77,19 @@ export function Navbar({
         [onSearchSubmit]
     )
 
+    // normalizo por si pasan "brandscope" sin guion
+    const normalizedScope =
+        typeof className === 'string' && className.includes('brandscope') && !className.includes('brand-scope')
+            ? className.replace('brandscope', 'brand-scope')
+            : className
+
     return (
         <header
             ref={containerRef}
             className={cn(
-                'sticky top-0 z-50 w-full border-b bg-background px-4 md:px-6 [&_a]:no-underline',
-                className
+                // 👇 tokens para que el scope de marca funcione
+                'sticky top-0 z-50 w-full border-b border-border bg-background text-foreground px-4 md:px-6 [&_a]:no-underline',
+                normalizedScope // 👈 aquí puedes pasar "brand-scope" (o "brandscope") desde afuera
             )}
             {...props}
         >

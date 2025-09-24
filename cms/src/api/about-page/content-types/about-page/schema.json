@@ -25,7 +25,7 @@
         "files"
       ]
     },
-    "article_sections": {
+    "about_sections": {
       "type": "relation",
       "relation": "oneToMany",
       "target": "api::article-section.article-section"

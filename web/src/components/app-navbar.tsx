@@ -3,7 +3,7 @@ import type { NavbarProps } from '@/components/ui/navbar'
 import { CakeSlice } from 'lucide-react'
 import {UsuarioDTO} from "@/types/user";
 import {getCurrentUser} from "@/lib/datamapping";
-import {FOOTER_ID} from "@/app/const";
+import {FOOTER_ID, HOME_URL} from "@/app/const";
 
 
 
@@ -20,6 +20,7 @@ export async function AppNavbar() {
                 {key: "logout", label: "Cerrar sesion", href: "/auth/logout", destructive: true, separatorAbove: true}],
         },
         navigationLinks: [
+            { href: HOME_URL, label: "Inicio" },
             { href: '/categories', label: 'Categorias' },
             { href: '/site/about', label: 'Sobre nosotros' },
             { href: footerRef , label: 'Contacto' },
@@ -29,5 +30,5 @@ export async function AppNavbar() {
         }
     };
 
-    return <Navbar {...NAVBAR_PROPS} />;
+    return <Navbar {...NAVBAR_PROPS} className={"brand-scope"}/>;
 }

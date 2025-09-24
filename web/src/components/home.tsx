@@ -1,63 +1,9 @@
 import ProductGrid from "@/components/ui/product-grid";
 import {ProductDTO} from "@/types/product";
-import {fetchAboutPage, fetchFooter, fetchProducts} from "@/lib/datamapping";
+import {fetchProducts} from "@/lib/datamapping";
 import {ProductCardProps} from "@/components/ui/product-card";
 import {normalizeStrapiUrl} from "@/types/strapi/common";
-import {Footer, FooterProps} from "@/components/ui/footer";
-import {FALLBACK_IMG, FOOTER_ID} from "@/app/const";
-import {FooterDTO} from "@/types/page-types";
-
-// const footerDemo: FooterProps = {
-//     "id": "footer-demo",
-//     "brand": {
-//         "name": "Pastelería Mil Sabores",
-//         "logoUrl": "/logo.png",
-//         "href": "/"
-//     },
-//     "sections": [
-//         {
-//             "title": "Contacto",
-//             "links": [
-//                 {
-//                     "label": "Escríbenos",
-//                     "link": "mailto:contacto@pasteleriams.cl",
-//                     "external": true
-//                 },
-//                 {
-//                     "label": "Llámanos",
-//                     "link": "tel:+56912345678",
-//                     "external": true
-//                 }
-//             ]
-//         },
-//         {
-//             "title": "Enlaces rápidos",
-//             "links": [
-//                 { "label": "Inicio", "link": "/", "external": false },
-//                 { "label": "Productos", "link": "/categories", "external": false },
-//                 { "label": "Sobre nosotros", "link": "/about", "external": false }
-//             ]
-//         },
-//         {
-//             "title": "Legal",
-//             "links": [
-//                 { "label": "Términos y Condiciones", "link": "/terms", "external": false },
-//                 { "label": "Política de Privacidad", "link": "/privacy", "external": false }
-//             ]
-//         }
-//     ],
-//     "socials": [
-//         { "kind": "facebook", "link": "https://facebook.com/pasteleriams", "label": "Facebook", "external": true },
-//         { "kind": "instagram", "link": "https://instagram.com/pasteleriams", "label": "Instagram", "external": true },
-//         { "kind": "github", "link": "https://github.com/pasteleriams", "label": "GitHub", "external": true },
-//         { "kind": "whatsapp", "link": "https://wa.me/56912345678", "label": "WhatsApp", "external": true }
-//     ],
-//     "copyright": {
-//         "owner": "Pastelería Mil Sabores",
-//         "year": "auto",
-//         "textPrefix": "©"
-//     }
-// }
+import {FALLBACK_IMG} from "@/app/const";
 
 
 
@@ -91,39 +37,6 @@ export async function HomePage() {
         "publicationState": "live"
     }, toProductCard);
 
-    const footerDefaults: FooterProps = {
-        id: FOOTER_ID,
-        copyright: {
-            owner: "Pasteleria Mil Sabores",
-        },
-        sections: [],
-        socials: []
-    }
-
-    const toFooterProps = (dto: FooterDTO): FooterProps => {
-        return {
-            id: FOOTER_ID,
-            copyright: {
-                owner: "Pasteleria Mil Sabores",
-            },
-            sections: dto.footer_sections,
-            socials: dto.socials
-        }
-    }
-
-    const footerFetched = await fetchFooter(toFooterProps)
-
-    const footerData: FooterProps = {
-        ...footerDefaults,
-        ...(footerFetched ?? {})
-    }
-
-    const aboutPage = await fetchAboutPage();
-    console.log("about", aboutPage);
-
-
-
-    console.log("pie" ,footerData);
     return (
         <>
             <main className="mx-auto max-w-6xl px-4 py-6 md:py-10">
@@ -140,9 +53,7 @@ export async function HomePage() {
                     </div>
                 </div>
             </main>
-            <div className="bg-primary text-primary-foreground w-full">
-                <Footer {...footerData} />
-            </div>
+
         </>
     )
 }
