@@ -22,7 +22,7 @@ export async function AppNavbar() {
         navigationLinks: [
             { href: '/', label: 'Inicio' },
             { href: '/categories', label: 'Categorias' },
-            { href: '/about', label: 'Sobre nosotros' },
+            { href: '/site/about', label: 'Sobre nosotros' },
             { href: footerRef , label: 'Contacto' },
         ],
         cart: {

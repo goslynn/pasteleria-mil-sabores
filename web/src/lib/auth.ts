@@ -49,7 +49,7 @@ export async function getSessionUserId(): Promise<number | null> {
     const jar = await cookies();
     const token = jar.get(cookieName)?.value;
 
-    console.log("session token:", token);
+    console.debug("session token:", token);
 
     if (!token) return null;
 

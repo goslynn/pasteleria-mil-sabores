@@ -1,9 +1,9 @@
-// app/components/article-section.tsx
-import Image from "next/image";
-import { BlocksRenderer, type BlocksContent } from "@strapi/blocks-react-renderer";
+import * as React from "react";
 import { cn } from "@/lib/utils";
-import {ArticleSection} from "@/types/page-types";
-
+import { ArticleSection } from "@/types/page-types";
+import StrapiImage from "@/components/ui/strapi-image";
+import type { StrapiMedia } from "@/types/strapi/common";
+import StrapiBlocks from "@/components/ui/strapi-blocks.client";
 
 export type ArticleSectionVariant = "centered" | "imageLeft" | "imageRight";
 
@@ -35,7 +35,7 @@ export type ImageBehavior =
 };
 
 export interface ArticleImage {
-    url: string;
+    url: string; // para centeredFallbackImage (imagen “externa”/manual)
     alt?: string;
     width?: number;
     height?: number;
@@ -43,11 +43,11 @@ export interface ArticleImage {
 
 /**
  * Seccion de articulo, tipo extraido de Strapi.
+ * `image` ya viene tipado como `Image = StrapiMedia | string`
  */
 export interface ArticleSectionProps extends ArticleSection {
     /** nivel de titulo (h1, h2...) */
     headingLevel: 1 | 2 | 3 | 4 | 5 | 6;
-
 
     /**
      * En variant="centered" puedes inyectar una imagen “externa” si quieres mostrarla igual.
@@ -77,6 +77,8 @@ export interface ArticleSectionProps extends ArticleSection {
     modifiedTimeISO?: string;
 }
 
+type StrapiImageInput = StrapiMedia | string;
+
 export function ArticleRenderer({
                                     title,
                                     paragraph,
@@ -87,15 +89,18 @@ export function ArticleRenderer({
                                     headingLevel = 2,
                                     id,
                                     useDivForParagraph,
-                                    imageBehavior = {fit: "responsive", wrapText: false},
+                                    imageBehavior = { fit: "responsive", wrapText: false },
                                     enableJsonLd = true,
                                     descriptionForSeo,
                                     publishedTimeISO,
                                     modifiedTimeISO,
                                 }: ArticleSectionProps) {
-
-    const imgToUse: ArticleImage | undefined =
-        variant === "centered" ? centeredFallbackImage ?? image : image;
+    // En variant centered, si hay fallback, úsalo;
+    // si no, usa la imagen de Strapi; si ninguna, no se renderiza imagen.
+    const imgToUse: StrapiImageInput | ArticleImage | undefined =
+        variant === "centered"
+            ? centeredFallbackImage ?? image
+            : image;
 
     const figure =
         imgToUse &&
@@ -103,7 +108,9 @@ export function ArticleRenderer({
 
     // layout principal
     const withSideImage =
-        (variant === "imageLeft" || variant === "imageRight") && !!imgToUse && !imageBehavior.wrapText;
+        (variant === "imageLeft" || variant === "imageRight") &&
+        !!imgToUse &&
+        !imageBehavior.wrapText;
 
     // JSON-LD básico de Article
     const jsonLd =
@@ -113,7 +120,10 @@ export function ArticleRenderer({
                 "@type": "Article",
                 headline: title,
                 description: descriptionForSeo,
-                image: imgToUse?.url,
+                image:
+                    typeof imgToUse === "object" && "url" in imgToUse
+                        ? imgToUse.url
+                        : undefined,
                 datePublished: publishedTimeISO,
                 dateModified: modifiedTimeISO ?? publishedTimeISO,
             }
@@ -126,11 +136,9 @@ export function ArticleRenderer({
             itemScope
             itemType="https://schema.org/Article"
         >
-
             <header className={cn(variant === "centered" ? "text-center" : "text-left")}>
                 {solveHeader(headingLevel, title)}
             </header>
-
 
             {/* centered con posible imagen arriba */}
             {variant === "centered" && imgToUse && !imageBehavior.wrapText && (
@@ -142,30 +150,33 @@ export function ArticleRenderer({
                 <div
                     className={cn(
                         "mt-6 grid gap-6 md:gap-8",
-                        variant === "imageRight" ? "md:grid-cols-[1fr_minmax(280px,420px)]" : "md:grid-cols-[minmax(280px,420px)_1fr]"
+                        variant === "imageRight"
+                            ? "md:grid-cols-[1fr_minmax(280px,420px)]"
+                            : "md:grid-cols-[minmax(280px,420px)_1fr]"
                     )}
                 >
                     {variant === "imageLeft" && figure}
-                    <ArticleBody content={paragraph} useDiv={useDivForParagraph}/>
+                    <StrapiBlocks content={paragraph} useDiv={useDivForParagraph} />   {/* ⬅️ */}
                     {variant === "imageRight" && figure}
                 </div>
             ) : (
-                // wrapping o sin imagen lateral
                 <div className="mt-6">
-                    {/* si wrapText true, la figura flota y el texto la rodea */}
                     {imgToUse && imageBehavior.wrapText && (
                         <div
                             className={cn(
                                 "mb-4 md:mb-2",
-                                variant === "imageRight" ? "md:float-right md:ml-6 md:mb-2" : "md:float-left md:mr-6 md:mb-2"
+                                variant === "imageRight"
+                                    ? "md:float-right md:ml-6 md:mb-2"
+                                    : "md:float-left md:mr-6 md:mb-2"
                             )}
                         >
                             {figure}
                         </div>
                     )}
-                    <ArticleBody content={paragraph} useDiv={useDivForParagraph}/>
-                    {/* limpiar floats si se usaron */}
-                    {imgToUse && imageBehavior.wrapText && <div className="clear-both"/>}
+
+                    <StrapiBlocks content={paragraph} useDiv={useDivForParagraph} />   {/* ⬅️ */}
+
+                    {imgToUse && imageBehavior.wrapText && <div className="clear-both" />}
                 </div>
             )}
 
@@ -174,7 +185,7 @@ export function ArticleRenderer({
                 <script
                     type="application/ld+json"
                     // biome-ignore lint/security/noDangerouslySetInnerHtml: server-rendered, contenido controlado
-                    dangerouslySetInnerHTML={{__html: JSON.stringify(jsonLd)}}
+                    dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
                 />
             )}
         </section>
@@ -184,31 +195,67 @@ export function ArticleRenderer({
 function solveHeader(level: number, children: React.ReactNode) {
     switch (level) {
         case 1:
-            return <h1 itemProp="headline" className="scroll-m-20 text-3xl md:text-4xl font-bold tracking-tight">{children}</h1>;
+            return (
+                <h1 itemProp="headline" className="scroll-m-20 text-3xl md:text-4xl font-bold tracking-tight">
+                    {children}
+                </h1>
+            );
         case 2:
-            return <h2 itemProp="headline" className="scroll-m-20 text-2xl md:text-3xl font-bold tracking-tight">{children}</h2>;
+            return (
+                <h2 itemProp="headline" className="scroll-m-20 text-2xl md:text-3xl font-bold tracking-tight">
+                    {children}
+                </h2>
+            );
         case 3:
-            return <h3 itemProp="headline" className="scroll-m-20 text-xl md:text-2xl font-bold tracking-tight">{children}</h3>;
+            return (
+                <h3 itemProp="headline" className="scroll-m-20 text-xl md:text-2xl font-bold tracking-tight">
+                    {children}
+                </h3>
+            );
         case 4:
-            return <h4 itemProp="headline" className="scroll-m-20 text-lg md:text-xl font-bold tracking-tight">{children}</h4>;
+            return (
+                <h4 itemProp="headline" className="scroll-m-20 text-lg md:text-xl font-bold tracking-tight">
+                    {children}
+                </h4>
+            );
         case 5:
-            return <h5 itemProp="headline" className="scroll-m-20 text-base md:text-lg font-bold tracking-tight">{children}</h5>;
+            return (
+                <h5 itemProp="headline" className="scroll-m-20 text-base md:text-lg font-bold tracking-tight">
+                    {children}
+                </h5>
+            );
         case 6:
-            return <h6 itemProp="headline" className="scroll-m-20 text-sm md:text-base font-bold tracking-tight">{children}</h6>;
+            return (
+                <h6 itemProp="headline" className="scroll-m-20 text-sm md:text-base font-bold tracking-tight">
+                    {children}
+                </h6>
+            );
         default:
-            return <h2 itemProp="headline" className="scroll-m-20 text-2xl md:text-3xl font-bold tracking-tight">{children}</h2>;
+            return (
+                <h2 itemProp="headline" className="scroll-m-20 text-2xl md:text-3xl font-bold tracking-tight">
+                    {children}
+                </h2>
+            );
     }
 }
 
 /* ---------- helpers ---------- */
 
 function renderFigure(
-    img: ArticleImage,
+    img: StrapiImageInput | ArticleImage,
     behavior: ImageBehavior,
     variant: ArticleSectionVariant,
     defaultAlt: string
 ) {
-    const alt = img.alt ?? defaultAlt;
+    // Determinar fuente (Strapi vs fallback manual)
+    const isFallback = typeof img === "object" && "url" in img && !("id" in img);
+    const src: StrapiMedia | string = isFallback ? (img as ArticleImage).url : (img as StrapiImageInput);
+    const alt = (isFallback ? (img as ArticleImage).alt : undefined) ?? defaultAlt;
+
+    const fallbackWH =
+        isFallback
+            ? { width: (img as ArticleImage).width, height: (img as ArticleImage).height }
+            : {};
 
     const commonClass =
         "overflow-hidden rounded-xl border border-border/60 bg-background/40 shadow-sm";
@@ -217,8 +264,8 @@ function renderFigure(
         const { width, height, priority } = behavior;
         return (
             <figure className={cn(commonClass, "max-w-full")}>
-                <Image
-                    src={img.url}
+                <StrapiImage
+                    src={src}
                     alt={alt}
                     width={width}
                     height={height}
@@ -232,14 +279,14 @@ function renderFigure(
     }
 
     if (behavior.fit === "intrinsic") {
+        // Si es fallback manual y trae width/height, los usamos; si no, StrapiImage infiere (o usa defaults)
         return (
             <figure className={cn(commonClass, "inline-block")}>
-                {/* sin width/height explícitos: usa metadata de la imagen si viene */}
-                <Image
-                    src={img.url}
+                <StrapiImage
+                    src={src}
                     alt={alt}
-                    width={img.width ?? 800}
-                    height={img.height ?? 600}
+                    width={fallbackWH.width}
+                    height={fallbackWH.height}
                     className="h-auto w-auto"
                     sizes="(min-width: 768px) 420px, 100vw"
                     priority={behavior.priority}
@@ -252,37 +299,18 @@ function renderFigure(
     // responsive
     return (
         <figure className={cn(commonClass, variant === "centered" ? "mx-auto max-w-3xl" : "w-full")}>
-            <Image
-                src={img.url}
+            <StrapiImage
+                src={src}
                 alt={alt}
-                width={img.width ?? 1200}
-                height={img.height ?? 800}
+                // ancho/alto: si es fallback manual y los trae, mejor para layout;
+                // si no, StrapiImage deduce desde StrapiMedia o cae a default.
+                width={fallbackWH.width}
+                height={fallbackWH.height}
                 className="h-auto w-full"
                 sizes={variant === "centered" ? "(min-width: 1024px) 768px, 100vw" : "(min-width: 768px) 420px, 100vw"}
                 priority={behavior.priority}
             />
             {alt && <figcaption className="px-3 pb-3 pt-1 text-xs text-muted-foreground">{alt}</figcaption>}
         </figure>
-    );
-}
-
-function ArticleBody({ content, useDiv }: { content: BlocksContent; useDiv?: boolean }) {
-    return (
-        <article className="prose prose-neutral dark:prose-invert max-w-none" itemProp="articleBody">
-            <BlocksRenderer
-                content={content}
-                blocks={{
-                    paragraph: ({ children }) =>
-                        useDiv ? <div className="mb-4 leading-7">{children}</div> : <p className="leading-7">{children}</p>,
-                }}
-                modifiers={{
-                    bold: ({ children }) => <strong>{children}</strong>,
-                    italic: ({ children }) => <em>{children}</em>,
-                    code: ({ children }) => (
-                        <code className="rounded bg-muted px-1 py-0.5 font-mono text-sm">{children}</code>
-                    ),
-                }}
-            />
-        </article>
     );
 }
