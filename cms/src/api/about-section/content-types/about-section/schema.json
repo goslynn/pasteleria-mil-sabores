@@ -1,0 +1,52 @@
+{
+  "kind": "collectionType",
+  "collectionName": "about_sections",
+  "info": {
+    "singularName": "about-section",
+    "pluralName": "about-sections",
+    "displayName": "AboutSection"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "tittle": {
+      "type": "string",
+      "required": true
+    },
+    "paragraph": {
+      "type": "blocks",
+      "required": true
+    },
+    "image": {
+      "type": "media",
+      "conditions": {
+        "visible": {
+          "!=": [
+            {
+              "var": "variant"
+            },
+            "centered"
+          ]
+        }
+      },
+      "multiple": false,
+      "required": true,
+      "allowedTypes": [
+        "images",
+        "files"
+      ]
+    },
+    "variant": {
+      "type": "enumeration",
+      "required": true,
+      "default": "centered",
+      "enum": [
+        "imageLeft",
+        "centered",
+        "imageRight"
+      ]
+    }
+  }
+}

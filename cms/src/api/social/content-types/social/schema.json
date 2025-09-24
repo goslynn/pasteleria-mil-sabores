@@ -1,0 +1,34 @@
+{
+  "kind": "collectionType",
+  "collectionName": "socials",
+  "info": {
+    "singularName": "social",
+    "pluralName": "socials",
+    "displayName": "Social"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "kind": {
+      "type": "enumeration",
+      "required": true,
+      "enum": [
+        "facebook",
+        "instagram",
+        "x",
+        "tiktok",
+        "youtube",
+        "linkedin",
+        "github",
+        "whatsapp"
+      ]
+    },
+    "link": {
+      "type": "string",
+      "required": true,
+      "regex": "^(https?:\\/\\/)([\\w.-]+)(:[0-9]+)?(\\/[^\\s]*)?$"
+    }
+  }
+}

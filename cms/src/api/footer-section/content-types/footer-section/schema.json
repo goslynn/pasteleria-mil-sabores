@@ -1,0 +1,26 @@
+{
+  "kind": "collectionType",
+  "collectionName": "footer_sections",
+  "info": {
+    "singularName": "footer-section",
+    "pluralName": "footer-sections",
+    "displayName": "FooterSection"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "maxLength": 15,
+      "required": true,
+      "unique": true
+    },
+    "links": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::link.link"
+    }
+  }
+}
