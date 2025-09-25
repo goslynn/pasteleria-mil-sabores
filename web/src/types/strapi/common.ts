@@ -24,8 +24,15 @@ export interface MediaFormatInfo {
     url?: string;
 }
 
+export enum ImageFormat {
+    Thumbnail = "thumbnail",
+    Small = "small",
+    Medium = "medium",
+    Large = "large",
+}
+
 /** `formats` es un diccionario (thumbnail, small, medium, large, etc.) */
-export type MediaFormats = Record<string, MediaFormatInfo | undefined>;
+export type MediaFormats = Record<ImageFormat | string, MediaFormatInfo | undefined>;
 
 export interface StrapiMedia extends StrapiBase {
     name?: string;
@@ -70,7 +77,7 @@ export interface StrapiObject<T> {
 }
 
 export function normalizeStrapiUrl(url?: string): string {
-    const host = process.env.STRAPI_HOST;
+    const host = process.env.STRAPI_HOST || process.env.NEXT_PUBLIC_STRAPI_HOST;
     if (!host) {
         throw new Error("STRAPI_HOST no está definido en las variables de entorno");
     }

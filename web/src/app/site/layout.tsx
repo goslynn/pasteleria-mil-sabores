@@ -2,10 +2,13 @@ import React from "react";
 import {AppNavbar} from "@/components/app-navbar";
 import {Footer, FooterProps} from "@/components/ui/footer";
 import {fetchFooter} from "@/lib/datamapping";
-import {FOOTER_ID} from "@/app/const";
+import {FOOTER_ID, HOME_URL} from "@/app/const";
 import {FooterDTO} from "@/types/page-types";
+import {brand} from "@/lib/brand";
 
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
+    const empresa = await brand();
+    console.log("empresa (brand): ", empresa);
     const footerDefaults: FooterProps = {
         id: FOOTER_ID,
         copyright: {
@@ -19,7 +22,12 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
         return {
             id: FOOTER_ID,
             copyright: {
-                owner: "Pasteleria Mil Sabores",
+                owner: empresa?.name || "Pasteleria Mil Sabores",
+            },
+            brand: {
+                name: empresa?.name || "Pasteleria Mil Sabores",
+                logo: empresa?.icon,
+                href: HOME_URL
             },
             sections: dto.footer_sections,
             socials: dto.socials
@@ -36,7 +44,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
         <>
             <AppNavbar/>
             <main className="min-h-dvh">{children}</main>
-            <div className="bg-primary text-primary-foreground w-full">
+            <div className="bg-accent text-accent-foreground w-full">
                 <Footer {...footerData} />
             </div>
         </>

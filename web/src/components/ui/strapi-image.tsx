@@ -2,15 +2,15 @@
 import Image, { type ImageProps } from 'next/image';
 import * as React from 'react';
 import { cn } from '@/lib/utils';
-import { normalizeStrapiUrl, type StrapiMedia, type MediaFormatInfo } from '@/types/strapi/common';
+import {normalizeStrapiUrl, type StrapiMedia, type MediaFormatInfo, ImageFormat} from '@/types/strapi/common';
 import { FALLBACK_IMG } from '@/app/const';
 
-type StrapiImageSource = StrapiMedia | string | null | undefined;
+export type StrapiImageSource = StrapiMedia | string | null | undefined;
 
 export interface StrapiImageProps
     extends Omit<ImageProps, 'src' | 'alt' | 'width' | 'height' | 'fill'> {
     src: StrapiImageSource;
-    format?: string;
+    format?: ImageFormat | string;
     alt?: string;
     title?: string;
     fill?: boolean;

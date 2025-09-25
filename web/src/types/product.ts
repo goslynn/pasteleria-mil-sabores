@@ -24,6 +24,7 @@ export interface ProductDTO extends StrapiBase {
     description?: BlocksContent
     price: number;
     images?: StrapiMedia[];
+    keyImage?: StrapiMedia;
     category?: CategoryDTO;
 }
 

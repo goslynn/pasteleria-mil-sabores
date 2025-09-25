@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { Plus, Heart } from "lucide-react"
+import {StrapiImage, StrapiImageSource} from "@/components/ui/strapi-image";
+import {ImageFormat} from "@/types/strapi/common";
 
 export interface Discount {
     type: "percentage" | "fixed"
@@ -19,7 +21,7 @@ export interface ProductCardProps {
     name: string
     price: number
     category?: string
-    imageUrl: string
+    imageSrc: StrapiImageSource
     discount?: Discount
     href: string
     className?: string
@@ -32,7 +34,7 @@ export function ProductCard({
                                 name,
                                 price,
                                 category,
-                                imageUrl,
+                                imageSrc,
                                 discount,
                                 href,
                                 className,
@@ -79,12 +81,13 @@ export function ProductCard({
                         )}
 
                         {/* Imagen contenida (no se deforma) */}
-                        <Image
-                            src={imageUrl}
+                        <StrapiImage
+                            src={imageSrc}
                             alt={name}
                             fill
                             className="object-cover pointer-events-none"
                             sizes="(max-width: 768px) 100vw, 400px"
+                            format={ImageFormat.Medium}
                             priority={false}
                         />
                     </div>

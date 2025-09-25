@@ -8,6 +8,8 @@ import {
     SiGithub, SiWhatsapp
 } from 'react-icons/si'
 import type { IconType } from 'react-icons'
+import {StrapiImage, StrapiImageSource} from "@/components/ui/strapi-image";
+import {ImageFormat} from "@/types/strapi/common";
 
 // ---------- Tipos ----------
 export type FooterSection = {
@@ -19,7 +21,7 @@ export interface FooterProps {
     id: string
     brand?: {
         name?: string
-        logoUrl?: string
+        logo?: StrapiImageSource
         href?: string
     }
     sections?: FooterSection[]
@@ -93,14 +95,13 @@ export function Footer({
                     {/* Marca */}
                     {brand ? (
                         <div className="flex items-center gap-3">
-                            {brand.logoUrl ? (
+                            {brand.logo ? (
                                 <a
                                     href={brand.href ?? '#'}
                                     className="inline-flex items-center gap-2 hover:opacity-90 transition-opacity"
                                     aria-label={brand.name ?? 'Inicio'}
                                 >
-                                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                                    <img src={brand.logoUrl} alt={brand.name ?? 'Logo'} className="h-8 w-auto" />
+                                    <StrapiImage src={brand.logo} className="h-8 w-auto" format={ImageFormat.Thumbnail}/>
                                     {brand.name ? <span className="font-semibold">{brand.name}</span> : null}
                                 </a>
                             ) : brand.name ? (
@@ -125,7 +126,7 @@ export function Footer({
                                         <a
                                             href={link}
                                             aria-label={label ?? kind}
-                                            className="inline-flex h-9 w-9 items-center justify-center rounded-full hover:bg-white/10 transition-colors"
+                                            className="inline-flex h-9 w-9 items-center justify-center rounded-full transition-transform duration-200 hover:scale-110"
                                             {...externalAttrs(external)}
                                         >
                                             <SocialIcon kind={kind} className="h-5 w-5" />

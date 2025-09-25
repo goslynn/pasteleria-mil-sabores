@@ -1,21 +1,23 @@
-import React, { useState, useRef, useId } from 'react';
+import React, { useState, useRef } from 'react';
 import {cn} from "@/lib/utils";
 import {Input} from "@/components/ui/input";
 import {SearchIcon, X} from "lucide-react";
 
 
 export function SearchBar({
-                       placeholder = 'Search...',
-                       onSubmit,
-                       className,
-                   }: {
+                              id = "search-input",
+                              placeholder = 'Search...',
+                              onSubmit,
+                              className,
+                          }: {
+    id? : string
     placeholder?: string
     onSubmit?: (q: string) => void
     className?: string
 }) {
+
     const [q, setQ] = useState('')
     const inputRef = useRef<HTMLInputElement | null>(null)
-    const id = useId()
 
     function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault()
@@ -35,8 +37,9 @@ export function SearchBar({
             />
 
             {/* Lupa a la izquierda */}
-            <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-2 text-muted-foreground/80 peer-disabled:opacity-50">
-                <SearchIcon size={16} />
+            <div
+                className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-2 text-muted-foreground/80 peer-disabled:opacity-50">
+                <SearchIcon size={16}/>
             </div>
 
             {/* Botón limpiar a la derecha (solo si hay texto) */}
@@ -51,7 +54,7 @@ export function SearchBar({
                     aria-label="Borrar búsqueda"
                     title="Borrar"
                 >
-                    <X className="h-3.5 w-3.5" />
+                    <X className="h-3.5 w-3.5"/>
                 </button>
             )}
         </form>

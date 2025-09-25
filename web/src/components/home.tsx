@@ -2,37 +2,28 @@ import ProductGrid from "@/components/ui/product-grid";
 import {ProductDTO} from "@/types/product";
 import {fetchProducts} from "@/lib/datamapping";
 import {ProductCardProps} from "@/components/ui/product-card";
-import {normalizeStrapiUrl} from "@/types/strapi/common";
-import {FALLBACK_IMG} from "@/app/const";
 
 
 
 export async function HomePage() {
     const toProductCard = (dto: ProductDTO): ProductCardProps => {
-        let img : string;
-        if (!dto.images?.[0]?.url) {
-            img = FALLBACK_IMG;
-        } else {
-            img = normalizeStrapiUrl(dto.images?.[0]?.url);
-        }
         return {
             category: dto?.category?.name,
             id: dto.documentId,
-            imageUrl: img,
+            imageSrc: dto.keyImage,
             name: dto.name,
             price: dto.price,
             href: "#"
         }
     }
 
-    const cards = await fetchProducts( {
+    const cards = await fetchProducts({
         "fields[0]": "code",
         "fields[1]": "name",
         "fields[2]": "price",
         "fields[3]": "description",
         "populate[category][fields][0]": "name",
-        "populate[images][fields][0]": "url",
-        "populate[images][fields][1]": "formats",
+        "populate[keyImage][populate]": "*",
         "pagination[pageSize]": "100",
         "publicationState": "live"
     }, toProductCard);

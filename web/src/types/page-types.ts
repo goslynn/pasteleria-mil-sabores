@@ -14,6 +14,7 @@ export type FooterDTO = {
 export interface BrandDTO extends StrapiBase {
     name?: string;
     logo?: StrapiMedia
+    icon?: StrapiMedia
 }
 
 export interface ArticleSection {
