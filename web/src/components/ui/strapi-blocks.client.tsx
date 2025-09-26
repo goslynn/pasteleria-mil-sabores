@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { BlocksRenderer, type BlocksContent } from '@strapi/blocks-react-renderer';
 import {cn} from "@/lib/utils";
+import {ExternalLink} from "lucide-react";
 
 export default function StrapiBlocks({
                                          content,
@@ -60,9 +61,18 @@ export default function StrapiBlocks({
                     'list-item': ({children}) => <li>{children}</li>,
 
                     // Enlace (Strapi lo expone como block 'link')
-                    link: ({children, url}) => (
-                        <a href={url} className="underline underline-offset-4">
+                    link: ({ children, url }) => (
+                        <a
+                            href={url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline underline-offset-4 whitespace-nowrap"
+                        >
                             {children}
+                            <ExternalLink
+                                className="ml-1 inline-block h-[0.85em] w-[0.85em] align-baseline"
+                                aria-hidden="true"
+                            />
                         </a>
                     ),
                 }}
