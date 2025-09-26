@@ -2,26 +2,34 @@
 
 import * as React from 'react';
 import { BlocksRenderer, type BlocksContent } from '@strapi/blocks-react-renderer';
+import {cn} from "@/lib/utils";
 
 export default function StrapiBlocks({
                                          content,
+                                         className
                                      }: {
-    content: BlocksContent | null | undefined;
+    content: BlocksContent | string | null | undefined,
+    className?: string
 }) {
+
     if (!content || content.length === 0) {
         return <p>No hay nada aquí :/</p>;
     }
 
+    if (typeof content === 'string') {
+        return <p className={cn("prose prose-neutral dark:prose-invert max-w-none", className)}>{content}</p>;
+    }
+
     return (
         <article
-            className="prose prose-neutral dark:prose-invert max-w-none article-scope"
+            className={cn("prose prose-neutral dark:prose-invert max-w-none article-scope", className)}
             itemProp="articleBody"
         >
             <BlocksRenderer
                 content={content}
                 blocks={{
                     // Headings (Strapi envía level: 1..6)
-                    heading: ({ children, level }) => {
+                    heading: ({children, level}) => {
                         const L = Math.min(Math.max(level, 1), 6) as 1 | 2 | 3 | 4 | 5 | 6;
                         const Tag = `h${L}` as const;
 
@@ -39,31 +47,31 @@ export default function StrapiBlocks({
                     },
 
                     // Párrafos
-                    paragraph: ({ children }) => <p>{children}</p>,
+                    paragraph: ({children}) => <p>{children}</p>,
 
                     // Listas (Strapi envía format: 'unordered' | 'ordered')
-                    list: ({ children, format }) =>
+                    list: ({children, format}) =>
                         format === 'ordered' ? (
                             <ol className="list-decimal pl-6">{children}</ol>
                         ) : (
                             <ul className="list-disc pl-6">{children}</ul>
                         ),
 
-                    'list-item': ({ children }) => <li>{children}</li>,
+                    'list-item': ({children}) => <li>{children}</li>,
 
                     // Enlace (Strapi lo expone como block 'link')
-                    link: ({ children, url }) => (
+                    link: ({children, url}) => (
                         <a href={url} className="underline underline-offset-4">
                             {children}
                         </a>
                     ),
                 }}
                 modifiers={{
-                    bold: ({ children }) => <strong>{children}</strong>,
-                    italic: ({ children }) => <em>{children}</em>,
-                    underline: ({ children }) => <u>{children}</u>,
-                    strikethrough: ({ children }) => <s>{children}</s>,
-                    code: ({ children }) => (
+                    bold: ({children}) => <strong>{children}</strong>,
+                    italic: ({children}) => <em>{children}</em>,
+                    underline: ({children}) => <u>{children}</u>,
+                    strikethrough: ({children}) => <s>{children}</s>,
+                    code: ({children}) => (
                         <code className="rounded bg-muted px-1 py-0.5 font-mono text-sm">{children}</code>
                     ),
                 }}
@@ -80,4 +88,4 @@ export default function StrapiBlocks({
       `}</style>
         </article>
     );
-}
+};

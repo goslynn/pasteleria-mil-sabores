@@ -45,6 +45,7 @@ export function About(
                         key={i}
                         content={sec}
                         headingLevel={2}
+                        className={"text-xl"}
                     />
                 ))}
             </section>

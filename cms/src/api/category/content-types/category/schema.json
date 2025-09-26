@@ -21,9 +21,6 @@
       "targetField": "name",
       "required": true
     },
-    "description": {
-      "type": "blocks"
-    },
     "products": {
       "type": "relation",
       "relation": "oneToMany",
@@ -38,6 +35,10 @@
         "images",
         "files"
       ]
+    },
+    "description": {
+      "type": "text",
+      "maxLength": 100
     }
   }
 }

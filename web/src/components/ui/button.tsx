@@ -28,6 +28,8 @@ const buttonVariants = cva(
                     "bg-green-600 text-white shadow-xs hover:bg-green-700 focus-visible:ring-green-600/30",
                 warning:
                     "bg-yellow-500 text-white shadow-xs hover:bg-yellow-600 focus-visible:ring-yellow-500/30",
+
+                nothing: "text-accent-foreground bg-transparent hover:bg-transparent shadow-none hover:shadow-none focus-visible:ring-0 focus-visible:border-border"
             },
             size: {
                 default: "h-9 px-4 py-2 has-[>svg]:px-3",

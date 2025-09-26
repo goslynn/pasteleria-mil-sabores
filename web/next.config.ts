@@ -18,6 +18,11 @@ const remotePatterns: RemotePattern[] = [
         port: url.port || undefined,
         pathname: "/uploads/**",
     },
+    {
+        protocol: "https",
+        hostname: "picsum.photos",
+        pathname: "/**",
+    }
 ]
 
 const nextConfig: NextConfig = {

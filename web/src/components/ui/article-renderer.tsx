@@ -104,6 +104,9 @@ export function ArticleRenderer({
         imgToUse != null &&
         !Boolean(imageBehavior.wrapText);
 
+    const isCentered = variant === ArticleVariant.Centered;
+    const sectionPad = isCentered ? "md:px-24" : "";
+
     const jsonLd = enableJsonLd
         ? {
             "@context": "https://schema.org",
@@ -121,22 +124,24 @@ export function ArticleRenderer({
 
     // ⬇️ Header listo para reusar (lo colocaremos arriba o dentro de la columna de texto)
     const headerEl = (
-        <header className={cn(variant === ArticleVariant.Centered ? "text-center" : "text-left", "mb-8")}>
+        <header className={cn(isCentered ? "text-center" : "text-left", "mb-8")}>
             {solveHeader(headingLevel, title)}
         </header>
     );
 
+    console.log("article: ", title, " isCentered: ", isCentered)
+
     return (
         <section
             id={id}
-            className={cn("mx-auto w-full max-w-5xl px-4 md:px-6", className)}
+            className={cn("mx-auto w-full max-w-5xl px-4 md:px-6", className, sectionPad)}
             itemScope
             itemType="https://schema.org/Article"
         >
             {/* En variantes laterales, movemos el header a la columna de texto para alinear con la imagen */}
             {!withSideImage && headerEl}
 
-            {variant === ArticleVariant.Centered && imgToUse != null && !imageBehavior.wrapText && (
+            {isCentered && imgToUse != null && !imageBehavior.wrapText && (
                 <div className="mt-6 flex justify-center">{figure}</div>
             )}
 
@@ -154,7 +159,7 @@ export function ArticleRenderer({
                     {/* ⬇️ Aquí va el header junto con el párrafo para alinear tope con la imagen */}
                     <div>
                         {headerEl}
-                        <StrapiBlocks content={paragraph} />
+                        <StrapiBlocks content={paragraph}/>
                     </div>
 
                     {variant === ArticleVariant.ImageRight && figure}
@@ -174,7 +179,7 @@ export function ArticleRenderer({
                         </div>
                     )}
 
-                    <StrapiBlocks content={paragraph} />
+                    <StrapiBlocks content={paragraph}/>
 
                     {imgToUse != null && imageBehavior.wrapText && <div className="clear-both" />}
                 </div>

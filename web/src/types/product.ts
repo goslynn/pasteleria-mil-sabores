@@ -1,5 +1,6 @@
-import {StrapiBase, StrapiMedia} from "@/types/strapi/common";
+import {StrapiBase} from "@/types/strapi/common";
 import {BlocksContent} from "@strapi/blocks-react-renderer"
+import {StrapiImageSource} from "@/components/ui/strapi-image";
 
 
 
@@ -23,15 +24,16 @@ export interface ProductDTO extends StrapiBase {
     name: string;
     description?: BlocksContent
     price: number;
-    images?: StrapiMedia[];
-    keyImage?: StrapiMedia;
+    images?: StrapiImageSource[];
+    keyImage?: StrapiImageSource;
     category?: CategoryDTO;
 }
 
 export interface CategoryDTO extends StrapiBase {
-    name?: string;
-    slug?: string;
-    description?: BlocksContent
+    name: string;
+    slug: string;
+    description?: string;
+    image?: StrapiImageSource
 }
 
 export type ProductCardDTO = Pick<
