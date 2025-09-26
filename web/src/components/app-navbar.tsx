@@ -21,7 +21,7 @@ export async function AppNavbar() {
         },
         navigationLinks: [
             { href: HOME_URL, label: "Inicio" },
-            { href: '/categories', label: 'Categorias' },
+            { href: '/site/categories', label: 'Categorias' },
             { href: '/site/about', label: 'Sobre nosotros' },
             { href: footerRef , label: 'Contacto' },
         ],

@@ -68,18 +68,22 @@ GET {{host}}/api/footer
 Authorization: Bearer {{token}}
 Accept: application/json
 
-
 ###
 # about
-GET {{host}}/api/about-page?populate[background][fields][0]=url&populate=article_sections
-Authorization: Bearer {{token}}
-Accept: application/json
-
-###
-# about 2
 GET {{host}}/api/about-page?populate=*
 Authorization: Bearer {{token}}
 Accept: application/json
+
+###
+# about completo
+GET {{host}}/api/about-page
+    ?fields[0]=header
+    &populate[0]=background
+    &populate[1]=about_sections.image
+    &publicationState=live
+Authorization: Bearer {{token}}
+Accept: application/json
+
 
 ###
 # terms and conditions

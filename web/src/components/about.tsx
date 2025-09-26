@@ -2,7 +2,7 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import StrapiImage from "@/components/ui/strapi-image";
-import { ArticleRenderer } from "@/components/ui/article-renderer";
+import {ArticleRenderer} from "@/components/ui/article-renderer";
 import type { AboutPageDTO } from "@/types/page-types";
 
 export function About(
