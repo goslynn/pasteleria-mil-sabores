@@ -31,7 +31,7 @@ export const viewport: Viewport = {
 export default function RootLayout({
                                        children,
                                    }: Readonly<{
-    children: React.ReactNode;
+    children: React.JSX.Element;
 }>) {
     return (
         <html lang="es" suppressHydrationWarning>

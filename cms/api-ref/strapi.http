@@ -48,7 +48,15 @@ Accept: application/json
 
 ###
 
-GET {{host}}/api/products?fields[0]=code&fields[1]=name&fields[2]=price&fields[3]=description&populate[images][fields][0]=url&populate[images][fields][1]=formats&pagination[pageSize]=100&publicationState=live
+GET {{host}}/api/products
+    ?fields[0]=code
+    &fields[1]=name
+    &fields[2]=price
+    &fields[3]=description
+    &populate[images][fields][0]=url
+    &populate[images][fields][1]=formats
+    &pagination[pageSize]=100
+    &publicationState=live
 Authorization: Bearer {{token}}
 Accept: application/json
 
@@ -59,7 +67,7 @@ Accept: application/json
 GET {{host}}/api/footer
     ?fields[0]=id
     &fields[1]=documentId
-    &populate[socials][fields][0]=kind
+    &populate[socials][fields][0]=kindCategoryDTO
     &populate[socials][fields][1]=link
     &populate[footer_sections][fields][0]=title
     &populate[footer_sections][populate][links][fields][0]=label
@@ -94,5 +102,22 @@ Accept: application/json
 ###
 # brand
 GET {{host}}/api/brand?populate=*
+Authorization: Bearer {{token}}
+Accept: application/json
+
+
+###
+GET {{host}}/api/categories
+    ?fields[0]=documentId
+    &fields[1]=name
+    &fields[2]=description
+    &populate[image][fields][0]=url
+    &populate[image][fields][1]=formats
+Authorization: Bearer {{token}}
+Accept: application/json
+
+###
+#producto
+GET {{host}}/api/product/tzczp7ofcyqu1mg4errdoa55?populate=*
 Authorization: Bearer {{token}}
 Accept: application/json

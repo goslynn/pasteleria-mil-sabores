@@ -13,7 +13,7 @@ export async function HomePage() {
             imageSrc: dto.keyImage,
             name: dto.name,
             price: dto.price,
-            href: "#"
+            href: `/site/product?q=${dto.documentId}`,
         }
     }
 
@@ -22,11 +22,13 @@ export async function HomePage() {
         "fields[1]": "name",
         "fields[2]": "price",
         "fields[3]": "description",
+        "fields[4]": "documentId",
         "populate[category][fields][0]": "name",
         "populate[keyImage][populate]": "*",
         "pagination[pageSize]": "100",
         "publicationState": "live"
     }, toProductCard);
+
 
     return (
         <>

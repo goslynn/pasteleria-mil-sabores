@@ -29,7 +29,7 @@ export interface ProductDTO extends StrapiBase {
     category?: CategoryDTO;
 }
 
-export interface CategoryDTO extends StrapiBase {
+export interface CategoryDTO extends StrapiBase  {
     name: string;
     slug: string;
     description?: string;

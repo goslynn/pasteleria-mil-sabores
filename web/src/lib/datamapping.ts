@@ -1,6 +1,6 @@
 import {UsuarioDTO} from "@/types/user";
 
-import {ProductCardDTO, ProductDTO} from "@/types/product";
+import {CategoryDTO, ProductCardDTO, ProductDTO} from "@/types/product";
 import {apiFetch, cmsFetch, HttpError, QueryValue, strapi} from "@/lib/fetching";
 import {StrapiCollection, StrapiObject} from "@/types/strapi/common";
 import {FooterDTO} from "@/types/page-types";
@@ -52,6 +52,17 @@ export async function fetchProducts<T>(q : Record<string, QueryValue>, mapper : 
         return [];
     }
 
+    return resp.data.map(mapper);
+}
+
+export async function fetchCategories<T>(q: Record<string, QueryValue>, mapper : (e : CategoryDTO) => T) : Promise<T[]> {
+    let resp : StrapiCollection<CategoryDTO>;
+    try {
+        resp = await strapi.get<StrapiCollection<CategoryDTO>>("/api/categories", { query: q });
+    } catch (e) {
+        console.error("error fetching categories: ", e);
+        return [];
+    }
     return resp.data.map(mapper);
 }
 
