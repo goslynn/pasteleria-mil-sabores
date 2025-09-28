@@ -57,26 +57,18 @@ const SAMPLE_PRODUCT = {
     } as StrapiImageSource,
 };
 
-export default function Page() {
+export default function ProductPage() {
     return (
-        <section
-            className="
-        mx-auto w-full max-w-6xl px-4 sm:px-6
-        [--page-gap:theme(spacing.8)] lg:[--page-gap:theme(spacing.10)]
-        mt-[var(--page-gap)] mb-[var(--page-gap)]
-        scroll-mt-[var(--site-header,0px)]
-      "
-        >
+        <div className="flex-1 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
             {/* Card contenedor */}
             <div className="bg-muted rounded-2xl border border-border shadow-md overflow-hidden">
 
-                {/* ZONA 1: centrado perfecto respecto a viewport */}
-                <div
-                    className="grid place-items-center p-4 sm:p-6 md:p-8 ">
+                {/* ZONA 1: centrado perfecto respecto al viewport */}
+                <div className="min-h-[70vh] grid place-items-center p-4 sm:p-6 md:p-8">
                     <ProductDetail product={SAMPLE_PRODUCT} />
                 </div>
 
-                <Separator/>
+                <Separator />
 
                 {/* ZONA 2: extra dentro del mismo card (scroll normal) */}
                 <div className="p-4 sm:p-6 md:p-8 space-y-10">
@@ -88,10 +80,9 @@ export default function Page() {
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
     );
 }
-
 
 
 

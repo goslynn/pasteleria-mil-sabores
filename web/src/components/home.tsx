@@ -13,7 +13,7 @@ export async function HomePage() {
             imageSrc: dto.keyImage,
             name: dto.name,
             price: dto.price,
-            href: `/site/product?q=${dto.documentId}`,
+            href: `/site/product/${dto.documentId}`,
         }
     }
 
