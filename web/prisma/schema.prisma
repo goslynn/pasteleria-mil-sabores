@@ -36,9 +36,10 @@ model PreferenciasUsuario {
 }
 
 model CarritoCompras {
-  idCarrito   Int     @id @default(autoincrement())
-  idUsuarioFk Int     @unique
-  usuario     Usuario @relation(fields: [idUsuarioFk], references: [idUsuario])
+  idCarrito      Int              @id @default(autoincrement())
+  idUsuarioFk    Int              @unique
+  usuario        Usuario          @relation(fields: [idUsuarioFk], references: [idUsuario])
+  carritoDetalle CarritoDetalle[]
 }
 
 model Descuento {
@@ -56,9 +57,12 @@ model Producto {
 }
 
 model CarritoDetalle {
-  idCarrito  Int      @id @default(autoincrement())
-  idProducto Int
-  producto   Producto @relation(fields: [idProducto], references: [idProducto])
+  idCarritoDetalle Int            @id @default(autoincrement())
+  idCarrito        Int
+  idProducto       Int
+  cantidad         Int            @default(1)
+  carrito          CarritoCompras @relation(fields: [idCarrito], references: [idCarrito])
+  producto         Producto       @relation(fields: [idProducto], references: [idProducto])
 }
 
 model Precio {

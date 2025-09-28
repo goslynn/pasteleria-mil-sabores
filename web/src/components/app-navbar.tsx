@@ -26,7 +26,7 @@ export async function AppNavbar() {
             { href: footerRef , label: 'Contacto' },
         ],
         cart: {
-            link: "/site/cart"
+            link: "/site/carrito"
         }
     };
 
