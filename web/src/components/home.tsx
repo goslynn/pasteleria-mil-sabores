@@ -1,23 +1,14 @@
 import ProductGrid from "@/components/ui/product-grid";
 import {ProductDTO} from "@/types/product";
-import {fetchProducts} from "@/lib/datamapping";
+import {toProductCard} from "@/lib/datamapping";
 import {ProductCardProps} from "@/components/ui/product-card";
+import {strapi} from "@/lib/fetching";
 
 
 
 export async function HomePage() {
-    const toProductCard = (dto: ProductDTO): ProductCardProps => {
-        return {
-            category: dto?.category?.name,
-            id: dto.documentId,
-            imageSrc: dto.keyImage,
-            name: dto.name,
-            price: dto.price,
-            href: `/site/product/${dto.documentId}`,
-        }
-    }
-
-    const cards = await fetchProducts({
+    const cards = await strapi.mapper.fetchCollection <ProductDTO, ProductCardProps>(
+        "/api/products",{
         "fields[0]": "code",
         "fields[1]": "name",
         "fields[2]": "price",
@@ -28,7 +19,6 @@ export async function HomePage() {
         "pagination[pageSize]": "100",
         "publicationState": "live"
     }, toProductCard);
-
 
     return (
         <>

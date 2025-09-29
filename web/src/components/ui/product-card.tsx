@@ -2,19 +2,14 @@
 
 import * as React from "react"
 import Link from "next/link"
-import Image from "next/image"
 import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
-import { Plus, Heart } from "lucide-react"
+import { Plus } from "lucide-react"
 import {StrapiImage, StrapiImageSource} from "@/components/ui/strapi-image";
 import {ImageFormat} from "@/types/strapi/common";
-
-export interface Discount {
-    type: "percentage" | "fixed"
-    value: number
-}
+import {Discount} from "@/types/product";
 
 export interface ProductCardProps {
     id: string | number
@@ -26,7 +21,6 @@ export interface ProductCardProps {
     href: string
     className?: string
     aspect?: "4/3" | "1/1" | "16/9"
-    onToggleFavorite?: () => void
     onAddToCart?: () => void
 }
 
@@ -39,7 +33,6 @@ export function ProductCard({
                                 href,
                                 className,
                                 aspect = "4/3",
-                                onToggleFavorite,
                                 onAddToCart,
                             }: ProductCardProps) {
     const finalPrice = discount
@@ -121,21 +114,7 @@ export function ProductCard({
 
             {/* Acciones (no navegan) */}
             <CardFooter className="flex items-center gap-3 px-4 pb-4 pt-0">
-                {onToggleFavorite && (
-                    <Button
-                        type="button"
-                        variant="outline"
-                        size="icon"
-                        onClick={(e) => {
-                            e.preventDefault()
-                            onToggleFavorite?.()
-                        }}
-                        aria-label="Agregar a favoritos"
-                    >
-                        <Heart className="size-4" />
-                    </Button>
-                )}
-
+                {/*TODO: Componente de add to cart button... */}
                 <Button
                     type="button"
                     className="flex-1"

@@ -13,6 +13,9 @@
  */
 
 // Check Strapi env vars at module load time
+import {StrapiCollection, StrapiObject} from "@/types/strapi/common";
+import {StrapiMapper} from "@/lib/strapi-client";
+
 const STRAPI_HOST = process.env.NEXT_PUBLIC_STRAPI_HOST || process.env.STRAPI_HOST;
 const STRAPI_TOKEN = process.env.NEXT_PUBLIC_STRAPI_TOKEN || process.env.STRAPI_TOKEN;
 
@@ -205,10 +208,6 @@ async function coreFetch<T>(fullUrl: string, opts: FetchOptions): Promise<T> {
     return data as T;
 }
 
-/** =========================
- *  Public API
- *  ========================= */
-
 /**
  * Fetch against your own Next.js app (routes /api or route handlers).
  * - In SSR automatically derives the host from headers/env.
@@ -288,15 +287,28 @@ export async function cmsFetch<T = unknown>(
     return coreFetch<T>(url, { ...rest, headers: headersFinal });
 }
 
-/**
- * Convenience helpers (optional)
- */
-export const api = {
-    get: async <T>(url: string, opts?: FetchOptions) =>
-        apiFetch<T>(url, { ...opts, method: "GET" }),
+type Fetcher = <T>(path: string, opts?: FetchOptions) => Promise<T>;
 
-    post: async <T>(url: string, body?: unknown, opts?: FetchOptions) =>
-        apiFetch<T>(url, {
+export interface Client {
+    // HTTP básicos
+    get<T>(url: string, opts?: FetchOptions): Promise<T>;
+
+    post<T>(url: string, body?: unknown, opts?: FetchOptions): Promise<T>;
+
+    put<T>(url: string, body?: unknown, opts?: FetchOptions): Promise<T>;
+
+    patch<T>(url: string, body?: unknown, opts?: FetchOptions): Promise<T>;
+
+    delete<T>(url: string, opts?: FetchOptions): Promise<T>;
+}
+
+export function clientOf(fetcher: Fetcher) : Client {
+    async function get<T>(url: string, opts?: FetchOptions) {
+        return fetcher<T>(url, { ...opts, method: "GET" });
+    }
+
+    async function post<T>(url: string, body?: unknown, opts?: FetchOptions) {
+        return fetcher<T>(url, {
             method: "POST",
             body: body instanceof FormData ? body : JSON.stringify(body ?? {}),
             headers: mergeHeaders(
@@ -304,10 +316,11 @@ export const api = {
                 opts?.headers
             ),
             ...opts,
-        }),
+        });
+    }
 
-    put: async <T>(url: string, body?: unknown, opts?: FetchOptions) =>
-        apiFetch<T>(url, {
+    async function put<T>(url: string, body?: unknown, opts?: FetchOptions) {
+        return fetcher<T>(url, {
             method: "PUT",
             body: body instanceof FormData ? body : JSON.stringify(body ?? {}),
             headers: mergeHeaders(
@@ -315,10 +328,11 @@ export const api = {
                 opts?.headers
             ),
             ...opts,
-        }),
+        });
+    }
 
-    patch: async <T>(url: string, body?: unknown, opts?: FetchOptions) =>
-        apiFetch<T>(url, {
+    async function patch<T>(url: string, body?: unknown, opts?: FetchOptions) {
+        return fetcher<T>(url, {
             method: "PATCH",
             body: body instanceof FormData ? body : JSON.stringify(body ?? {}),
             headers: mergeHeaders(
@@ -326,67 +340,31 @@ export const api = {
                 opts?.headers
             ),
             ...opts,
-        }),
+        });
+    }
 
-    delete: async <T>(url: string, opts?: FetchOptions) =>
-        apiFetch<T>(url, { ...opts, method: "DELETE" }),
-};
+    async function del<T>(url: string, opts?: FetchOptions) {
+        return fetcher<T>(url, { ...opts, method: "DELETE" });
+    }
 
-/**
- * Strapi-specific convenience helpers
- */
-export const strapi = {
-    get: async <T>(path: string, opts?: FetchOptions) =>
-        cmsFetch<T>(path, { ...opts, method: "GET" }),
 
-    post: async <T>(path: string, body?: unknown, opts?: FetchOptions) =>
-        cmsFetch<T>(path, {
-            method: "POST",
-            body: body instanceof FormData ? body : JSON.stringify(body ?? {}),
-            headers: mergeHeaders(
-                body instanceof FormData ? {} : { "Content-Type": "application/json" },
-                opts?.headers
-            ),
-            ...opts,
-        }),
+    return {
+        get,
+        post,
+        put,
+        patch,
+        delete: del,
+    };
+}
 
-    put: async <T>(path: string, body?: unknown, opts?: FetchOptions) =>
-        cmsFetch<T>(path, {
-            method: "PUT",
-            body: body instanceof FormData ? body : JSON.stringify(body ?? {}),
-            headers: mergeHeaders(
-                body instanceof FormData ? {} : { "Content-Type": "application/json" },
-                opts?.headers
-            ),
-            ...opts,
-        }),
+export function strapiClientOf(fetcher: Fetcher) {
+    const client = clientOf(fetcher);
+    return {
+        ...client,
+        mapper: new StrapiMapper(client)
+    }
 
-    delete: async <T>(path: string, opts?: FetchOptions) =>
-        cmsFetch<T>(path, { ...opts, method: "DELETE" }),
-};
+}
 
-/**
- * Example usage:
- *
- * // Basic API fetch
- * const data = await apiFetch('/api/users');
- *
- * // Strapi fetch with query params
- * const products = await cmsFetch('/api/products', {
- *   strapiQuery: {
- *     populate: ['image', 'category'],
- *     filters: {
- *       price: { $gte: 100 },
- *       category: { name: 'Electronics' }
- *     },
- *     sort: ['price:desc', 'name:asc'],
- *     pagination: { page: 1, pageSize: 10 }
- *   }
- * });
- *
- * // Using convenience helpers
- * const user = await http.post('/api/users', { name: 'John' });
- * const article = await strapi.get('/api/articles/1', {
- *   strapiQuery: { populate: '*' }
- * });
- */
+export const nextApi = clientOf(apiFetch);
+export const strapi = strapiClientOf(cmsFetch);

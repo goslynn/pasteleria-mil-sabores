@@ -10,32 +10,33 @@ import {
     Breadcrumb,
     BreadcrumbItem,
     BreadcrumbLink,
-    BreadcrumbList, BreadcrumbPage,
-    BreadcrumbSeparator
-} from "@/components/ui/breadcrumb";
+    BreadcrumbList,
+    BreadcrumbPage,
+    BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
+import { Discount } from '@/types/product';
+import { Button } from '@/components/ui/button';
+
+export interface ProductDetail {
+    code: string;
+    name: string;
+    description: BlocksContent | string | null | undefined;
+    price: number;
+    images?: StrapiImageSource[];
+    discount?: Discount;
+    category: {
+        name: string;
+        slug: string;
+    } | null;
+    keyImage?: StrapiImageSource;
+}
 
 export interface ProductDetailProps {
-    product: {
-        id: number;
-        documentId: string;
-        code: string;
-        name: string;
-        description: BlocksContent | string | null;
-        price: number;
-        images: any; // puede venir null o arreglo de imágenes de Strapi
-        category: {
-            id: number;
-            documentId: string;
-            name: string;
-            slug: string;
-            description: string | null;
-        } | null;
-        keyImage?: StrapiImageSource;
-    };
+    product: ProductDetail;
     className?: string;
-    debug?: boolean; // <- muestra la sección inferior con metadatos y código
-    onAddToCart?: (p: { id: number; code: string; name: string; price: number }) => void;
-    onShopNow?: (p: { id: number; code: string; name: string; price: number }) => void;
+    debug?: boolean;
+    onAddToCart?: (p: { code: string; name: string; price: number }) => void;
+    onShopNow?: (p: { code: string; name: string; price: number }) => void;
 }
 
 const clp = new Intl.NumberFormat('es-CL', {
@@ -44,22 +45,18 @@ const clp = new Intl.NumberFormat('es-CL', {
     maximumFractionDigits: 0,
 });
 
-export default function ProductDetail({
-                                          product,
-                                          className,
-                                          debug = false,
-                                          onAddToCart,
-                                          onShopNow,
-                                      }: ProductDetailProps) {
+export default function ProductDetailCard({
+                                              product,
+                                              className,
+                                              debug,
+                                              onAddToCart,
+                                              onShopNow,
+                                          }: ProductDetailProps) {
     // --- Galería (slider) ---
     const gallery: StrapiImageSource[] = React.useMemo(() => {
         const list: StrapiImageSource[] = [];
         if (product.keyImage) list.push(product.keyImage);
-        // Si product.images viene de Strapi como media[] ó null
-        const imgs = (product as any)?.images;
-        if (Array.isArray(imgs)) {
-            for (const it of imgs) list.push(it);
-        }
+        if (Array.isArray(product.images)) list.push(...product.images);
         return list;
     }, [product]);
 
@@ -75,7 +72,6 @@ export default function ProductDetail({
 
     function handleAdd() {
         onAddToCart?.({
-            id: product.id,
             code: product.code,
             name: product.name,
             price: product.price,
@@ -83,15 +79,29 @@ export default function ProductDetail({
     }
     function handleShop() {
         onShopNow?.({
-            id: product.id,
             code: product.code,
             name: product.name,
             price: product.price,
         });
     }
 
+    // --- Precio con descuento ---
+    const discountedPrice = React.useMemo(() => {
+        const d = product.discount;
+        if (!d) return null;
+        if (d.type === 'percentage') return Math.max(0, Math.round(product.price * (1 - d.value / 100)));
+        return Math.max(0, Math.round(product.price - d.value));
+    }, [product.price, product.discount]);
+
+    const discountBadge = React.useMemo(() => {
+        if (!product.discount) return null;
+        return product.discount.type === 'percentage'
+            ? `-${product.discount.value}%`
+            : `-${clp.format(product.discount.value)}`;
+    }, [product.discount]);
+
     return (
-        <article className={cn('mx-auto max-w-6xl ', className)}>
+        <article className={cn('mx-auto max-w-6xl', className)}>
             {/* Breadcrumbs */}
             <Breadcrumb className="mb-6">
                 <BreadcrumbList>
@@ -106,9 +116,7 @@ export default function ProductDetail({
                             <BreadcrumbSeparator />
                             <BreadcrumbItem>
                                 <BreadcrumbLink asChild>
-                                    <Link href={`/categoria/${product.category.slug}`}>
-                                        {product.category.name}
-                                    </Link>
+                                    <Link href={`/categoria/${product.category.slug}`}>{product.category.name}</Link>
                                 </BreadcrumbLink>
                             </BreadcrumbItem>
                         </>
@@ -138,7 +146,6 @@ export default function ProductDetail({
                                     alt={product.name}
                                 />
 
-                                {/* Controles */}
                                 {gallery.length > 1 && (
                                     <>
                                         <button
@@ -164,17 +171,13 @@ export default function ProductDetail({
                                             ›
                                         </button>
 
-                                        {/* Dots */}
                                         <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-2">
                                             {gallery.map((_, i) => (
                                                 <button
                                                     key={i}
                                                     onClick={() => setIdx(i)}
                                                     aria-label={`Ir a la imagen ${i + 1}`}
-                                                    className={cn(
-                                                        'h-2 w-2 rounded-full border',
-                                                        i === idx ? 'bg-foreground' : 'bg-background/70'
-                                                    )}
+                                                    className={cn('h-2 w-2 rounded-full border', i === idx ? 'bg-foreground' : 'bg-background/70')}
                                                 />
                                             ))}
                                         </div>
@@ -185,80 +188,74 @@ export default function ProductDetail({
                             <div className="grid h-full place-content-center text-muted-foreground">Sin imagen</div>
                         )}
                     </div>
-                    {/* NOTA: el código se movió abajo (solo visible con debug) */}
                 </section>
 
                 {/* Info */}
                 <section className="flex min-h-full flex-col gap-4">
                     <header>
                         <h1 className="text-3xl font-semibold tracking-tight">{product.name}</h1>
-                        {product.category ? (
-                            <i className="mt-1 text-sm text-muted-foreground">{product.category.name}</i>
-                        ) : null}
+                        {product.category ? <i className="mt-1 text-sm text-muted-foreground">{product.category.name}</i> : null}
                     </header>
 
-                    <div className="text-3xl font-bold">{clp.format(product.price)}</div>
+                    {/* Precio (con o sin descuento) */}
+                    {discountedPrice !== null && discountedPrice < product.price ? (
+                        <div className="flex items-baseline gap-3">
+              <span className="text-2xl font-semibold line-through text-muted-foreground/70">
+                {clp.format(product.price)}
+              </span>
+                            <span className="text-4xl font-extrabold">{clp.format(discountedPrice)}</span>
+                            {discountBadge && <span className="rounded-full border px-2 py-0.5 text-xs font-medium">{discountBadge}</span>}
+                        </div>
+                    ) : (
+                        <div className="text-3xl font-bold">{clp.format(product.price)}</div>
+                    )}
 
-                    {/* Descripción (Blocks o string) */}
+                    {/* Descripción */}
                     <div className="prose prose-neutral dark:prose-invert max-w-none">
-                        {Array.isArray(product.description) ? (
-                            <StrapiBlocks content={product.description} />
-                        ) : product.description ? (
-                            <p>{product.description}</p>
-                        ) : (
-                            <p className="text-muted-foreground">Sin descripción.</p>
-                        )}
+                        <StrapiBlocks content={product.description} />
                     </div>
 
-                    {/* Acciones al fondo de la columna derecha */}
+                    {/* Acciones */}
                     <div className="mt-auto pt-4">
                         <div className="grid grid-cols-2 gap-3">
-                            {/* Poco llamativo */}
-                            <button
-                                type="button"
+                            <Button
+                                variant="outline"
+                                size="lg"
+                                className="h-12"
                                 onClick={handleAdd}
-                                className={cn(
-                                    'inline-flex h-12 items-center justify-center rounded-lg border px-5',
-                                    'bg-background text-foreground hover:bg-accent hover:text-accent-foreground',
-                                    'transition'
-                                )}
                                 aria-label="Agregar al carrito"
                                 title="Agregar al carrito"
+                                type="button"
                             >
                                 Agregar al carrito
-                            </button>
+                            </Button>
 
-                            {/* Llamativo */}
-                            <button
-                                type="button"
+                            <Button
+                                variant="default"
+                                size="lg"
+                                className="h-12 active:scale-[0.98]"
                                 onClick={handleShop}
-                                className={cn(
-                                    'inline-flex h-12 items-center justify-center rounded-lg px-5',
-                                    'bg-primary text-primary-foreground hover:opacity-90 active:scale-[0.98]',
-                                    'transition'
-                                )}
                                 aria-label="Comprar ahora"
                                 title="Comprar ahora"
+                                type="button"
                             >
                                 Comprar ahora
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </section>
             </div>
 
-            {/* Meta (oculta salvo debug=true) */}
+            {/* Meta (solo con debug=true) */}
             {debug && (
                 <section className="mt-10 border-t pt-6 text-xs text-muted-foreground" aria-labelledby="product-meta">
-                    <h2 id="product-meta" className="sr-only">Metadatos del producto</h2>
+                    <h2 id="product-meta" className="sr-only">
+                        Metadatos del producto
+                    </h2>
                     <dl className="grid grid-cols-1 gap-2 sm:grid-cols-4">
                         <div>
                             <dt className="font-medium">Código</dt>
                             <dd className="truncate">{product.code}</dd>
-                        </div>
-                        <div>
-                            <dt className="font-medium">ID</dt>
-                            <dd className="truncate">{product.documentId}</dd>
                         </div>
                         <div>
                             <dt className="font-medium">Creado</dt>

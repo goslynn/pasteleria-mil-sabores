@@ -1,9 +1,11 @@
 import {UsuarioDTO} from "@/types/user";
 
-import {CategoryDTO, ProductCardDTO, ProductDTO} from "@/types/product";
-import {apiFetch, cmsFetch, HttpError, QueryValue, strapi} from "@/lib/fetching";
+import {strapi, apiFetch, HttpError, QueryValue} from "@/lib/fetching";
 import {StrapiCollection, StrapiObject} from "@/types/strapi/common";
 import {FooterDTO} from "@/types/page-types";
+import {ProductDTO} from "@/types/product";
+import {ProductCardProps} from "@/components/ui/product-card";
+import {ProductDetail} from "@/components/ui/product-detail";
 
 // Devuelve el usuario de la sesión actual o null si no hay sesión
 export async function getCurrentUser(): Promise<UsuarioDTO | null> {
@@ -43,27 +45,57 @@ export async function getUserById(id: number): Promise<UsuarioDTO> {
     return data;
 }
 
-export async function fetchProducts<T>(q : Record<string, QueryValue>, mapper : (e : ProductDTO) => T) : Promise<T[]> {
-    let resp: StrapiCollection<ProductDTO>;
-    try {
-        resp = await strapi.get<StrapiCollection<ProductDTO>>("/api/products", { query: q });
-    } catch (e) {
-        console.error("error fetching products: ", e);
-        return [];
+export const toProductCard = (dto: ProductDTO): ProductCardProps => {
+    return {
+        category: dto?.category?.name,
+        id: dto.code,
+        imageSrc: dto.keyImage,
+        name: dto.name,
+        price: dto.price,
+        href: `/site/product/${dto.code}`,
     }
-
-    return resp.data.map(mapper);
 }
 
-export async function fetchCategories<T>(q: Record<string, QueryValue>, mapper : (e : CategoryDTO) => T) : Promise<T[]> {
-    let resp : StrapiCollection<CategoryDTO>;
+export const toProductDetail = (dto: ProductDTO) : ProductDetail => {
+    const cat = dto.category
+        ? { name: dto.category.name, slug: dto.category.slug }
+        : null;
+
+    return {
+        category: cat,
+        code: dto.code,
+        description: dto.description,
+        images: dto.images,
+        keyImage: dto.keyImage,
+        name: dto.name,
+        price: dto.price,
+    };
+}
+
+
+export async function fetchCollection<DTO>(
+    endpoint: string,
+    q: Record<string, QueryValue>
+): Promise<DTO[]>;
+
+export async function fetchCollection<DTO, OUT>(
+    endpoint: string,
+    q: Record<string, QueryValue>,
+    mapper: (e: DTO) => OUT
+): Promise<OUT[]>;
+
+export async function fetchCollection<DTO, OUT>(
+    endpoint: string,
+    q: Record<string, QueryValue>,
+    mapper?: (e: DTO) => OUT
+): Promise<(DTO | OUT)[]> {
     try {
-        resp = await strapi.get<StrapiCollection<CategoryDTO>>("/api/categories", { query: q });
+        const resp = await strapi.get<StrapiCollection<DTO>>(endpoint, { query: q });
+        return mapper ? resp.data.map(mapper) : resp.data;
     } catch (e) {
-        console.error("error fetching categories: ", e);
+        console.error(`error fetching ${endpoint}:`, e);
         return [];
     }
-    return resp.data.map(mapper);
 }
 
 export async function fetchFooter<T>(
@@ -90,12 +122,31 @@ export async function fetchFooter<T>(
     }
 }
 
-export async function fetchAboutPage() {
+
+export async function fetchObject<DTO, OUT>(
+    endpoint: string,
+    q: Record<string, QueryValue>,
+    mapper: (dto: DTO) => OUT
+): Promise<OUT | null> ;
+
+
+export async function fetchObject<DTO>(
+    endpoint: string,
+    q: Record<string, QueryValue>
+): Promise<DTO | null>;
+
+export async function fetchObject<DTO, OUT>(
+    endpoint: string,
+    q: Record<string, QueryValue>,
+    mapper?: (dto: DTO) => OUT
+): Promise<DTO | OUT | null> {
     try {
-        //TODO: crear tipado para la about page, usarlo directamente en el componente react respectivo.
-        return strapi.get<any>("/api/about-page", {query : {"populate": "*"}});
+        const resp = await strapi.get<StrapiObject<DTO>>(endpoint, { query: q });
+        if (!resp?.data) return null;
+        return mapper ? mapper(resp.data) : resp.data;
     } catch (e) {
-        console.error("error fetching about page:", e);
+        console.error(`error fetching ${endpoint}:`, e);
         return null;
     }
 }
+

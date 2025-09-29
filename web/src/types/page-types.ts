@@ -1,4 +1,4 @@
-import {StrapiBase, StrapiMedia} from "@/types/strapi/common";
+import {StrapiMedia} from "@/types/strapi/common";
 import {SocialLink} from "@/types/general";
 import {FooterSection} from "@/components/ui/footer";
 import {BlocksContent} from "@strapi/blocks-react-renderer";
@@ -10,7 +10,7 @@ export type FooterDTO = {
     footer_sections: FooterSection[];
 }
 
-export interface BrandDTO extends StrapiBase {
+export interface BrandDTO {
     name?: string;
     logo?: StrapiMedia
     icon?: StrapiMedia
