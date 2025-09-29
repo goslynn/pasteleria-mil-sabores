@@ -33,3 +33,11 @@ export interface AboutPageDTO {
     background: StrapiImageSource
     about_sections: ArticleSection[];
 }
+
+export type PageProps = {
+    searchParams: {
+        q?: string;
+        page?: string;
+        pageSize?: string;
+    } | Record<string, string | string[] | undefined>;
+};

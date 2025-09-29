@@ -1,4 +1,5 @@
 import {ProductDTO} from "@/types/product";
+import {StrapiCollection} from "@/types/strapi/common";
 
 export interface ProductResponse {
     data?: {
@@ -16,3 +17,5 @@ export interface ProductKey {
     code: string;
     documentId: string;
 }
+
+export type ProductQueryResponse = StrapiCollection<ProductDTO>

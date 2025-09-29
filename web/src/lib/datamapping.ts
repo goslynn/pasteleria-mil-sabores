@@ -3,9 +3,10 @@ import {UsuarioDTO} from "@/types/user";
 import {strapi, apiFetch, HttpError, QueryValue} from "@/lib/fetching";
 import {StrapiCollection, StrapiObject} from "@/types/strapi/common";
 import {FooterDTO} from "@/types/page-types";
-import {ProductDTO} from "@/types/product";
+import {CategoryDTO, ProductDTO} from "@/types/product";
 import {ProductCardProps} from "@/components/ui/product-card";
 import {ProductDetail} from "@/components/ui/product-detail";
+import {CategoryItem} from "@/components/ui/category";
 
 // Devuelve el usuario de la sesión actual o null si no hay sesión
 export async function getCurrentUser(): Promise<UsuarioDTO | null> {
@@ -70,6 +71,15 @@ export const toProductDetail = (dto: ProductDTO) : ProductDetail => {
         name: dto.name,
         price: dto.price,
     };
+}
+
+export const toCategoryItem = (dto : CategoryDTO) : CategoryItem => {
+    return {
+        title: dto.name,
+        description: dto.description,
+        image: dto.image,
+        href: `/site/product?cat=${dto.slug}`
+    }
 }
 
 

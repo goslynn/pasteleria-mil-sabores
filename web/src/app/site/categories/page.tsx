@@ -1,25 +1,19 @@
 import * as React from 'react';
 import CategorySection, {CategoryItem} from "@/components/ui/category";
 import {CategoryDTO} from "@/types/product"
-import {fetchCollection} from "@/lib/datamapping";
+import {toCategoryItem} from "@/lib/datamapping";
+import {strapi} from "@/lib/fetching";
 
 
 export default async function CategoriesPage() {
-    const toCategoryItem = (dto : CategoryDTO) : CategoryItem => {
-        return {
-            title: dto?.name,
-            description: dto?.description,
-            image: dto?.image,
-            href: `/site/product?cat=${dto?.documentId}`
-        }
-    }
 
-    const data = await fetchCollection<CategoryDTO, CategoryItem>(
+    const data = await strapi.mapper.fetchCollection<CategoryDTO, CategoryItem>(
         "/api/categories",
         {
             "fields[0]": "documentId",
             "fields[1]": "name",
             "fields[2]": "description",
+            "fields[3]": "slug",
             "populate[image][fields][0]": "url",
             "populate[image][fields][1]": "formats"
         },

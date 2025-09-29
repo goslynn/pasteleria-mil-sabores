@@ -14,3 +14,12 @@ export function getInitials(name: string) : string {
         .join("")
         .slice(0, 2);
 }
+
+type HttpError = {
+    status?: number;
+    message?: string;
+};
+
+export function isHttpError(e: unknown): e is HttpError {
+    return typeof e === "object" && e !== null && "status" in e;
+}
