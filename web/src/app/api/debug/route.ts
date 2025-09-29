@@ -10,7 +10,7 @@ function safeError(err: unknown) {
             name: err.name,
             message: err.message,
             stack: err.stack,
-            cause: (err as any).cause ?? null,
+            cause: (err as Error).cause ?? null,
         };
     }
     try {
