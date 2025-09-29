@@ -1,45 +1,58 @@
-import React, { useState, useRef } from 'react';
-import {cn} from "@/lib/utils";
-import {Input} from "@/components/ui/input";
-import {SearchIcon, X} from "lucide-react";
+// search-bar.tsx
+"use client";
 
+import React, { useState, useRef } from "react";
+import { cn } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
+import { SearchIcon, X } from "lucide-react";
+
+export type SearchBarProps = {
+    /** Server Action (permitida como form action) */
+    action: (formData: FormData) => Promise<void> | void;
+    /** id del input (opcional) */
+    id?: string;
+    /** placeholder del input (opcional) */
+    placeholder?: string;
+    className?: string;
+    /** valor inicial (hidratado desde server si quieres) */
+    initialQuery?: string;
+    /** página por defecto para paginación */
+    defaultPage?: number | string;
+};
 
 export function SearchBar({
                               id = "search-input",
-                              placeholder = 'Search...',
-                              onSubmit,
+                              placeholder = "Buscar…",
+                              action,
                               className,
-                          }: {
-    id? : string
-    placeholder?: string
-    onSubmit?: (q: string) => void
-    className?: string
-}) {
+                              initialQuery = "",
+                              defaultPage = 1,
+                          }: SearchBarProps) {
+    const [q, setQ] = useState<string>(initialQuery);
+    const inputRef = useRef<HTMLInputElement | null>(null);
 
-    const [q, setQ] = useState('')
-    const inputRef = useRef<HTMLInputElement | null>(null)
-
-    function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-        e.preventDefault()
-        onSubmit?.(q)
-    }
-
+    // 👇 No interceptamos el submit; dejamos que el form llame a la Server Action.
+    //    Mantener onSubmit aquí rompería el patrón de Server Action.
     return (
-        <form onSubmit={handleSubmit} className={cn('relative mx-auto w-full max-w-xs', className)}>
+        <form action={action} className={cn("relative mx-auto w-full max-w-xs", className)}>
             <Input
+                ref={inputRef}
                 id={id}
-                name="search"
+                name="q"                 // <- la Server Action leerá "q"
                 type="search"
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder={placeholder}
                 className="peer h-8 ps-8 pe-8"
+                aria-label="Buscar productos"
             />
 
+            {/* Si usas paginación */}
+            <input type="hidden" name="page" value={String(defaultPage)} />
+
             {/* Lupa a la izquierda */}
-            <div
-                className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-2 text-muted-foreground/80 peer-disabled:opacity-50">
-                <SearchIcon size={16}/>
+            <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-2 text-muted-foreground/80 peer-disabled:opacity-50">
+                <SearchIcon size={16} />
             </div>
 
             {/* Botón limpiar a la derecha (solo si hay texto) */}
@@ -47,16 +60,16 @@ export function SearchBar({
                 <button
                     type="button"
                     onClick={() => {
-                        setQ('')
-                        inputRef.current?.focus()
+                        setQ("");
+                        inputRef.current?.focus();
                     }}
                     className="absolute inset-y-0 end-0 my-auto me-1 inline-flex h-6 w-6 items-center justify-center rounded-full text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                     aria-label="Borrar búsqueda"
                     title="Borrar"
                 >
-                    <X className="h-3.5 w-3.5"/>
+                    <X className="h-3.5 w-3.5" />
                 </button>
             )}
         </form>
-    )
+    );
 }

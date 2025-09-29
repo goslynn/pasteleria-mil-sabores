@@ -15,7 +15,7 @@ import { HamburgerIcon } from '@/components/ui/hamburger-icon'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { DEFAULT_USER_MENU, AppUserMenu } from '@/components/ui/app-user-menu'
 import { DEFAULT_HOME_LOGO, HomeLogo, type HomeLogoProps } from '@/components/ui/home-logo'
-import { SearchBar } from '@/components/ui/search-bar'
+import {SearchBar, SearchBarProps} from '@/components/ui/search-bar'
 import {usePathname} from "next/navigation";
 import {UserMenuProps} from "@/components/ui/user-menu";
 import {CartButton, CartButtonProps} from "@/components/ui/carrito-theme";
@@ -30,7 +30,7 @@ export interface NavbarProps extends React.HTMLAttributes<HTMLElement> {
     userMenu?: Partial<UserMenuProps>
     navigationLinks?: NavbarNavItem[]
     searchPlaceholder?: string
-    onSearchSubmit?: (query: string) => void
+    searchBarProps : SearchBarProps
     cart: CartButtonProps;
 }
 
@@ -55,7 +55,7 @@ export function Navbar({
                            userMenu,
                            navigationLinks = [],
                            searchPlaceholder = 'Buscar...',
-                           onSearchSubmit,
+                           searchBarProps,
                            cart,
                            className,
                            ...props
@@ -69,13 +69,6 @@ export function Navbar({
     useEffect(() => setMounted(true), [])
 
     const pathname = usePathname()
-
-    const handleSearchSubmit = useCallback(
-        (q: string) => {
-            onSearchSubmit?.(q)
-        },
-        [onSearchSubmit]
-    )
 
     // normalizo por si pasan "brandscope" sin guion
     const normalizedScope =
@@ -160,7 +153,7 @@ export function Navbar({
 
                     {/* Centro: búsqueda */}
                     <div className="grow">
-                        <SearchBar placeholder={searchPlaceholder} onSubmit={handleSearchSubmit}/>
+                        <SearchBar {...searchBarProps}/>
                     </div>
 
                     {/* Derecha: Usuario + Tema */}

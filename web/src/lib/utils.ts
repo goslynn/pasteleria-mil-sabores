@@ -23,3 +23,14 @@ type HttpError = {
 export function isHttpError(e: unknown): e is HttpError {
     return typeof e === "object" && e !== null && "status" in e;
 }
+
+export function parsePositiveInt(value: string): number | null {
+    const num = Number(value);
+
+    // validar que sea entero y positivo
+    if (!Number.isInteger(num) || num <= 0) {
+        return null; // o lanza error según tu caso
+    }
+
+    return num;
+}

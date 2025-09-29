@@ -1,21 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ProductDTO } from "@/types/product";
 import { strapi } from "@/lib/fetching";
-import { ProductDetailResponse, ProductResponse, ProductKey } from "@/app/api/product/types";
+import {ProductDetailResponse, ProductResponse, ProductKey, BasicHttpError} from "@/app/api/product/types";
 import { prisma } from "@/lib/db";
 import { StrapiCollection } from "@/types/strapi/common";
 
 // Forzar runtime Node
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-class HttpError extends Error {
-    status: number;
-    constructor(status: number, message: string) {
-        super(message);
-        this.status = status;
-    }
-}
 
 /**
  * Busca en Strapi el par (documentId, code) por code.
@@ -33,12 +25,12 @@ async function fetchStrapiKeyByCode(code: string): Promise<{ documentId: string;
     const res = await strapi.get<StrapiCollection<ProductKey>>("/api/products", { query });
     const list = res?.data ?? [];
     if (list.length === 0) {
-        throw new HttpError(404, `Producto code='${code}' no encontrado en Strapi.`);
+        throw new BasicHttpError(404, `Producto code='${code}' no encontrado en Strapi.`);
     }
 
     const prod = list[0];
-    if (!prod.code) throw new HttpError(422, "El producto de Strapi no tiene code válido.");
-    if (!prod.documentId) throw new HttpError(422, "El producto de Strapi no tiene documentId válido.");
+    if (!prod.code) throw new BasicHttpError(422, "El producto de Strapi no tiene code válido.");
+    if (!prod.documentId) throw new BasicHttpError(422, "El producto de Strapi no tiene documentId válido.");
 
     return { documentId: prod.documentId, code: prod.code };
 }
@@ -50,7 +42,7 @@ async function fetchStrapiKeyByCode(code: string): Promise<{ documentId: string;
  * Retorna { idProducto, prodDocumentId } de Prisma.
  */
 async function fetchAndUpsertProductByCode(code: string) {
-    if (!code) throw new HttpError(400, "Falta el code del producto en el path.");
+    if (!code) throw new BasicHttpError(400, "Falta el code del producto en el path.");
 
     const key = await fetchStrapiKeyByCode(code);
 
@@ -106,7 +98,7 @@ export async function GET(_req: NextRequest, ctx: RouteContext<"/api/product/[id
         try {
             local = await fetchAndUpsertProductByCode(code);
         } catch (err) {
-            const e = err as HttpError;
+            const e = err as BasicHttpError;
             return NextResponse.json(
                 { error: "No se pudo obtener/guardar el producto", detail: e.message },
                 { status: e.status ?? 500 }
@@ -158,7 +150,7 @@ export async function POST(_req: NextRequest, ctx: RouteContext<"/api/product/[i
         if (!created) return NextResponse.json({ error: "Imposible crear producto" }, { status: 500 });
         return NextResponse.json({ ok: true }, { status: 201 });
     } catch (err) {
-        const e = err as HttpError;
+        const e = err as BasicHttpError;
         return NextResponse.json({ error: e.message }, { status: e.status ?? 500 });
     }
 }

@@ -19,3 +19,12 @@ export interface ProductKey {
 }
 
 export type ProductQueryResponse = StrapiCollection<ProductDTO>
+
+export class BasicHttpError extends Error {
+    status: number;
+
+    constructor(status: number, message: string) {
+        super(message);
+        this.status = status;
+    }
+}
