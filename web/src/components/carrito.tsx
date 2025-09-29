@@ -5,41 +5,30 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Trash2 } from "lucide-react"
-import { ProductCardDTO } from "@/types/product"
+import { ProductDTO } from "@/types/product"
 import { StrapiImage } from "@/components/ui/strapi-image"
+import {ImageFormat} from "@/types/strapi/common";
+import {cn} from "@/lib/utils";
 
-type CarritoItem = ProductCardDTO & {
+export type CarritoItem = ProductDTO & {
     quantity: number
 }
 
-const carritoEjemplo: CarritoItem[] = [
-    {
-        documentId: "1",
-        code: "SKU001",
-        name: "Camiseta básica",
-        price: 12000,
-        images: [],
-        category: undefined,
-        quantity: 2,
-    },
-    {
-        documentId: "2",
-        code: "SKU002",
-        name: "Pantalón jeans",
-        price: 24990,
-        images: [],
-        category: undefined,
-        quantity: 1,
-    },
-]
+export type CarritoProps = {
+    items: CarritoItem[],
+    className?: string,
+}
 
-export default function CarritoPage() {
-    const [carrito, setCarrito] = React.useState<CarritoItem[]>(carritoEjemplo)
+// TODO: parametrizar accion de pago.
+export default function CarritoPage({
+                                        ...props
+                                    } : CarritoProps) {
+    const [carrito, setCarrito] = React.useState<CarritoItem[]>(props.items)
 
     const handleQuantityChange = (id: string, value: number) => {
         setCarrito((prev) =>
             prev.map((item) =>
-                item.documentId === id ? { ...item, quantity: value } : item
+                item.code === id ? { ...item, quantity: value } : item
             )
         )
     }
@@ -47,7 +36,7 @@ export default function CarritoPage() {
     const handleIncrement = (id: string) => {
         setCarrito((prev) =>
             prev.map((item) =>
-                item.documentId === id
+                item.code === id
                     ? { ...item, quantity: item.quantity + 1 }
                     : item
             )
@@ -57,7 +46,7 @@ export default function CarritoPage() {
     const handleDecrement = (id: string) => {
         setCarrito((prev) =>
             prev.map((item) =>
-                item.documentId === id
+                item.code === id
                     ? { ...item, quantity: Math.max(1, item.quantity - 1) }
                     : item
             )
@@ -65,7 +54,7 @@ export default function CarritoPage() {
     }
 
     const handleRemove = (id: string) => {
-        setCarrito((prev) => prev.filter((item) => item.documentId !== id))
+        setCarrito((prev) => prev.filter((item) => item.code !== id))
     }
 
     const subtotal = carrito.reduce((acc, p) => acc + p.price * p.quantity, 0)
@@ -73,7 +62,7 @@ export default function CarritoPage() {
     const total = subtotal + envio
 
     return (
-        <main className="min-h-screen bg-background text-foreground px-4 py-6">
+        <div className={cn("min-h-screen bg-background text-foreground px-4 py-6", props.className)}>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Columna izquierda */}
                 <div className="col-span-2 space-y-6">
@@ -90,19 +79,16 @@ export default function CarritoPage() {
                             )}
                             {carrito.map((p) => (
                                 <Card
-                                    key={p.documentId}
+                                    key={p.code}
                                     className="flex flex-col sm:flex-row gap-6 p-4"
                                 >
                                     {/* Imagen */}
                                     <div className="w-full sm:w-32 h-32 rounded-lg overflow-hidden bg-muted text-muted-foreground flex items-center justify-center flex-shrink-0">
-                                        {p.images?.[0] ? (
-                                            <StrapiImage
-                                                src={p.images[0]}
-                                                className="w-full h-full object-cover"
-                                            />
-                                        ) : (
-                                            <span className="text-sm">Sin imagen</span>
-                                        )}
+                                        <StrapiImage
+                                            src={p.keyImage}
+                                            className="w-full h-full object-cover"
+                                            format={ImageFormat.Small}
+                                        />
                                     </div>
 
                                     {/* Info y cantidad */}
@@ -117,7 +103,7 @@ export default function CarritoPage() {
                                             <Button
                                                 variant="outline"
                                                 size="sm"
-                                                onClick={() => handleDecrement(p.documentId)}
+                                                onClick={() => handleDecrement(p.code)}
                                             >
                                                 -
                                             </Button>
@@ -127,7 +113,7 @@ export default function CarritoPage() {
                                                 min={1}
                                                 onChange={(e) =>
                                                     handleQuantityChange(
-                                                        p.documentId,
+                                                        p.code,
                                                         Math.max(1, parseInt(e.target.value, 10) || 1)
                                                     )
                                                 }
@@ -136,7 +122,7 @@ export default function CarritoPage() {
                                             <Button
                                                 variant="outline"
                                                 size="sm"
-                                                onClick={() => handleIncrement(p.documentId)}
+                                                onClick={() => handleIncrement(p.code)}
                                             >
                                                 +
                                             </Button>
@@ -151,7 +137,7 @@ export default function CarritoPage() {
                                         <Button
                                             variant="ghost"
                                             size="icon"
-                                            onClick={() => handleRemove(p.documentId)}
+                                            onClick={() => handleRemove(p.code)}
                                         >
                                             <Trash2 className="w-5 h-5 text-destructive" />
                                         </Button>
@@ -204,6 +190,6 @@ export default function CarritoPage() {
                     </Card>
                 </div>
             </div>
-        </main>
+        </div>
     )
 }

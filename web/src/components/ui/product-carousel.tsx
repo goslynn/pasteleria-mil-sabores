@@ -31,6 +31,10 @@ export type ProductSliderProps = {
     loop?: boolean
     /** separación entre slides (usa patrón -ml/pl del ejemplo oficial) */
     spacing?: 'tight' | 'normal' | 'wide'
+    /** dónde ubicar las flechas */
+    controlsPosition?: 'inside' | 'outside'
+    /** empuje lateral extra para las flechas cuando están "outside" */
+    controlsGutterPx?: number // ej: 12 -> -left-[12px]
 }
 
 function presetToClasses(preset: NonNullable<ProductSliderProps['columnsPreset']>): string {
@@ -62,7 +66,7 @@ function spacingItem(spacing: NonNullable<ProductSliderProps['spacing']>): strin
     }
 }
 
-export default function ProductSlider({
+export default function ProductCarousel({
                                           items,
                                           className,
                                           title,
@@ -71,10 +75,23 @@ export default function ProductSlider({
                                           defaultAspect = '4/3',
                                           loop = false,
                                           spacing = 'normal',
+                                          controlsPosition = 'outside',
+                                          controlsGutterPx = 12,
                                       }: ProductSliderProps) {
     const basis = presetToClasses(columnsPreset)
     const trackGap = spacingTrack(spacing)
     const itemPad = spacingItem(spacing)
+
+    const insidePrev = 'left-2'
+    const insideNext = 'right-2'
+    const outsidePrev = `left-0 -translate-x-full -ml-[${controlsGutterPx}px]`
+    const outsideNext = `right-0 translate-x-full -mr-[${controlsGutterPx}px]`
+
+    const prevClass =
+        controlsPosition === 'outside' ? outsidePrev : insidePrev
+    const nextClass =
+        controlsPosition === 'outside' ? outsideNext : insideNext
+
 
     return (
         <section aria-label={title ?? 'Productos'} className={cn('relative', className)}>
@@ -112,8 +129,17 @@ export default function ProductSlider({
 
                 {controls && (
                     <>
-                        <CarouselPrevious aria-label="Ver anteriores" className="left-2" />
-                        <CarouselNext aria-label="Ver siguientes" className="right-2" />
+                        <CarouselPrevious
+                            aria-label="Ver anteriores"
+                            className={cn(
+                                'pointer-events-auto', // por si el contenedor tiene pointer-events
+                                prevClass
+                            )}
+                        />
+                        <CarouselNext
+                            aria-label="Ver siguientes"
+                            className={cn('pointer-events-auto', nextClass)}
+                        />
                     </>
                 )}
             </Carousel>

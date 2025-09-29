@@ -49,7 +49,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
                 <div className="p-4 sm:p-6 md:p-8 space-y-10">
                     {related.length > 0 && (
-                        <div className="rounded-xl border border-border p-6 bg-background/60">
+                        <div className="rounded-xl border border-border py-6 px-12 bg-background/60">
                             <ProductCarousel {...sliderProps} columnsPreset="1-2-3-4" spacing="normal"/>
                         </div>
                     )}

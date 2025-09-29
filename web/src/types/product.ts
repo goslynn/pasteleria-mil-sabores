@@ -2,7 +2,6 @@ import {StrapiBase} from "@/types/strapi/common";
 import {BlocksContent} from "@strapi/blocks-react-renderer"
 import {StrapiImageSource} from "@/components/ui/strapi-image";
 
-
 export interface Discount {
     type: "percentage" | "fixed"
     value: number
