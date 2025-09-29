@@ -48,18 +48,18 @@ model Descuento {
 }
 
 model Producto {
-  idProducto          Int              @id @default(autoincrement())
-  referenciaProductos Int
-  carritoDetalle      CarritoDetalle[]
-  precio              Precio[]
+  idProducto             String              @id
+  prodDocumentId         String              @unique
+  carritoDetalle         CarritoDetalle[]
+  precio                 Precio[]
   //productoCategoria   ProductoCategoria[]
-  detallePedido       DetallePedido[]
+  detallePedido          DetallePedido[]
 }
 
 model CarritoDetalle {
   idCarritoDetalle Int            @id @default(autoincrement())
   idCarrito        Int
-  idProducto       Int
+  idProducto       String
   cantidad         Int            @default(1)
   carrito          CarritoCompras @relation(fields: [idCarrito], references: [idCarrito])
   producto         Producto       @relation(fields: [idProducto], references: [idProducto])
@@ -67,7 +67,7 @@ model CarritoDetalle {
 
 model Precio {
   idPrecio         Int      @id @default(autoincrement())
-  idProductoFk     Int
+  idProductoFk     String
   referenciaPrecio Int
   producto         Producto @relation(fields: [idProductoFk], references: [idProducto])
 }
@@ -110,7 +110,7 @@ model Envio {
 model DetallePedido {
   idDetalle      Int      @id @default(autoincrement())
   idPedidoFk     Int
-  idProductoFk   Int      @unique
+  idProductoFk   String
   cantidad       Float
   precioUnitario Float
   pedido         Pedido   @relation(fields: [idPedidoFk], references: [idPedido])
