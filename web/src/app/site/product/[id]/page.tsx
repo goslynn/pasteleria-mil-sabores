@@ -2,7 +2,7 @@ import {ProductDetailResponse} from "@/app/api/product/types";
 import {Separator} from "@/components/ui/separator";
 import {nextApi} from "@/lib/fetching";
 import ProductDetailCard from "@/components/ui/product-detail";
-import ProductSlider, {ProductSliderProps} from "@/components/ui/product-slider";
+import ProductCarousel, {ProductSliderProps} from "@/components/ui/product-carousel";
 import {toProductCard, toProductDetail} from "@/lib/datamapping";
 
 
@@ -34,6 +34,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
         items: related.map(toProductCard)
     }
 
+    console.log("sliderProps:", sliderProps);
+
     return (
         <div className="flex-1 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
             {/* Card contenedor */}
@@ -48,7 +50,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 <div className="p-4 sm:p-6 md:p-8 space-y-10">
                     {related.length > 0 && (
                         <div className="rounded-xl border border-border p-6 bg-background/60">
-                            <ProductSlider {...sliderProps} />
+                            <ProductCarousel {...sliderProps} columnsPreset="1-2-3-4" spacing="normal"/>
                         </div>
                     )}
                 </div>

@@ -1,6 +1,5 @@
 import * as React from "react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import StrapiImage, { type StrapiImageSource } from "@/components/ui/strapi-image";
 import { ImageFormat } from "@/types/strapi/common";
@@ -36,10 +35,16 @@ export function CategoryRowCard({
                                     className,
                                 }: CategoryRowCardProps) {
     return (
-        <article
+        <Link
+            href={href}
+            aria-label={`Ver productos de ${title}`}
+            title={`Ver productos de ${title}`}
             className={cn(
-                "group relative isolate w-full rounded-2xl border bg-card/50 p-3 md:p-4",
-                "flex items-center gap-4 md:gap-6 hover:shadow-lg transition-shadow",
+                // contenedor clickeable
+                "group relative isolate block w-full rounded-2xl border bg-card/50 p-3 md:p-4",
+                "flex items-center gap-4 md:gap-6 transition-shadow hover:shadow-lg cursor-pointer",
+                // accesibilidad en foco
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2",
                 className
             )}
         >
@@ -58,7 +63,7 @@ export function CategoryRowCard({
             {/* Texto centro */}
             <div className="min-w-0 flex-1">
                 <header className="mb-2">
-                    <h3 className="text-xl  font-semibold tracking-tight">{title}</h3>
+                    <h3 className="text-xl font-semibold tracking-tight">{title}</h3>
                 </header>
 
                 {!!description && (
@@ -68,25 +73,21 @@ export function CategoryRowCard({
                 )}
             </div>
 
-            {/* CTA derecha: icono circular con grow on hover */}
-            <Button
-                asChild
-                variant="nothing"
-                size="lg"
-                className="ml-2 transition-transform duration-200 active:scale-95 hover:scale-130"
+            {/* CTA derecha: ícono que crece con hover de toda la tarjeta */}
+            <span
+                aria-hidden="true"
+                className={cn(
+                    "shrink-0 grid place-items-center rounded-full",
+                    "transition-transform duration-200 group-hover:scale-125"
+                )}
             >
-                <Link
-                    href={href}
-                    aria-label={`Ver productos de ${title}`}
-                    title={`Ver productos de ${title}`}
-                >
-                    <ChevronRight color="currentColor" className="md:size-12" />
-                </Link>
-            </Button>
-
-        </article>
+        {/* Usa el color de acento (definido en globals.css / Tailwind theme) */}
+                <ChevronRight className="size-8 md:size-12 " />
+      </span>
+        </Link>
     );
 }
+
 
 export function CategorySquareTile({ title, href, image, className }: CategorySquareTileProps) {
     return (
