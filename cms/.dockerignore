@@ -1,6 +1,10 @@
+.idea
+.env.example
+README.md
 node_modules
 .tmp
 dist
+api-ref
 .git
 Dockerfile
 docker-compose*.yml
