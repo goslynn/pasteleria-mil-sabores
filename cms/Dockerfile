@@ -1,40 +1,32 @@
-# ========== Base de build ==========
-FROM node:20-alpine AS base
-WORKDIR /repo
-ENV PNPM_HOME="/root/.local/share/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
+#TODO: Considerar dev dependencies para etapa build.
 
-# Copiamos workspace + cms para resolver deps
-COPY pnpm-workspace.yaml ./
-COPY pnpm-lock.yaml ./
-COPY package.json ./
-COPY cms/package.json cms/package.json
-# Instalar deps de cms (dev para build)
-RUN pnpm --filter @pasteleria/cms... install --frozen-lockfile
+# Creating multi-stage build for production
+FROM node:22-alpine AS build
+RUN apk update && apk add --no-cache build-base gcc autoconf automake zlib-dev libpng-dev vips-dev git > /dev/null 2>&1
+ARG NODE_ENV=production
+ENV NODE_ENV=${NODE_ENV}
 
-# Copiar código cms y compilar
-COPY cms cms
-WORKDIR /repo/cms
-RUN pnpm build
+WORKDIR /opt/
+COPY package*.json ./
+RUN npm install -g node-gyp
+RUN npm config set fetch-retry-maxtimeout 600000 -g && npm install --only=production
+ENV PATH=/opt/node_modules/.bin:$PATH
+WORKDIR /opt/app
+COPY . .
+RUN npm run build
 
-# ========== Runtime (producción) ==========
-FROM node:20-alpine AS runner
-WORKDIR /app
-ENV NODE_ENV=production
-ENV HOST=0.0.0.0
-ENV PORT=1337
+# Creating final production image
+FROM node:22-alpine
+RUN apk add --no-cache vips-dev
+ARG NODE_ENV=production
+ENV NODE_ENV=${NODE_ENV}
+WORKDIR /opt/
+COPY --from=build /opt/node_modules ./node_modules
+WORKDIR /opt/app
+COPY --from=build /opt/app ./
+ENV PATH=/opt/node_modules/.bin:$PATH
 
-# Deploy pruned (pnpm v9)
-# Esto genera node_modules + files productivos mínimos en /app
-COPY --from=base /repo /repo
-RUN corepack enable && \
-    cd /repo && pnpm deploy --filter @pasteleria/cms --prod /app
-
-# Copiar el build de Strapi (dist)
-COPY --from=base /repo/cms/dist ./dist
-# Copiar público
-COPY --from=base /repo/cms/public ./public
-
+RUN chown -R node:node /opt/app
+USER node
 EXPOSE 1337
-CMD ["node", "dist/server.js"]
+CMD ["npm", "run", "start"]
