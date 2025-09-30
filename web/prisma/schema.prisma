@@ -62,13 +62,14 @@ model CarritoDetalle {
   idProducto       String
   cantidad         Int    @default(1)
 
-  // Snapshot del producto al momento de agregarlo
   nombreProducto String
   precioUnitario Float
   imagenUrl      String?
 
   carrito  CarritoCompras @relation(fields: [idCarrito], references: [idCarrito])
   producto Producto       @relation(fields: [idProducto], references: [idProducto])
+
+  @@unique([idCarrito, idProducto], name: "carritoProductoUnique") // <- esto es clave
 }
 
 model Precio {

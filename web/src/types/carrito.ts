@@ -14,6 +14,7 @@ export type CarritoResponse = {
     carritoDetalle: CarritoDetalleResponse[];
 };
 export type CarritoItem = {
+    idCarrito: number;
     idDetalle: number;
     code: string;
     name: string;

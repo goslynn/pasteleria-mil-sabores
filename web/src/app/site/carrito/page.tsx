@@ -1,26 +1,20 @@
+import { nextApi } from "@/lib/fetching";
 import CarritoPage from "@/components/carrito";
 import { CarritoItem } from "@/types/carrito";
 import { CarritoResponse } from "@/types/carrito";
 import { getCurrentUser } from "@/lib/datamapping";
 
-export default async function RegisterPage() {
+export default async function Carrito() {
     const user = await getCurrentUser();
-    if (!user) {
-        return <p>No hay usuario logueado</p>;
-    }
-    const userId = user.idUsuario;
-
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/carrito/${userId}`, {
-        cache: "no-store",
-    });
+    if (!user?.idUsuario) return <p>No hay usuario logueado</p>;
 
     let carritoItems: CarritoItem[] = [];
 
-    if (res.ok) {
-        const data: CarritoResponse = await res.json();
-
-        carritoItems = data.carritoDetalle.map((d) => ({
+    try {
+        const data: CarritoResponse = await nextApi.get(`/api/carrito/${user.idUsuario}`)
+        carritoItems = data.carritoDetalle.map(d => ({
             idDetalle: d.idCarritoDetalle,
+            idCarrito: d.idCarrito,
             code: d.idProducto,
             name: d.nombreProducto,
             price: d.precioUnitario,
@@ -28,13 +22,12 @@ export default async function RegisterPage() {
             keyImage: d.imagenUrl || "",
             category: undefined,
         }));
+    } catch (e) {
+        console.error("Error cargando carrito:", e)
     }
 
     return (
-        <section
-            className="flex items-center justify-center min-h-screen p-4"
-            aria-label="Carrito de compras"
-        >
+        <section className="flex items-center justify-center min-h-screen p-4">
             <CarritoPage items={carritoItems} />
         </section>
     );

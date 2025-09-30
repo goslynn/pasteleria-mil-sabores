@@ -1,78 +1,90 @@
 "use client"
 
-import React from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Trash2 } from "lucide-react"
-import { StrapiImage } from "@/components/ui/strapi-image"
-import { ImageFormat } from "@/types/strapi/common"
-import { cn } from "@/lib/utils"
-import { CarritoItem } from "@/types/carrito"
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Trash2 } from "lucide-react";
+import { StrapiImage } from "@/components/ui/strapi-image";
+import { ImageFormat } from "@/types/strapi/common";
+import { cn } from "@/lib/utils";
+import { CarritoItem } from "@/types/carrito";
+import { nextApi } from "@/lib/fetching";
 
-async function updateCantidad(idDetalle: number, cantidad: number) {
-    const res = await fetch(`/api/carrito/${idDetalle}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cantidad }),
-    })
-    if (!res.ok) throw new Error("Error actualizando cantidad")
+// Funciones de API con idCarrito + idDetalle
+async function updateCantidad(id: number, idDetalle: number, cantidad: number) {
+    await nextApi.put(`/api/carrito/${id}/detalle/${idDetalle}`, { cantidad });
 }
 
-async function removeItem(idDetalle: number) {
-    const res = await fetch(`/api/carrito/${idDetalle}`, {
-        method: "DELETE",
-    })
-    if (!res.ok) throw new Error("Error eliminando producto")
+async function removeItem(id: number, idDetalle: number) {
+    await nextApi.delete(`/api/carrito/${id}/detalle/${idDetalle}`);
 }
 
-export default function CarritoPage({ items, className }: { items: CarritoItem[], className?: string }) {
-    const [carrito, setCarrito] = React.useState<CarritoItem[]>(items)
+// Componente
+export default function CarritoPage({
+                                        items,
+                                        className,
+                                    }: {
+    items: CarritoItem[];
+    className?: string;
+}) {
+    const [carrito, setCarrito] = React.useState<CarritoItem[]>(items);
 
-    const handleQuantityChange = async (idDetalle: number, value: number) => {
-        setCarrito((prev) =>
-            prev.map((item) =>
+    const handleQuantityChange = async (idCarrito: number, idDetalle: number, value: number) => {
+        if (value < 1) {
+            // Si la cantidad es menor a 1, eliminar el producto
+            await handleRemove(idCarrito, idDetalle);
+            return;
+        }
+
+        setCarrito(prev =>
+            prev.map(item =>
                 item.idDetalle === idDetalle ? { ...item, quantity: value } : item
             )
-        )
+        );
+
         try {
-            await updateCantidad(idDetalle, value)
+            await updateCantidad(idCarrito, idDetalle, value);
         } catch (err) {
-            console.error(err)
+            console.error(err);
+            alert("No se pudo actualizar la cantidad.");
         }
-    }
+    };
 
-    const handleIncrement = (idDetalle: number) => {
-        const item = carrito.find((i) => i.idDetalle === idDetalle)
-        if (!item) return
-        handleQuantityChange(idDetalle, item.quantity + 1)
-    }
+// Incrementar / decrementar
+    const handleIncrement = (idCarrito: number, idDetalle: number) => {
+        const item = carrito.find(i => i.idDetalle === idDetalle);
+        if (!item) return;
+        handleQuantityChange(idCarrito, idDetalle, item.quantity + 1);
+    };
 
-    const handleDecrement = (idDetalle: number) => {
-        const item = carrito.find((i) => i.idDetalle === idDetalle)
-        if (!item) return
-        handleQuantityChange(idDetalle, Math.max(1, item.quantity - 1))
-    }
+    const handleDecrement = (idCarrito: number, idDetalle: number) => {
+        const item = carrito.find(i => i.idDetalle === idDetalle);
+        if (!item) return;
+        handleQuantityChange(idCarrito, idDetalle, item.quantity - 1); // puede ser 0 → eliminar
+    };
 
-    const handleRemove = async (idDetalle: number) => {
-        setCarrito((prev) => prev.filter((item) => item.idDetalle !== idDetalle))
+    // Eliminar producto
+    const handleRemove = async (idCarrito: number, idDetalle: number) => {
+        setCarrito(prev => prev.filter(item => item.idDetalle !== idDetalle));
         try {
-            await removeItem(idDetalle)
+            await removeItem(idCarrito, idDetalle);
         } catch (err) {
-            console.error(err)
+            console.error(err);
+            alert("No se pudo eliminar el producto.");
         }
-    }
-    
-    const subtotal = carrito.reduce((acc, p) => acc + p.price * p.quantity, 0)
-    const envio = subtotal > 0 ? 4000 : 0
-    const total = subtotal + envio
+    };
+
+    // Totales
+    const subtotal = carrito.reduce((acc, p) => acc + p.price * p.quantity, 0);
+    const envio = subtotal > 0 ? 4000 : 0;
+    const total = subtotal + envio;
 
     return (
         <div className={cn("min-h-screen bg-background text-foreground px-4 py-6", className)}>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Columna izquierda */}
                 <div className="col-span-2 space-y-6">
-                    {/* Carrito */}
                     <Card>
                         <CardHeader>
                             <CardTitle>Carrito de Compras</CardTitle>
@@ -83,7 +95,7 @@ export default function CarritoPage({ items, className }: { items: CarritoItem[]
                                     Tu carrito está vacío.
                                 </p>
                             )}
-                            {carrito.map((p) => (
+                            {carrito.map(p => (
                                 <Card key={p.idDetalle} className="flex flex-col sm:flex-row gap-6 p-4">
                                     {/* Imagen */}
                                     <div className="w-full sm:w-32 h-32 rounded-lg overflow-hidden bg-muted text-muted-foreground flex items-center justify-center flex-shrink-0">
@@ -106,7 +118,7 @@ export default function CarritoPage({ items, className }: { items: CarritoItem[]
                                             <Button
                                                 variant="outline"
                                                 size="sm"
-                                                onClick={() => handleDecrement(p.idDetalle)}
+                                                onClick={() => handleDecrement(p.idCarrito, p.idDetalle)}
                                             >
                                                 -
                                             </Button>
@@ -114,8 +126,9 @@ export default function CarritoPage({ items, className }: { items: CarritoItem[]
                                                 type="number"
                                                 value={p.quantity}
                                                 min={1}
-                                                onChange={(e) =>
+                                                onChange={e =>
                                                     handleQuantityChange(
+                                                        p.idCarrito,
                                                         p.idDetalle,
                                                         Math.max(1, parseInt(e.target.value, 10) || 1)
                                                     )
@@ -125,7 +138,7 @@ export default function CarritoPage({ items, className }: { items: CarritoItem[]
                                             <Button
                                                 variant="outline"
                                                 size="sm"
-                                                onClick={() => handleIncrement(p.idDetalle)}
+                                                onClick={() => handleIncrement(p.idCarrito, p.idDetalle)}
                                             >
                                                 +
                                             </Button>
@@ -140,7 +153,7 @@ export default function CarritoPage({ items, className }: { items: CarritoItem[]
                                         <Button
                                             variant="ghost"
                                             size="icon"
-                                            onClick={() => handleRemove(p.idDetalle)}
+                                            onClick={() => handleRemove(p.idCarrito, p.idDetalle)}
                                         >
                                             <Trash2 className="w-5 h-5 text-destructive" />
                                         </Button>
@@ -190,5 +203,5 @@ export default function CarritoPage({ items, className }: { items: CarritoItem[]
                 </div>
             </div>
         </div>
-    )
+    );
 }
