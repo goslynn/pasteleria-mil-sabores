@@ -6,18 +6,19 @@ export const dynamic = "force-dynamic";
 
 export async function DELETE(
     _req: NextRequest,
-    { params }: { params: { id: string; idDetalle: string } }
+    { params }: { params: Promise<{ id: string; idDetalle: string }> } // <-- cambio aquí
 ) {
-    const idCarrito = Number(params.id);        // <-- aquí cambia
-    const idDetalle = Number(params.idDetalle);
+    const { id, idDetalle } = await params; // <-- await params
+    const idCarrito = Number(id);
+    const idDetalleNum = Number(idDetalle);
 
-    if (!idCarrito || !idDetalle) {
+    if (!idCarrito || !idDetalleNum) {
         return NextResponse.json({ error: "Parámetros inválidos" }, { status: 400 });
     }
 
     try {
         const detalle = await prisma.carritoDetalle.findFirst({
-            where: { idCarrito, idCarritoDetalle: idDetalle },
+            where: { idCarrito, idCarritoDetalle: idDetalleNum },
         });
 
         if (!detalle) {
@@ -25,7 +26,7 @@ export async function DELETE(
         }
 
         await prisma.carritoDetalle.delete({
-            where: { idCarritoDetalle: idDetalle },
+            where: { idCarritoDetalle: idDetalleNum },
         });
 
         const restantes = await prisma.carritoDetalle.count({ where: { idCarrito } });
@@ -42,19 +43,20 @@ export async function DELETE(
 
 export async function PUT(
     req: NextRequest,
-    { params }: { params: { id: string; idDetalle: string } } 
+    { params }: { params: Promise<{ id: string; idDetalle: string }> } // <-- cambio aquí
 ) {
-    const idCarrito = Number(params.id);
-    const idDetalle = Number(params.idDetalle);
+    const { id, idDetalle } = await params; // <-- await params
+    const idCarrito = Number(id);
+    const idDetalleNum = Number(idDetalle);
     const { cantidad } = await req.json();
 
-    if (!idCarrito || !idDetalle || !cantidad) {
+    if (!idCarrito || !idDetalleNum || !cantidad) {
         return NextResponse.json({ error: "Parámetros inválidos" }, { status: 400 });
     }
 
     try {
         const detalle = await prisma.carritoDetalle.findFirst({
-            where: { idCarrito, idCarritoDetalle: idDetalle },
+            where: { idCarrito, idCarritoDetalle: idDetalleNum },
         });
 
         if (!detalle) {
@@ -62,7 +64,7 @@ export async function PUT(
         }
 
         const actualizado = await prisma.carritoDetalle.update({
-            where: { idCarritoDetalle: idDetalle },
+            where: { idCarritoDetalle: idDetalleNum },
             data: { cantidad },
         });
 
@@ -72,4 +74,3 @@ export async function PUT(
         return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
     }
 }
-
