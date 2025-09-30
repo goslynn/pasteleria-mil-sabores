@@ -5,64 +5,70 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Trash2 } from "lucide-react"
-import { ProductDTO } from "@/types/product"
 import { StrapiImage } from "@/components/ui/strapi-image"
-import {ImageFormat} from "@/types/strapi/common";
-import {cn} from "@/lib/utils";
+import { ImageFormat } from "@/types/strapi/common"
+import { cn } from "@/lib/utils"
+import { CarritoItem } from "@/types/carrito"
 
-export type CarritoItem = ProductDTO & {
-    quantity: number
+async function updateCantidad(idDetalle: number, cantidad: number) {
+    const res = await fetch(`/api/carrito/${idDetalle}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cantidad }),
+    })
+    if (!res.ok) throw new Error("Error actualizando cantidad")
 }
 
-export type CarritoProps = {
-    items: CarritoItem[],
-    className?: string,
+async function removeItem(idDetalle: number) {
+    const res = await fetch(`/api/carrito/${idDetalle}`, {
+        method: "DELETE",
+    })
+    if (!res.ok) throw new Error("Error eliminando producto")
 }
 
-// TODO: parametrizar accion de pago.
-export default function CarritoPage({
-                                        ...props
-                                    } : CarritoProps) {
-    const [carrito, setCarrito] = React.useState<CarritoItem[]>(props.items)
+export default function CarritoPage({ items, className }: { items: CarritoItem[], className?: string }) {
+    const [carrito, setCarrito] = React.useState<CarritoItem[]>(items)
 
-    const handleQuantityChange = (id: string, value: number) => {
+    const handleQuantityChange = async (idDetalle: number, value: number) => {
         setCarrito((prev) =>
             prev.map((item) =>
-                item.code === id ? { ...item, quantity: value } : item
+                item.idDetalle === idDetalle ? { ...item, quantity: value } : item
             )
         )
+        try {
+            await updateCantidad(idDetalle, value)
+        } catch (err) {
+            console.error(err)
+        }
     }
 
-    const handleIncrement = (id: string) => {
-        setCarrito((prev) =>
-            prev.map((item) =>
-                item.code === id
-                    ? { ...item, quantity: item.quantity + 1 }
-                    : item
-            )
-        )
+    const handleIncrement = (idDetalle: number) => {
+        const item = carrito.find((i) => i.idDetalle === idDetalle)
+        if (!item) return
+        handleQuantityChange(idDetalle, item.quantity + 1)
     }
 
-    const handleDecrement = (id: string) => {
-        setCarrito((prev) =>
-            prev.map((item) =>
-                item.code === id
-                    ? { ...item, quantity: Math.max(1, item.quantity - 1) }
-                    : item
-            )
-        )
+    const handleDecrement = (idDetalle: number) => {
+        const item = carrito.find((i) => i.idDetalle === idDetalle)
+        if (!item) return
+        handleQuantityChange(idDetalle, Math.max(1, item.quantity - 1))
     }
 
-    const handleRemove = (id: string) => {
-        setCarrito((prev) => prev.filter((item) => item.code !== id))
+    const handleRemove = async (idDetalle: number) => {
+        setCarrito((prev) => prev.filter((item) => item.idDetalle !== idDetalle))
+        try {
+            await removeItem(idDetalle)
+        } catch (err) {
+            console.error(err)
+        }
     }
-
+    
     const subtotal = carrito.reduce((acc, p) => acc + p.price * p.quantity, 0)
     const envio = subtotal > 0 ? 4000 : 0
     const total = subtotal + envio
 
     return (
-        <div className={cn("min-h-screen bg-background text-foreground px-4 py-6", props.className)}>
+        <div className={cn("min-h-screen bg-background text-foreground px-4 py-6", className)}>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Columna izquierda */}
                 <div className="col-span-2 space-y-6">
@@ -78,10 +84,7 @@ export default function CarritoPage({
                                 </p>
                             )}
                             {carrito.map((p) => (
-                                <Card
-                                    key={p.code}
-                                    className="flex flex-col sm:flex-row gap-6 p-4"
-                                >
+                                <Card key={p.idDetalle} className="flex flex-col sm:flex-row gap-6 p-4">
                                     {/* Imagen */}
                                     <div className="w-full sm:w-32 h-32 rounded-lg overflow-hidden bg-muted text-muted-foreground flex items-center justify-center flex-shrink-0">
                                         <StrapiImage
@@ -103,7 +106,7 @@ export default function CarritoPage({
                                             <Button
                                                 variant="outline"
                                                 size="sm"
-                                                onClick={() => handleDecrement(p.code)}
+                                                onClick={() => handleDecrement(p.idDetalle)}
                                             >
                                                 -
                                             </Button>
@@ -113,7 +116,7 @@ export default function CarritoPage({
                                                 min={1}
                                                 onChange={(e) =>
                                                     handleQuantityChange(
-                                                        p.code,
+                                                        p.idDetalle,
                                                         Math.max(1, parseInt(e.target.value, 10) || 1)
                                                     )
                                                 }
@@ -122,7 +125,7 @@ export default function CarritoPage({
                                             <Button
                                                 variant="outline"
                                                 size="sm"
-                                                onClick={() => handleIncrement(p.code)}
+                                                onClick={() => handleIncrement(p.idDetalle)}
                                             >
                                                 +
                                             </Button>
@@ -137,7 +140,7 @@ export default function CarritoPage({
                                         <Button
                                             variant="ghost"
                                             size="icon"
-                                            onClick={() => handleRemove(p.code)}
+                                            onClick={() => handleRemove(p.idDetalle)}
                                         >
                                             <Trash2 className="w-5 h-5 text-destructive" />
                                         </Button>
@@ -154,8 +157,7 @@ export default function CarritoPage({
                         </CardHeader>
                         <CardContent>
                             <p className="text-muted-foreground">
-                                Aquí puedes mostrar promociones, recomendaciones o políticas de
-                                envío.
+                                Aquí puedes mostrar promociones, recomendaciones o políticas de envío.
                             </p>
                         </CardContent>
                     </Card>
@@ -180,10 +182,7 @@ export default function CarritoPage({
                                 <span>Total</span>
                                 <span>${total.toLocaleString("es-CL")}</span>
                             </div>
-                            <Button
-                                className="w-full mt-4"
-                                disabled={carrito.length === 0}
-                            >
+                            <Button className="w-full mt-4" disabled={carrito.length === 0}>
                                 Proceder al pago
                             </Button>
                         </CardContent>
