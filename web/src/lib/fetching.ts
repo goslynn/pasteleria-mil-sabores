@@ -13,7 +13,6 @@
  */
 
 // Check Strapi env vars at module load time
-import {StrapiCollection, StrapiObject} from "@/types/strapi/common";
 import {StrapiMapper} from "@/lib/strapi-client";
 
 const STRAPI_HOST = process.env.NEXT_PUBLIC_STRAPI_HOST || process.env.STRAPI_HOST;
@@ -208,7 +207,14 @@ async function coreFetch<T>(fullUrl: string, opts: FetchOptions): Promise<T> {
     });
 
     const data = (await parseBody(res, parse)) as T | string | null;
-    if (!res.ok) throw new HttpError<T>(res, data as T | string | null);
+
+    console.log("Request at: ", fullUrl);
+    console.log("Rsulted in: ", data);
+    if (!res.ok) {
+        const err = new HttpError<T>(res, data as T | string | null);
+        console.log("HTTP ERROR DETECTADO: ", err.toString());
+        throw err;
+    }
     return data as T;
 }
 
