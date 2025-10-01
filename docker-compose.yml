@@ -10,6 +10,9 @@ services:
       - ./cms/.env
     ports:
       - "1337:1337"
+    volumes:
+      # Montamos la carpeta .tmp completa (donde está data.db)
+      - ./cms/.tmp:/opt/app/.tmp
     restart: unless-stopped
 
   web:
@@ -29,7 +32,6 @@ services:
     command: sh -c "npx prisma migrate deploy --schema=/app/prisma/schema.prisma \
       && npx prisma db seed --schema=/app/prisma/schema.prisma \
       && node server.js"
-
 
 volumes:
   web_db:

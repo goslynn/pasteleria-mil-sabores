@@ -6,17 +6,7 @@ export default [
     'strapi::poweredBy',
     'strapi::query',
     'strapi::body',
-    {
-        name: 'strapi::session',
-        config: {
-            key: 'sid',
-            httpOnly: true,   // sigue siendo buena práctica
-            secure: false,    // <- permite cookies por HTTP (sin "Secure")
-            sameSite: 'lax',  // evita problemas típicos; usa 'strict' si quieres
-            rolling: true,
-            renew: true,
-        },
-    },
+    'strapi::session',
     'strapi::favicon',
     'strapi::public',
 ];
