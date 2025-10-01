@@ -14,8 +14,8 @@ services:
 
   web:
     build:
-      context: .
-      dockerfile: web/Dockerfile
+      context: ./web
+      dockerfile: Dockerfile
     container_name: web
     env_file:
       - ./web/.env
@@ -26,9 +26,10 @@ services:
     restart: unless-stopped
     depends_on:
       - cms
-    # Ejecuta migraciones y seed al iniciar el contenedor
-    command: sh -c "npx prisma migrate deploy && npx prisma db seed && node web/server.js"
+    command: sh -c "npx prisma migrate deploy --schema=/app/prisma/schema.prisma \
+      && npx prisma db seed --schema=/app/prisma/schema.prisma \
+      && node server.js"
+
 
 volumes:
   web_db:
-
