@@ -1,3 +1,7 @@
+INSERT INTO Pais(idPais,nombre)
+VALUES
+    (1,'Chile');
+
 INSERT INTO Region(nombre,idPaisFk)
 VALUES
     ('Región de Arica y Parinacota',1),
@@ -365,9 +369,3 @@ VALUES
     ('Isla de Maipo',7),
     ('Padre Hurtado',7),
     ('Peñaflor',7);
-
-INSERT INTO "Usuario"
-("nombre", "email", "password", "fechaNacimiento", "createdAt")
-VALUES
-    ('Invitado', 'Invitado@local', '', '2000-01-01', NOW());
-

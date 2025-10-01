@@ -55,5 +55,8 @@
   },
   "volta": {
     "node": "22.19.0"
+  },
+  "prisma": {
+    "seed": "node ./prisma/seed.js"
   }
 }
