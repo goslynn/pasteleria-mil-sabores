@@ -10,10 +10,24 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 async function main() {
-    // Ejecutar SQL de comunas y regiones
-    const sqlFile = join(__dirname, "../seed/insertComunas.sql"); // ruta correcta
+    const sqlFile = join(__dirname, "../seed/insertComunas.sql");
     const sql = await readFile(sqlFile, "utf-8");
-    await prisma.$executeRawUnsafe(sql);
+
+    // Separar cada statement por ';' y eliminar líneas vacías
+    const statements = sql
+        .split(";")
+        .map(s => s.trim())
+        .filter(Boolean);
+
+    for (const stmt of statements) {
+        try {
+            await prisma.$executeRawUnsafe(stmt);
+        } catch (err) {
+            console.error("Error ejecutando SQL:", stmt);
+            throw err;
+        }
+    }
+
     console.log("Seed completado ✅");
 }
 
