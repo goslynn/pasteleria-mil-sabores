@@ -1,6 +1,7 @@
 INSERT INTO Pais (idPais,nombre)
-VALUE
+VALUES
     (1,'Chile');
+
 
 INSERT INTO Region(nombre,idPaisFk)
 VALUES
