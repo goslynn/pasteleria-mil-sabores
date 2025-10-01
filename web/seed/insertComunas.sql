@@ -365,3 +365,9 @@ VALUES
     ('Isla de Maipo',7),
     ('Padre Hurtado',7),
     ('Peñaflor',7);
+
+INSERT INTO "Usuario"
+("nombre", "email", "password", "fechaNacimiento", "createdAt")
+VALUES
+    ('Invitado', 'Invitado@local', '', '2000-01-01', NOW());
+

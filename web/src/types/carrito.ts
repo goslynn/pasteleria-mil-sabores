@@ -1,3 +1,5 @@
+import {ProductDTO} from "@/types/product";
+
 export type CarritoDetalleResponse = {
     idCarritoDetalle: number;
     idCarrito: number;
@@ -9,12 +11,8 @@ export type CarritoDetalleResponse = {
 };
 
 export type CarritoPostBody = {
-    idUsuario: number;
-    idProducto: string;
+    code: string;
     cantidad: number;
-    nombre: string;
-    precio: number;
-    imagenUrl?: string;
 };
 
 export type CarritoResponse = {
@@ -23,14 +21,9 @@ export type CarritoResponse = {
     carritoDetalle?: CarritoDetalleResponse[];
 };
 
-export type CarritoItem = {
+export type CarritoItem = ProductDTO &  {
     idCarrito: number;
     idDetalle: number;
-    code: string;
-    name: string;
-    price: number;
     quantity: number;
-    keyImage: string;
-    category?: string;
 };
 

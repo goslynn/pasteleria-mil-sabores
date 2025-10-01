@@ -67,7 +67,7 @@ export function AddToCartButton(props: AddToCartButtonProps) {
 
     // defaults que se pueden sobrescribir
     const handleAdded = onAdded ?? ((body: CarritoPostBody) => {
-        alert(`✅ Producto agregado: ${body.nombre} (x${body.cantidad})`)
+        alert(`✅ Producto agregado: (x${body.cantidad})`)
     })
     const handleError = onAddError ?? ((error: Error) => {
         alert(`❌ Error al agregar al carrito: ${error.message}`)
@@ -100,12 +100,6 @@ export function AddToCartButton(props: AddToCartButtonProps) {
         setLoading(true)
         setAdded(true)
 
-        let { userId } = await nextApi.get<{ userId?: number }>('/api/session', {
-            cache: 'no-store',
-            next: { revalidate: 0 },
-        })
-        if (!userId) userId = -1 // guest
-
         let prod: ProductLike
         try {
             prod = toProductLike(producto)
@@ -118,11 +112,8 @@ export function AddToCartButton(props: AddToCartButtonProps) {
         }
 
         const body: CarritoPostBody = {
-            idUsuario: userId,
-            idProducto: prod.code,
-            cantidad,
-            nombre: prod.name,
-            precio: prod.price,
+            code : prod.code,
+            cantidad : cantidad,
         }
 
         try {

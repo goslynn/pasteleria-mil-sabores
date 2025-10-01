@@ -5,13 +5,11 @@ import { CarritoResponse } from "@/types/carrito";
 import { getCurrentUser } from "@/lib/datamapping";
 
 export default async function Carrito() {
-    const user = await getCurrentUser();
-    if (!user?.idUsuario) return <p>No hay usuario logueado</p>;
-
+    let user = await getCurrentUser();
     let carritoItems: CarritoItem[] = [];
 
     try {
-        const data: CarritoResponse = await nextApi.get(`/api/carrito/${user.idUsuario}`)
+        const data: CarritoResponse = await nextApi.get(`/api/carrito/`)
         carritoItems = data.carritoDetalle.map(d => ({
             idDetalle: d.idCarritoDetalle,
             idCarrito: d.idCarrito,
