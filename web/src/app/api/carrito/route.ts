@@ -1,21 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { CarritoPostBody } from "@/types/carrito";
+import {isPositiveNumber} from "@/lib/utils";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-type CarritoPostBody = {
-    idUsuario: number;
-    idProducto: string;
-    cantidad: number;
-    nombre: string;
-    precio: number;
-    imagenUrl?: string;
-};
+type CarritoPostResponse = { idCarrito: number };
 
-type CarritoPostResponse = {
-    idCarrito: number;
-};
 
 export async function POST(req: NextRequest) {
     let body: CarritoPostBody;
@@ -25,50 +17,52 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "JSON inválido" }, { status: 400 });
     }
 
-    const { idUsuario, idProducto, cantidad, nombre, precio, imagenUrl } = body;
-    if (!idUsuario || !idProducto || !cantidad || !nombre || !precio) {
+    const { idUsuario, idProducto, cantidad, nombre, precio, imagenUrl } = body ?? {};
+
+    if (
+        !idUsuario ||
+        !idProducto ||
+        !isPositiveNumber(cantidad) ||
+        !nombre ||
+        !isPositiveNumber(precio)
+    ) {
         return NextResponse.json(
-            { error: "Faltan campos obligatorios" },
+            { error: "Faltan campos obligatorios o son inválidos" },
             { status: 400 }
         );
     }
 
     try {
-        // 1. Aseguramos que exista carrito
+
         const carrito = await prisma.carritoCompras.upsert({
             where: { idUsuarioFk: idUsuario },
             create: { idUsuarioFk: idUsuario },
             update: {},
         });
 
-        // 2. Verificamos si ya existe el producto en el carrito
         const existing = await prisma.carritoDetalle.findFirst({
             where: {
                 idCarrito: carrito.idCarrito,
-                idProducto,
+                idProducto: idProducto,
             },
+            select: { idCarritoDetalle: true, cantidad: true }
         });
 
-        let detalle;
-        if (existing) {
-            // 3a. Si existe, actualizamos la cantidad (sumamos la nueva)
-            detalle = await prisma.carritoDetalle.update({
-                where: { idCarritoDetalle: existing.idCarritoDetalle },
+        const detalle = existing
+            ? await prisma.carritoDetalle.update({
+                where: { idCarritoDetalle: existing.idCarritoDetalle }, // requiere PK idCarritoDetalle en tu modelo
                 data: { cantidad: existing.cantidad + cantidad },
-            });
-        } else {
-            // 3b. Si no existe, creamos el detalle
-            detalle = await prisma.carritoDetalle.create({
+            })
+            : await prisma.carritoDetalle.create({
                 data: {
                     idCarrito: carrito.idCarrito,
-                    idProducto,
-                    cantidad,
+                    idProducto: idProducto,
+                    cantidad: cantidad,
                     nombreProducto: nombre,
                     precioUnitario: precio,
                     imagenUrl: imagenUrl ?? null,
                 },
             });
-        }
 
         const response: CarritoPostResponse = { idCarrito: detalle.idCarrito };
         return NextResponse.json(response, { status: 201 });

@@ -8,11 +8,21 @@ export type CarritoDetalleResponse = {
     imagenUrl: string | null;
 };
 
-export type CarritoResponse = {
-    idCarrito: number;
-    idUsuarioFk: number;
-    carritoDetalle: CarritoDetalleResponse[];
+export type CarritoPostBody = {
+    idUsuario: number;
+    idProducto: string;
+    cantidad: number;
+    nombre: string;
+    precio: number;
+    imagenUrl?: string;
 };
+
+export type CarritoResponse = {
+    idCarrito?: number;
+    idUsuarioFk?: number;
+    carritoDetalle?: CarritoDetalleResponse[];
+};
+
 export type CarritoItem = {
     idCarrito: number;
     idDetalle: number;

@@ -3,13 +3,12 @@
 import * as React from "react"
 import Link from "next/link"
 import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
-import { Plus } from "lucide-react"
-import {StrapiImage, StrapiImageSource} from "@/components/ui/strapi-image";
-import {ImageFormat} from "@/types/strapi/common";
-import {Discount} from "@/types/product";
+import { StrapiImage, StrapiImageSource } from "@/components/ui/strapi-image"
+import { ImageFormat } from "@/types/strapi/common"
+import { Discount } from "@/types/product"
+import { AddToCartButton } from "@/components/add-to-cart"
 
 export interface ProductCardProps {
     id: string | number
@@ -25,6 +24,7 @@ export interface ProductCardProps {
 }
 
 export function ProductCard({
+                                id,
                                 name,
                                 price,
                                 category,
@@ -46,10 +46,16 @@ export function ProductCard({
             : aspect === "16/9" ? "aspect-video"
                 : "aspect-[4/3]"
 
+    // ⬇️ Normalizamos para AddToCartButton (code, name, price final)
+    const productoForCart = React.useMemo(() => ({
+        code: String(id),
+        name,
+        price: finalPrice,
+    }), [id, name, finalPrice])
+
     return (
         <Card
             className={cn(
-                // asegura tokens del tema
                 "group flex h-full flex-col overflow-hidden rounded-xl bg-card text-card-foreground border border-border",
                 "shadow-sm transition-transform duration-150 hover:scale-[1.015] hover:shadow-md",
                 "cursor-pointer",
@@ -59,21 +65,12 @@ export function ProductCard({
             {/* Clic a la ficha: imagen + texto */}
             <Link href={href} className="flex flex-col flex-1">
                 <CardHeader className="p-4 pb-2">
-                    {/* Marco con ratio fijo y ring del tema */}
-                    <div
-                        className={cn(
-                            "relative w-full overflow-hidden rounded-lg border border-border bg-card",
-                            aspectClass
-                        )}
-                    >
-                        {/* etiqueta de descuento si es porcentaje */}
+                    <div className={cn("relative w-full overflow-hidden rounded-lg border border-border bg-card", aspectClass)}>
                         {discount?.type === "percentage" && (
                             <Badge variant="destructive" className="absolute left-2 top-2 z-10">
                                 -{discount.value}%
                             </Badge>
                         )}
-
-                        {/* Imagen contenida (no se deforma) */}
                         <StrapiImage
                             src={imageSrc}
                             alt={name}
@@ -87,7 +84,6 @@ export function ProductCard({
                 </CardHeader>
 
                 <CardContent className="flex flex-col gap-2 px-4 pb-2">
-                    {/* Título 1 línea + precio a la derecha */}
                     <div className="flex items-start justify-between gap-3">
                         <h3 className="truncate text-base font-semibold leading-tight">{name}</h3>
 
@@ -103,7 +99,6 @@ export function ProductCard({
                         )}
                     </div>
 
-                    {/* Categoría */}
                     {category && (
                         <Badge variant="secondary" className="w-fit">
                             {category}
@@ -112,20 +107,14 @@ export function ProductCard({
                 </CardContent>
             </Link>
 
-            {/* Acciones (no navegan) */}
+            {/* Acciones */}
             <CardFooter className="flex items-center gap-3 px-4 pb-4 pt-0">
-                {/*TODO: Componente de add to cart button... */}
-                <Button
-                    type="button"
+                <AddToCartButton
                     className="flex-1"
-                    onClick={(e) => {
-                        e.preventDefault()
-                        onAddToCart?.()
-                    }}
-                >
-                    <Plus className="mr-2 size-4" />
-                    Agregar al carrito
-                </Button>
+                    label="Agregar al carrito"
+                    producto={productoForCart}
+                    onAdded={() => onAddToCart?.()}
+                />
             </CardFooter>
         </Card>
     )

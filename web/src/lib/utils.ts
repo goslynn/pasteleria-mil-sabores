@@ -34,3 +34,7 @@ export function parsePositiveInt(value: string): number | null {
 
     return num;
 }
+
+export function isPositiveNumber(n: unknown): n is number {
+    return typeof n === "number" && Number.isFinite(n) && n > 0;
+}

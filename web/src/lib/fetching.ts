@@ -72,6 +72,10 @@ export class HttpError<T = unknown> extends Error {
         this.data = data;
         this.headers = res.headers;
     }
+
+    toString(): string {
+        return `HttpError: ${this.status} ${this.statusText} - ${this.url} - Data: ${JSON.stringify(this.data)}`;
+    }
 }
 
 /** =========================
