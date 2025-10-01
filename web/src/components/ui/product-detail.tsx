@@ -16,6 +16,8 @@ import {
 } from '@/components/ui/breadcrumb';
 import { Discount } from '@/types/product';
 import { Button } from '@/components/ui/button';
+import { AddToCartButton } from '@/components/add-to-cart';
+import {QuantityStepper} from "@/components/ui/quantity-stepper";
 
 export interface ProductDetail {
     code: string;
@@ -24,10 +26,7 @@ export interface ProductDetail {
     price: number;
     images?: StrapiImageSource[];
     discount?: Discount;
-    category: {
-        name: string;
-        slug: string;
-    } | null;
+    category: { name: string; slug: string } | null;
     keyImage?: StrapiImageSource;
 }
 
@@ -70,13 +69,6 @@ export default function ProductDetailCard({
         setIdx((p) => (p === gallery.length - 1 ? 0 : p + 1));
     }
 
-    function handleAdd() {
-        onAddToCart?.({
-            code: product.code,
-            name: product.name,
-            price: product.price,
-        });
-    }
     function handleShop() {
         onShopNow?.({
             code: product.code,
@@ -95,10 +87,46 @@ export default function ProductDetailCard({
 
     const discountBadge = React.useMemo(() => {
         if (!product.discount) return null;
-        return product.discount.type === 'percentage'
-            ? `-${product.discount.value}%`
-            : `-${clp.format(product.discount.value)}`;
+        return product.discount.type === 'percentage' ? `-${product.discount.value}%` : `-${clp.format(product.discount.value)}`;
     }, [product.discount]);
+
+    // Para AddToCartButton (mismo contrato que ProductCard)
+    const productoForCart = React.useMemo(
+        () => ({
+            code: String(product.code),
+            name: product.name,
+            price: discountedPrice !== null ? discountedPrice : product.price,
+        }),
+        [product.code, product.name, product.price, discountedPrice]
+    );
+
+    // --- Cantidad ---
+    const [qty, setQty] = React.useState<number>(1);
+    const MIN = 1;
+    const MAX = 99;
+
+    const inc = () => setQty((q) => Math.min(MAX, q + 1));
+    const dec = () => setQty((q) => Math.max(MIN, q - 1));
+
+    const onInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const v = e.target.value.replace(/\D/g, '');
+        const n = v === '' ? NaN : Number(v);
+        if (Number.isNaN(n)) {
+            setQty(MIN);
+        } else {
+            setQty(Math.max(MIN, Math.min(MAX, n)));
+        }
+    };
+
+    const onKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            inc();
+        } else if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            dec();
+        }
+    };
 
     return (
         <article className={cn('mx-auto max-w-6xl', className)}>
@@ -215,20 +243,25 @@ export default function ProductDetailCard({
                         <StrapiBlocks content={product.description} />
                     </div>
 
+                    {/* Cantidad */}
+                    <div className="space-y-2">
+                        <QuantityStepper value={qty} onChange={setQty} min={1} max={20} size="sm" />
+                    </div>
+
                     {/* Acciones */}
                     <div className="mt-auto pt-4">
                         <div className="grid grid-cols-2 gap-3">
-                            <Button
-                                variant="outline"
-                                size="lg"
+                            {/* Pasa cantidad como prop opcional y como data-attribute para mínimo acoplamiento */}
+                            <AddToCartButton
                                 className="h-12"
-                                onClick={handleAdd}
-                                aria-label="Agregar al carrito"
-                                title="Agregar al carrito"
+                                label="Agregar al carrito"
+                                producto={productoForCart}
+                                onAdded={() => onAddToCart?.(productoForCart)}
+                                cantidad={qty}
+                                data-qty={qty}
                                 type="button"
-                            >
-                                Agregar al carrito
-                            </Button>
+                                variant="secondary"
+                            />
 
                             <Button
                                 variant="default"
