@@ -1,51 +1,40 @@
 # Fase build
 FROM node:22-alpine AS build
-#dependencias nativas
-RUN apk update && apk add --no-cache python3 build-base gcc g++ autoconf automake zlib-dev libpng-dev vips-dev git  > /dev/null 2>&1
 
-ARG NODE_ENV=production
-ENV NODE_ENV=${NODE_ENV}
+RUN apk update && apk add --no-cache \
+  python3 build-base gcc g++ autoconf automake zlib-dev libpng-dev vips-dev git
 
-WORKDIR /opt/
+# 👇 OJO: para instalar y buildear, usar development
+ENV NODE_ENV=development
+WORKDIR /opt/app
 
-# Aprovecha caché: primero manifiestos
 COPY package*.json ./
 
-ENV NODE_ENV=production
+# Instala TODAS las deps (incluye dev)
+RUN npm install -g node-gyp \
+ && npm config set fetch-retry-maxtimeout 600000 -g \
+ && npm install
 
-# Instala TODAS las dependencias (incluye dev)
-RUN npm install -g node-gyp
-RUN npm config set fetch-retry-maxtimeout 600000 -g && npm install --only=production
-ENV PATH=/opt/node_modules/.bin:$PATH
-
-WORKDIR /opt/app
 # Copia el código
 COPY . .
 
-# Compila el admin de Strapi
+# Build del admin de Strapi (con devDeps presentes: postcss/autoprefixer)
 RUN npm run build
 
-# Prunea dev deps para dejar node_modules "prod only"
-#RUN npm prune --omit=dev
+# Ahora sí, quita devDeps para el artefacto final
+RUN npm prune --omit=dev
 
-# -Fase runtime
+# Fase runtime
 FROM node:22-alpine
-
-# Libvips runtime para sharp
 RUN apk add --no-cache vips-dev
 
-ARG NODE_ENV=production
-ENV NODE_ENV=${NODE_ENV}
-
-WORKDIR /opt/
-
-# Copiamos todo lo ya compilado y node_modules ya pruneados
-COPY --from=build /opt/node_modules ./node_modules
-
+# 👇 En runtime sí es producción
+ENV NODE_ENV=production
 WORKDIR /opt/app
-COPY --from=build /opt/app ./
-ENV PATH=/opt/node_modules/.bin:$PATH
 
+COPY --from=build /opt/app ./
+
+# Seguridad mínima
 RUN chown -R node:node /opt/app
 USER node
 
