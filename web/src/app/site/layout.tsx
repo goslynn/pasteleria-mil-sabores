@@ -6,8 +6,8 @@ import {CartProvider} from "@/hooks/cart-context";
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
     return (
         <>
-            <AppNavbar/>
             <CartProvider>
+            <AppNavbar/>
                 <main className="min-h-dvh">{children}</main>
             </CartProvider>
             <AppFooter/>

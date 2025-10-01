@@ -57,6 +57,7 @@ export default function CarritoPage({
         setCarrito(prev => prev.filter(item => item.idDetalle !== idDetalle));
         try {
             await removeItem(idCarrito, idDetalle);
+            window.dispatchEvent(new CustomEvent('cart:changed'))
         } catch (err) {
             console.error(err);
             alert("No se pudo eliminar el producto.");

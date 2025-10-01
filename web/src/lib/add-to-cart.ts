@@ -70,6 +70,7 @@ export async function addToCart(
         const response = await postFn(body)
         if (response?.idCarrito && setCartId) setCartId(response.idCarrito)
         onAdded?.(body)
+        window.dispatchEvent(new CustomEvent('cart:changed'))
         return { body, response }
     } catch (e) {
         const err = e instanceof Error ? e : new Error('Error desconocido al agregar al carrito')
