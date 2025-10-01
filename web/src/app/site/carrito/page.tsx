@@ -1,32 +1,32 @@
-import { nextApi } from "@/lib/fetching";
+// app/carrito/page.tsx (o donde tengas este componente)
 import CarritoPage from "@/components/carrito";
-import { CarritoItem } from "@/types/carrito";
-import { CarritoResponse } from "@/types/carrito";
-import { getCurrentUser } from "@/lib/datamapping";
+import type { CarritoResponse } from "@/types/carrito";
+import { nextApi } from "@/lib/fetching";
+import {notFound} from "next/navigation";
 
 export default async function Carrito() {
-    let user = await getCurrentUser();
-    let carritoItems: CarritoItem[] = [];
+    let carrito: CarritoResponse | null = null;
 
     try {
-        const data: CarritoResponse = await nextApi.get(`/api/carrito/`)
-        carritoItems = data.carritoDetalle.map(d => ({
-            idDetalle: d.idCarritoDetalle,
-            idCarrito: d.idCarrito,
-            code: d.idProducto,
-            name: d.nombreProducto,
-            price: d.precioUnitario,
-            quantity: d.cantidad,
-            keyImage: d.imagenUrl || "",
-            category: undefined,
-        }));
+        // Puede venir como JSON directo o envuelto en { data: ... }
+        const res = await nextApi.get<CarritoResponse | { data: CarritoResponse }>(
+            "/api/carrito"
+        );
+        carrito =
+            (res as { data?: CarritoResponse })?.data ?? (res as CarritoResponse);
     } catch (e) {
-        console.error("Error cargando carrito:", e)
+        console.error("Error cargando carrito:", e);
+    }
+
+    const items = carrito?.carritoDetalle ?? [];
+
+    if (!items.length) {
+        notFound()
     }
 
     return (
         <section className="flex items-center justify-center min-h-screen p-4">
-            <CarritoPage items={carritoItems} />
+            <CarritoPage items={items} />
         </section>
     );
 }

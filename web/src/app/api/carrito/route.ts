@@ -1,15 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { CarritoPostBody } from "@/types/carrito";
+import {CarritoItem, CarritoPostBody, CarritoResponse} from "@/types/carrito";
 import {isPositiveNumber} from "@/lib/utils";
 import {nextApi} from "@/lib/fetching";
 import {ProductDTO} from "@/types/product";
 import {getSessionUserId} from "@/lib/auth";
+import {BasicHttpError} from "@/app/api/product/types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-type CarritoPostResponse = { idCarrito: number };
 
 export async function POST(req: NextRequest) {
     let body: CarritoPostBody;
@@ -75,24 +74,87 @@ export async function POST(req: NextRequest) {
         );
     }
 }
-export async function GET(req: NextRequest) {
 
+export async function GET(_req: NextRequest) {
     let idUsuario = await getSessionUserId();
     if (!idUsuario) idUsuario = 1;
 
-
-    let carrito = await prisma.carritoCompras.findUnique({
-        where: { idUsuarioFk: idUsuario },
-        include: { carritoDetalle: true },
-    });
-
-    if (!carrito)
-        return NextResponse.json({
-            idCarrito: 0,
-            idUsuarioFk: idUsuario,
-            carritoDetalle: [],
+    try {
+        const carrito = await prisma.carritoCompras.findUnique({
+            where: { idUsuarioFk: idUsuario },
+            include: { carritoDetalle: true },
         });
 
+        // Si no hay carrito aún, responde vacío con forma estable
+        if (!carrito) {
+            const empty: CarritoResponse = {
+                idCarrito: 0,
+                idUsuarioFk: idUsuario,
+                carritoDetalle: [],
+            };
+            return NextResponse.json(empty, { status: 200 });
+        }
 
-    return NextResponse.json(carrito);
+        // Enriquecer cada ítem consultando el endpoint de productos
+        let items : CarritoItem[];
+        try {
+            items = await Promise.all(
+                carrito.carritoDetalle.map(async (d) => {
+                    try {
+                        const res = await nextApi.get<{ data: { product: ProductDTO } }>(
+                            `/api/product/${d.idProducto}`
+                        );
+                        const p = res?.data?.product;
+
+                        // Chequeo básico del producto recibido
+                        if (!p?.code || !p.name || typeof p.price !== "number") {
+                            throw new BasicHttpError(404, "Producto inválido");
+                            // return NextResponse.json({error: "Producto inválido"}, {status: 404});
+                        }
+
+                        const item: CarritoItem = {
+                            ...p,
+                            idCarrito: carrito.idCarrito,
+                            idDetalle: d.idCarritoDetalle,
+                            quantity: d.cantidad
+                        };
+                        return item;
+                    } catch {
+                        // Fallback a lo persistido en DB si el endpoint falla
+                        const item: CarritoItem = {
+                            idCarrito: d.idCarrito,
+                            idDetalle: d.idCarritoDetalle,
+                            code: d.idProducto,
+                            name: d.nombreProducto ?? d.idProducto,
+                            price: d.precioUnitario ?? 0,
+                            keyImage: null,
+                            quantity: d.cantidad
+                        };
+                        return item;
+                    }
+                })
+            );
+        } catch (err) {
+            const httperr = err as BasicHttpError;
+            return NextResponse.json(
+                { error: `Error consultando productos del carrito: ${httperr.toString()}` },
+                { status: httperr.status ?? 500 }
+            );
+        }
+
+
+        const response: CarritoResponse = {
+            idCarrito: carrito.idCarrito,
+            idUsuarioFk: carrito.idUsuarioFk,
+            carritoDetalle: items,
+        };
+
+        return NextResponse.json(response, { status: 200 });
+    } catch (err) {
+        console.error("Error en GET /carrito:", err);
+        return NextResponse.json(
+            { error: "Error interno del servidor" },
+            { status: 500 }
+        );
+    }
 }
