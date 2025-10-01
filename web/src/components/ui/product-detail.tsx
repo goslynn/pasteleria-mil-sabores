@@ -16,8 +16,10 @@ import {
 } from '@/components/ui/breadcrumb';
 import { Discount } from '@/types/product';
 import { Button } from '@/components/ui/button';
-import { AddToCartButton } from '@/components/add-to-cart';
+import { CartButton } from '@/components/cart-button';
 import {QuantityStepper} from "@/components/ui/quantity-stepper";
+import {useAddToCart} from "@/lib/add-to-cart";
+import {useRouter} from "next/navigation";
 
 export interface ProductDetail {
     code: string;
@@ -102,31 +104,18 @@ export default function ProductDetailCard({
 
     // --- Cantidad ---
     const [qty, setQty] = React.useState<number>(1);
-    const MIN = 1;
-    const MAX = 99;
 
-    const inc = () => setQty((q) => Math.min(MAX, q + 1));
-    const dec = () => setQty((q) => Math.max(MIN, q - 1));
+    const runAddToCart = useAddToCart()
+    const router = useRouter()
 
-    const onInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const v = e.target.value.replace(/\D/g, '');
-        const n = v === '' ? NaN : Number(v);
-        if (Number.isNaN(n)) {
-            setQty(MIN);
-        } else {
-            setQty(Math.max(MIN, Math.min(MAX, n)));
+    async function handleShopNow() {
+        try {
+            await runAddToCart(productoForCart, { cantidad: qty })
+            await router.push('/site/carrito')
+        } catch (err) {
+            alert(`❌ Error: ${(err as Error).message}`)
         }
-    };
-
-    const onKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'ArrowUp') {
-            e.preventDefault();
-            inc();
-        } else if (e.key === 'ArrowDown') {
-            e.preventDefault();
-            dec();
-        }
-    };
+    }
 
     return (
         <article className={cn('mx-auto max-w-6xl', className)}>
@@ -244,16 +233,20 @@ export default function ProductDetailCard({
                     </div>
 
                     {/* Cantidad */}
-                    <div className="space-y-2">
-                        <QuantityStepper value={qty} onChange={setQty} min={1} max={20} size="sm" />
-                    </div>
+                    <div className="mt-auto w-full max-w-md space-y-4 pt-4">
+                        <QuantityStepper
+                            value={qty}
+                            onChange={setQty}
+                            min={1}
+                            max={20}
+                            size="md"
+                            className="w-full"
+                        />
 
-                    {/* Acciones */}
-                    <div className="mt-auto pt-4">
+
                         <div className="grid grid-cols-2 gap-3">
-                            {/* Pasa cantidad como prop opcional y como data-attribute para mínimo acoplamiento */}
-                            <AddToCartButton
-                                className="h-12"
+                            <CartButton
+                                className="h-12 rounded-2xl"
                                 label="Agregar al carrito"
                                 producto={productoForCart}
                                 onAdded={() => onAddToCart?.(productoForCart)}
@@ -266,8 +259,8 @@ export default function ProductDetailCard({
                             <Button
                                 variant="default"
                                 size="lg"
-                                className="h-12 active:scale-[0.98]"
-                                onClick={handleShop}
+                                className="h-12 rounded-2xl active:scale-[0.98]"
+                                onClick={handleShopNow}
                                 aria-label="Comprar ahora"
                                 title="Comprar ahora"
                                 type="button"

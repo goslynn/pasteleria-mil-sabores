@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils"
 import { StrapiImage, StrapiImageSource } from "@/components/ui/strapi-image"
 import { ImageFormat } from "@/types/strapi/common"
 import { Discount } from "@/types/product"
-import { AddToCartButton } from "@/components/add-to-cart"
+import { CartButton } from "@/components/cart-button"
 
 export interface ProductCardProps {
     id: string | number
@@ -109,7 +109,7 @@ export function ProductCard({
 
             {/* Acciones */}
             <CardFooter className="flex items-center gap-3 px-4 pb-4 pt-0">
-                <AddToCartButton
+                <CartButton
                     className="flex-1"
                     label="Agregar al carrito"
                     producto={productoForCart}
