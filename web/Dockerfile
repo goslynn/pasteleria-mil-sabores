@@ -18,7 +18,7 @@ RUN pnpm --filter @pasteleria/web... install --frozen-lockfile
 COPY web web
 WORKDIR /app/web
 RUN npx prisma generate
-
+RUN npx prisma db seed
 # Build de Next (turbopack + standalone)
 WORKDIR /app
 RUN pnpm --filter @pasteleria/web build
