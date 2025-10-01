@@ -14,20 +14,6 @@ async function main() {
     const sqlFile = join(__dirname, "../seed/insertComunas.sql"); // ruta correcta
     const sql = await readFile(sqlFile, "utf-8");
     await prisma.$executeRawUnsafe(sql);
-
-    // Crear usuario Invitado si no existe
-    await prisma.usuario.upsert({
-        where: { email: "Invitado@local" },
-        update: {},
-        create: {
-            nombre: "Invitado",
-            email: "Invitado@local",
-            password: "",
-            fechaNacimiento: new Date("2000-01-01"),
-            createdAt: new Date("2000-01-01T00:00:00"),
-        },
-    });
-
     console.log("Seed completado ✅");
 }
 
