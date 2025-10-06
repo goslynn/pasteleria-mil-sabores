@@ -2,7 +2,6 @@
 
 import * as React from 'react'
 import type { Link as LinkType, SocialKind, SocialLink } from '@/types/general'
-// react-icons de Simple Icons (brand icons)
 import {
     SiFacebook, SiInstagram, SiX, SiTiktok, SiYoutube, SiLinkedin,
     SiGithub, SiWhatsapp
@@ -11,7 +10,7 @@ import type { IconType } from 'react-icons'
 import {StrapiImage, StrapiImageSource} from "@/components/ui/strapi-image";
 import {ImageFormat} from "@/types/strapi/common";
 
-// ---------- Tipos ----------
+
 export type FooterSection = {
     title?: string
     links: LinkType[]
@@ -54,7 +53,6 @@ function SocialIcon({ kind, className }: { kind: SocialKind; className?: string 
     return <Icon className={className} aria-hidden="true" />
 }
 
-// ---------- Componente ----------
 export function Footer({
                            id,
                            brand,

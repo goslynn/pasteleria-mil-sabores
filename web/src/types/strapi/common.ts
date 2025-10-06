@@ -71,10 +71,12 @@ export interface StrapiCollection<T> {
 }
 
 /** Recurso individual típico de Strapi */
-export interface StrapiObject<T> {
+interface StrapiObject<T> {
     data: StrapiBase & T;
     meta?: ApiMeta;
 }
+
+export default StrapiObject
 
 export function normalizeStrapiUrl(url?: string): string {
     const host = process.env.STRAPI_HOST || process.env.NEXT_PUBLIC_STRAPI_HOST;

@@ -1,5 +1,5 @@
 import {Client, QueryValue} from "@/lib/fetching";
-import {StrapiCollection, StrapiObject} from "@/types/strapi/common";
+import StrapiObject, {StrapiCollection} from "@/types/strapi/common";
 
 export class StrapiMapper {
 

@@ -2,29 +2,24 @@
  * Global HTTP utilities for both Server (SSR/Route Handlers) and Client.
  * - apiFetch: for calling your own Next.js app (self API / route handlers)
  * - cmsFetch: for calling Strapi CMS (requires env vars)
- *
- * Goals
- * 1) Global: works in server and client (derives base URL in SSR).
- * 2) Fully parameterizable per request.
- * 3) Separate functions for Next.js (apiFetch) and Strapi (cmsFetch).
- * 4) Strapi via env at top; throw if missing.
- * 5) Generic typed return; propagate HTTP errors via HttpError.
- * 6) Support Strapi query params abstraction to JSON.
  */
 
-// Check Strapi env vars at module load time
-import {StrapiMapper} from "@/lib/strapi-client";
+import { StrapiMapper } from "@/lib/strapi-client";
 
-const STRAPI_HOST = process.env.NEXT_PUBLIC_STRAPI_HOST || process.env.STRAPI_HOST;
-const STRAPI_TOKEN = process.env.NEXT_PUBLIC_STRAPI_TOKEN || process.env.STRAPI_TOKEN;
+const STRAPI_INTERNAL_URL =
+    process.env.STRAPI_INTERNAL_URL ||
+    process.env.STRAPI_HOST || // compat antiguo
+    undefined;
 
-if (!STRAPI_HOST || !STRAPI_TOKEN) {
-    throw new Error(
-        "STRAPI_HOST / STRAPI_TOKEN no están definidos. Configura NEXT_PUBLIC_STRAPI_HOST y NEXT_PUBLIC_STRAPI_TOKEN (o STRAPI_HOST/STRAPI_TOKEN)."
-    );
-}
+const STRAPI_PUBLIC_URL =
+    process.env.NEXT_PUBLIC_STRAPI_URL ||
+    process.env.NEXT_PUBLIC_STRAPI_HOST || // compat antiguo
+    process.env.STRAPI_PUBLIC_URL || // opcional
+    STRAPI_INTERNAL_URL; // último recurso
 
-/** Minimal shape for Next.js extra options supported by fetch */
+const STRAPI_SERVER_TOKEN = process.env.STRAPI_TOKEN || undefined;
+const STRAPI_PUBLIC_TOKEN = process.env.NEXT_PUBLIC_STRAPI_TOKEN || undefined;
+
 export type NextExtras = {
     next?: {
         revalidate?: number | false;
@@ -34,7 +29,6 @@ export type NextExtras = {
 
 export type QueryPrimitive = string | number | boolean | null | undefined;
 export type QueryValue = QueryPrimitive | QueryPrimitive[];
-
 
 export type FetchOptions = RequestInit &
     NextExtras & {
@@ -52,6 +46,11 @@ export type FetchOptions = RequestInit &
     parse?: "auto" | "json" | "text" | ((res: Response) => Promise<unknown>);
     /** Forward request cookies from SSR to same-origin requests (default true) */
     forwardCookies?: boolean;
+    /**
+     * Force using server base resolution even in contexts donde window está definido.
+     * Útil para edge/SSR raros. Por defecto false.
+     */
+    useServer?: boolean;
 };
 
 /** Error type thrown on non-2xx HTTP responses */
@@ -90,11 +89,6 @@ function isAbsolute(url: string): boolean {
     return /^https?:\/\//i.test(url);
 }
 
-function encodeOne(v: QueryPrimitive): string {
-    if (v === null || v === undefined) return "";
-    return encodeURIComponent(String(v));
-}
-
 function appendQuery(url: string, query?: Record<string, QueryValue>): string {
     if (!query || Object.keys(query).length === 0) return url;
 
@@ -105,17 +99,15 @@ function appendQuery(url: string, query?: Record<string, QueryValue>): string {
     if (existingSearch) parts.push(existingSearch);
 
     const push = (k: string, val: QueryPrimitive): void => {
-        // no encodeamos la key (Strapi necesita los []), solo el valor
         parts.push(`${k}=${encodeURIComponent(String(val))}`);
     };
 
     for (const [k, v] of Object.entries(query)) {
         if (v == null) continue;
-
         if (Array.isArray(v)) {
             for (const item of v) {
-                if (item == null) continue;                 // <- filtra undefined/null
-                push(k, item as QueryPrimitive);            // item ya es string|number|boolean
+                if (item == null) continue;
+                push(k, item as QueryPrimitive);
             }
         } else {
             push(k, v as QueryPrimitive);
@@ -137,13 +129,10 @@ function joinUrl(base: string, path: string): string {
  */
 async function getNextHeaders(): Promise<Headers | null> {
     if (!isServer) return null;
-
     try {
-        // Dynamic import to avoid client-side errors
-        const { headers } = await import('next/headers');
+        const { headers } = await import("next/headers");
         const hOrPromise = headers();
 
-        // Handle both async and sync headers() returns
         const maybeThen = hOrPromise?.then;
         const isThenable = typeof maybeThen === "function";
 
@@ -153,26 +142,35 @@ async function getNextHeaders(): Promise<Headers | null> {
     }
 }
 
-async function getServerBaseUrl(): Promise<string> {
-    // Prefer public URL if exists
-    const envUrl =
-        process.env.NEXT_PUBLIC_SITE_URL ||
-        (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "");
-    if (envUrl) return sanitizeBase(envUrl);
-
-    // Derive from headers in SSR
+async function getOriginFromHeaders(): Promise<string | null> {
     const h = await getNextHeaders();
-    if (h) {
-        try {
-            const proto = h.get("x-forwarded-proto") ?? "http";
-            const host = h.get("x-forwarded-host") ?? h.get("host");
-            if (host) return `${proto}://${host}`;
-        } catch {
-            // headers() not available
-        }
+    if (!h) return null;
+    try {
+        const proto = h.get("x-forwarded-proto") ?? "http";
+        const host = h.get("x-forwarded-host") ?? h.get("host");
+        if (host) return `${proto}://${host}`;
+    } catch {
+        // ignore
     }
+    return null;
+}
 
-    // Fallback dev
+async function getServerBaseUrl(): Promise<string> {
+    // 1) Mejor fuente: headers en SSR (respeta proxy/rewrite/ingress)
+    const fromHdr = await getOriginFromHeaders();
+    if (fromHdr) return sanitizeBase(fromHdr);
+
+    // 2) Envs habituales (prod)
+    const envUrlRaw =
+        process.env.SITE_URL || // recomendado
+        process.env.NEXT_PUBLIC_SITE_URL || // compat
+        (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "") ||
+        process.env.RENDER_EXTERNAL_URL || // Render.com
+        "";
+
+    if (envUrlRaw) return sanitizeBase(envUrlRaw);
+
+    // 3) Fallback dev
     return "http://localhost:3000";
 }
 
@@ -180,7 +178,6 @@ async function parseBody(res: Response, mode: FetchOptions["parse"]): Promise<un
     if (typeof mode === "function") return mode(res);
     if (mode === "json") return res.json();
     if (mode === "text") return res.text();
-    // auto: try JSON, if fails return text
     const text = await res.text();
     try {
         return text ? JSON.parse(text) : null;
@@ -200,41 +197,41 @@ function mergeHeaders(a?: HeadersInit, b?: HeadersInit): HeadersInit | undefined
 /** Core fetch used by both apiFetch and cmsFetch */
 async function coreFetch<T>(fullUrl: string, opts: FetchOptions): Promise<T> {
     const { parse = "auto", ...rest } = opts;
+
     const res = await fetch(fullUrl, {
-        cache: "no-store",
         ...rest,
         headers: rest.headers,
     });
 
     const data = (await parseBody(res, parse)) as T | string | null;
 
-    console.log("Request at: ", fullUrl);
-    console.log("Rsulted in: ", data);
     if (!res.ok) {
         const err = new HttpError<T>(res, data as T | string | null);
-        console.log("HTTP ERROR DETECTADO: ", err.toString());
+        // Puedes mantener logs si quieres:
+        // console.log("HTTP ERROR: ", err.toString());
         throw err;
     }
     return data as T;
 }
 
-/**
- * Fetch against your own Next.js app (routes /api or route handlers).
- * - In SSR automatically derives the host from headers/env.
- * - In client allows relative URL (delegates to browser).
- * - forwardCookies: forward cookies from SSR for same-origin (default true).
- */
+/** =========================
+ *  apiFetch (self API)
+ *  ========================= */
 export async function apiFetch<T = unknown>(path: string, opts: FetchOptions = {}): Promise<T> {
     const {
         baseUrl,
         query,
         forwardCookies = true,
         headers: hdrs,
+        useServer = false,
         ...rest
     } = opts;
 
+    // Si estamos en server o el caller fuerza server, resolvemos origin de server.
+    const shouldUseServerBase = isServer || useServer;
+
     const base = sanitizeBase(
-        baseUrl || (isServer ? await getServerBaseUrl() : "")
+        baseUrl || (shouldUseServerBase ? await getServerBaseUrl() : "")
     );
 
     let url = joinUrl(base, path);
@@ -242,20 +239,16 @@ export async function apiFetch<T = unknown>(path: string, opts: FetchOptions = {
 
     let headersFinal: HeadersInit | undefined = hdrs;
 
-    // In SSR, if same-origin and forwardCookies=true, inject Cookie
-    if (isServer && forwardCookies) {
+    // En SSR, si same-origin y forwardCookies=true, inyecta Cookie
+    if (shouldUseServerBase && forwardCookies) {
         const h = await getNextHeaders();
         if (h) {
             try {
-                const proto = h.get("x-forwarded-proto") ?? "http";
-                const host = h.get("x-forwarded-host") ?? h.get("host") ?? "";
-                if (host) {
-                    const currentOrigin = `${proto}://${host}`;
-                    const targetOrigin = isAbsolute(url) ? new URL(url).origin : currentOrigin;
-                    if (targetOrigin === currentOrigin) {
-                        const cookie = h.get("cookie");
-                        if (cookie) headersFinal = mergeHeaders(headersFinal, { cookie });
-                    }
+                const origin = await getOriginFromHeaders();
+                const targetOrigin = isAbsolute(url) ? new URL(url).origin : origin;
+                if (origin && targetOrigin === origin) {
+                    const cookie = h.get("cookie");
+                    if (cookie) headersFinal = mergeHeaders(headersFinal, { cookie });
                 }
             } catch {
                 // ignore
@@ -263,56 +256,67 @@ export async function apiFetch<T = unknown>(path: string, opts: FetchOptions = {
         }
     }
 
-    return coreFetch<T>(url, { ...rest, headers: headersFinal });
+    return coreFetch<T>(
+        url,
+        {
+            ...rest,
+            headers: headersFinal,
+            cache: "no-store", // el caller puede overridear con opts.cache
+        });
 }
 
-/**
- * Fetch against Strapi CMS using Bearer token from env.
- * - Uses STRAPI_HOST and STRAPI_TOKEN defined at start (throws error if missing).
- * - Allows baseUrl override if you need to hit another host.
- * - Adds Authorization: Bearer <token> by default (you can overwrite headers).
- * - Supports Strapi-specific query params abstraction.
- */
+/** =========================
+ *  cmsFetch (Strapi)
+ *  ========================= */
 export async function cmsFetch<T = unknown>(
     path: string,
     opts: FetchOptions = {}
 ): Promise<T> {
-    const {
-        baseUrl,
-        query,
-        headers: hdrs,
-        ...rest
-    } = opts;
+    const { baseUrl, query, headers: hdrs, ...rest } = opts;
 
-    const base = sanitizeBase(baseUrl || STRAPI_HOST);
+    // Elegimos base según contexto
+    const baseResolved = sanitizeBase(
+        baseUrl ||
+        (isServer ? STRAPI_INTERNAL_URL : STRAPI_PUBLIC_URL) ||
+        "" // dejamos que falle abajo con mensaje claro
+    );
 
-    let url = joinUrl(base, path);
+    if (!baseResolved) {
+        throw new Error(
+            isServer
+                ? "Falta STRAPI_INTERNAL_URL (o STRAPI_HOST). Define la URL interna del CMS para SSR."
+                : "Falta NEXT_PUBLIC_STRAPI_URL (o NEXT_PUBLIC_STRAPI_HOST). Define la URL pública del CMS para el navegador."
+        );
+    }
+
+    let url = joinUrl(baseResolved, path);
     url = appendQuery(url, query);
 
-    const authHeaders: HeadersInit = {
-        Authorization: `Bearer ${STRAPI_TOKEN}`,
-    };
+    // Token según contexto (opcional si tu endpoint es público)
+    const token = isServer ? STRAPI_SERVER_TOKEN : STRAPI_PUBLIC_TOKEN;
+
+    const authHeaders: HeadersInit =
+        token ? { Authorization: `Bearer ${token}` } : {};
+
     const headersFinal = mergeHeaders(authHeaders, hdrs);
 
     return coreFetch<T>(url, { ...rest, headers: headersFinal });
 }
 
+/** =========================
+ *  Clientes
+ *  ========================= */
 type Fetcher = <T>(path: string, opts?: FetchOptions) => Promise<T>;
 
 export interface Client {
-    // HTTP básicos
     get<T>(url: string, opts?: FetchOptions): Promise<T>;
-
     post<T>(url: string, body?: unknown, opts?: FetchOptions): Promise<T>;
-
     put<T>(url: string, body?: unknown, opts?: FetchOptions): Promise<T>;
-
     patch<T>(url: string, body?: unknown, opts?: FetchOptions): Promise<T>;
-
     delete<T>(url: string, opts?: FetchOptions): Promise<T>;
 }
 
-export function clientOf(fetcher: Fetcher) : Client {
+export function clientOf(fetcher: Fetcher): Client {
     async function get<T>(url: string, opts?: FetchOptions) {
         return fetcher<T>(url, { ...opts, method: "GET" });
     }
@@ -357,23 +361,15 @@ export function clientOf(fetcher: Fetcher) : Client {
         return fetcher<T>(url, { ...opts, method: "DELETE" });
     }
 
-
-    return {
-        get,
-        post,
-        put,
-        patch,
-        delete: del,
-    };
+    return { get, post, put, patch, delete: del };
 }
 
 export function strapiClientOf(fetcher: Fetcher) {
     const client = clientOf(fetcher);
     return {
         ...client,
-        mapper: new StrapiMapper(client)
-    }
-
+        mapper: new StrapiMapper(client),
+    };
 }
 
 export const nextApi = clientOf(apiFetch);

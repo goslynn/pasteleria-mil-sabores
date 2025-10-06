@@ -4,9 +4,13 @@ import {FOOTER_ID, HOME_URL} from "@/app/const";
 import {fetchFooter} from "@/lib/datamapping";
 import {brand} from "@/lib/brand";
 
+
+export const revalidate = 300;
+
 export default async function AppFooter() {
     const empresa = await brand();
     console.log("empresa (brand): ", empresa);
+
     const footerDefaults: FooterProps = {
         id: FOOTER_ID,
         copyright: {

@@ -5,6 +5,8 @@ ENV PNPM_HOME="/root/.local/share/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
 
+RUN apk add --no-cache ca-certificates
+
 # 1) Copiar manifiestos primero (mejor caché)
 COPY pnpm-lock.yaml package.json ./
 

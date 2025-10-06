@@ -1,56 +1,51 @@
-import { Navbar } from '@/components/ui/navbar'
-import type { NavbarProps } from '@/components/ui/navbar'
+'use client'
+
+import { Navbar, NavigationLinks } from '@/components/ui/navbar'
 import { CakeSlice } from 'lucide-react'
-import { UsuarioDTO } from "@/types/user";
-import { getCurrentUser } from "@/lib/datamapping";
-import { FOOTER_ID, HOME_URL } from "@/app/const";
-import { redirect } from "next/navigation";
+import { FOOTER_ID, HOME_URL } from '@/app/const'
+import { HomeLogo } from '@/components/ui/home-logo'
+import { SearchBar } from '@/components/ui/search-bar'
+import AppUserMenu from '@/components/ui/app-user-menu'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
+import { GoToCartButton } from '@/components/ui/goto-carrito-button'
+import { Link } from '@/types/general'
 
-export async function AppNavbar() {
-    const user: UsuarioDTO | null = await getCurrentUser();
-    const footerRef = `#${FOOTER_ID}`;
+type AppNavbarProps = {
+    searchAction: (formData: FormData) => void | Promise<void>
+}
 
-    // ✅ Server Action declarada directamente aquí
-    async function searchAction(formData: FormData) {
-        "use server"; // necesario para que Next la trate como Server Action
-        const q = (formData.get("q") ?? "").toString().trim();
-        const page = "1";
-        if (q.length > 0) {
-            redirect(`/site/product?q=${encodeURIComponent(q)}&page=${page}`);
-        }
-    }
+export function AppNavbar({ searchAction }: AppNavbarProps) {
+    if (!searchAction) throw new Error('AppNavbar requiere searchAction')
 
-    const NAVBAR_PROPS: NavbarProps = {
-        homeLogo: { icon: <CakeSlice />, label: "Mil Sabores" },
-        userMenu: {
-            userName: user?.nombre,
-            userEmail: user?.email,
-            loginHref: "auth/login",
-            items: [
-                { key: "config", label: "Ajustes", href: "/site/config" },
-                {
-                    key: "logout",
-                    label: "Cerrar sesion",
-                    href: "/auth/logout",
-                    destructive: true,
-                    separatorAbove: true,
-                },
-            ],
-        },
-        navigationLinks: [
-            { href: HOME_URL, label: "Inicio" },
-            { href: "/site/categories", label: "Categorias" },
-            { href: "/site/about", label: "Sobre nosotros" },
-            { href: footerRef, label: "Contacto" },
-        ],
-        cart: { link: "/site/carrito" },
+    const footerRef = `#${FOOTER_ID}`
 
-        // ❌ ya no usamos onSearchSubmit
-        // ✅ pasamos la Server Action al SearchBar
-        searchBarProps: {
-            action: searchAction,
-        },
-    };
+    const enlaces: Link[] = [
+        { link: HOME_URL, label: 'Inicio' },
+        { link: '/site/categories', label: 'Categorias' },
+        { link: '/site/about', label: 'Sobre nosotros' },
+        { link: footerRef, label: 'Contacto' },
+    ]
 
-    return <Navbar {...NAVBAR_PROPS} className="brand-scope" />;
+    return (
+        <Navbar className="brand-scope">
+            <Navbar.Icon>
+                <HomeLogo icon={<CakeSlice />} label="Mil Sabores" />
+            </Navbar.Icon>
+
+            <Navbar.Search>
+                {/* ahora sí le pasas la FUNCIÓN */}
+                <SearchBar action={searchAction} />
+            </Navbar.Search>
+
+            <Navbar.Actions>
+                <AppUserMenu />
+                <ThemeToggle />
+                <GoToCartButton link="/site/carrito" />
+            </Navbar.Actions>
+
+            <Navbar.Bottom>
+                <NavigationLinks links={enlaces} />
+            </Navbar.Bottom>
+        </Navbar>
+    )
 }
