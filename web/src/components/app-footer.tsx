@@ -9,7 +9,6 @@ export const revalidate = 300;
 
 export default async function AppFooter() {
     const empresa = await brand();
-    console.log("empresa (brand): ", empresa);
 
     const footerDefaults: FooterProps = {
         id: FOOTER_ID,

@@ -36,8 +36,6 @@ export interface ProductDetailProps {
     product: ProductDetail;
     className?: string;
     debug?: boolean;
-    onAddToCart?: (p: { code: string; name: string; price: number }) => void;
-    onShopNow?: (p: { code: string; name: string; price: number }) => void;
 }
 
 const clp = new Intl.NumberFormat('es-CL', {
@@ -50,8 +48,6 @@ export default function ProductDetailCard({
                                               product,
                                               className,
                                               debug,
-                                              onAddToCart,
-                                              onShopNow,
                                           }: ProductDetailProps) {
     // --- Galería (slider) ---
     const gallery: StrapiImageSource[] = React.useMemo(() => {
@@ -69,14 +65,6 @@ export default function ProductDetailCard({
     }
     function next() {
         setIdx((p) => (p === gallery.length - 1 ? 0 : p + 1));
-    }
-
-    function handleShop() {
-        onShopNow?.({
-            code: product.code,
-            name: product.name,
-            price: product.price,
-        });
     }
 
     // --- Precio con descuento ---
@@ -249,7 +237,6 @@ export default function ProductDetailCard({
                                 className="h-12 rounded-2xl"
                                 label="Agregar al carrito"
                                 producto={productoForCart}
-                                onAdded={() => onAddToCart?.(productoForCart)}
                                 cantidad={qty}
                                 data-qty={qty}
                                 type="button"
