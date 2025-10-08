@@ -2,7 +2,7 @@
 
 
 import TaskAwait from "@/components/ui/task-await";
-import {nextApi} from "@/lib/fetching";
+import nextApi from "@/lib/fetching";
 
 export default function Logout() {
     return (

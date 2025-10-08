@@ -18,8 +18,16 @@ export interface ProductKey {
     documentId: string;
 }
 
+export type FindProductsParams = {
+    page: number;
+    q?: string | null;
+    category?: string | null;
+    pageSize?: number;
+};
+
 export type ProductQueryResponse = StrapiCollection<ProductDTO>
 
+//TODO: Pasar a excepciones.ts
 export class BasicHttpError extends Error {
     status: number;
 

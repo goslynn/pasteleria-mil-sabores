@@ -1,9 +1,9 @@
-import {ProductDetailResponse} from "@/app/api/product/types";
 import {Separator} from "@/components/ui/separator";
-import {nextApi} from "@/lib/fetching";
 import ProductDetailCard from "@/components/ui/product-detail";
 import ProductCarousel, {ProductSliderProps} from "@/components/ui/product-carousel";
 import {toProductCard, toProductDetail} from "@/lib/datamapping";
+import {getProductWithRelated} from "@/app/services/product.service";
+
 
 
 interface ProductPageProps {
@@ -12,10 +12,11 @@ interface ProductPageProps {
 
 export default async function ProductPage({ params }: ProductPageProps) {
     const { id } = await params;
-    console.log("ProductPage id:", id);
-    const resp = await nextApi.get<ProductDetailResponse>(`api/product/${id}?related=4`);
 
-    const pd = resp.data?.product;
+
+    const resp = await getProductWithRelated(id, 4)
+
+    const pd = resp?.product;
     if (!pd) {
         return (
             <div className="flex-1 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
@@ -27,7 +28,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
             </div>
         );
     }
-    const related = resp.data?.related || [];
+    const related = resp?.related || [];
 
     const sliderProps : ProductSliderProps = {
         title: "Productos Relacionados.",

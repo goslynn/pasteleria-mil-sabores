@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ProductDTO } from "@/types/product";
 import { strapi } from "@/lib/fetching";
-import {ProductDetailResponse, ProductResponse, ProductKey, BasicHttpError} from "@/app/api/product/types";
+import {ProductDetailResponse, ProductResponse, ProductKey, BasicHttpError} from "@/types/server";
 import { prisma } from "@/lib/db";
 import { StrapiCollection } from "@/types/strapi/common";
 
 // Forzar runtime Node
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 /**
  * Busca en Strapi el par (documentId, code) por code.

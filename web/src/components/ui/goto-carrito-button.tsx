@@ -7,7 +7,7 @@ import {ShoppingCart} from 'lucide-react'
 import {cn} from '@/lib/utils'
 import {useCart} from '@/hooks/cart-context'
 import {CarritoResponse} from "@/types/carrito";
-import {nextApi} from "@/lib/fetching";
+import nextApi from "@/lib/fetching";
 
 export interface CartButtonProps {
     link: string

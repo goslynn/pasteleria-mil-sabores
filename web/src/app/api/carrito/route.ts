@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import {CarritoItem, CarritoPostBody, CarritoResponse} from "@/types/carrito";
 import {isPositiveNumber} from "@/lib/utils";
-import {nextApi} from "@/lib/fetching";
+import nextApi from "@/lib/fetching";
 import {ProductDTO} from "@/types/product";
 import {getSessionUserId} from "@/lib/auth";
-import {BasicHttpError} from "@/app/api/product/types";
+import {BasicHttpError} from "@/types/server";2
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

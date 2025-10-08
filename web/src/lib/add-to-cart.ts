@@ -4,7 +4,7 @@
 import * as React from 'react'
 import type { ProductDTO } from '@/types/product'
 import type { CarritoPostBody, CarritoResponse } from '@/types/carrito'
-import { HttpError, nextApi } from '@/lib/fetching'
+import nextApi, { HttpError } from '@/lib/fetching'
 import { useCart } from '@/hooks/cart-context'
 
 /** Contrato mínimo del producto */

@@ -1,6 +1,6 @@
 import {UsuarioDTO} from "@/types/user";
 
-import {strapi, HttpError, nextApi} from "@/lib/fetching";
+import nextApi, {strapi, HttpError} from "@/lib/fetching";
 import StrapiObject from "@/types/strapi/common";
 import {FooterDTO} from "@/types/page-types";
 import {CategoryDTO, ProductDTO} from "@/types/product";
@@ -82,7 +82,7 @@ export const toCategoryItem = (dto : CategoryDTO) : CategoryItem => {
         title: dto.name,
         description: dto.description,
         image: dto.image,
-        href: `/site/product?cat=${dto.slug}`
+        href: `/site/product?cat=${dto.slug}&page=1`
     }
 }
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import {QueryValue, strapi} from "@/lib/fetching";
-import {BasicHttpError, ProductQueryResponse} from "@/app/api/product/types";
+import {BasicHttpError, ProductQueryResponse} from "@/types/server";
 import { parsePositiveInt } from "@/lib/utils";
 
 export const runtime = "nodejs";

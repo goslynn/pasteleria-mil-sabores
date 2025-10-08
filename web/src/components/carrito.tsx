@@ -8,7 +8,7 @@ import { StrapiImage } from "@/components/ui/strapi-image";
 import { ImageFormat } from "@/types/strapi/common";
 import { cn } from "@/lib/utils";
 import { CarritoItem } from "@/types/carrito";
-import { nextApi } from "@/lib/fetching";
+import nextApi from "@/lib/fetching";
 import { QuantityStepper } from "@/components/ui/quantity-stepper"; // <<— nuevo
 
 // Funciones de API con idCarrito + idDetalle

@@ -372,5 +372,6 @@ export function strapiClientOf(fetcher: Fetcher) {
     };
 }
 
-export const nextApi = clientOf(apiFetch);
+const nextApi = clientOf(apiFetch);
+export default nextApi
 export const strapi = strapiClientOf(cmsFetch);

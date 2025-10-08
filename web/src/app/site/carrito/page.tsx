@@ -1,7 +1,7 @@
 // app/carrito/page.tsx (o donde tengas este componente)
 import CarritoPage from "@/components/carrito";
 import type { CarritoResponse } from "@/types/carrito";
-import { nextApi } from "@/lib/fetching";
+import nextApi from "@/lib/fetching";
 import {notFound} from "next/navigation";
 
 export default async function Carrito() {

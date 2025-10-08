@@ -1,11 +1,6 @@
 import ProductGrid from "@/components/ui/product-grid";
 import { toProductCard } from "@/lib/datamapping";
-import { nextApi } from "@/lib/fetching";
-import { PageProps } from "@/types/page-types";
-import { ProductDTO } from "@/types/product";
-import { StrapiCollection, ApiMeta } from "@/types/strapi/common";
 import { notFound, redirect } from "next/navigation";
-import { isHttpError } from "@/lib/utils";
 import {
     Pagination,
     PaginationContent,
@@ -15,23 +10,24 @@ import {
     PaginationNext,
     PaginationEllipsis,
 } from "@/components/ui/pagination";
-
-// Tipos locales para máxima claridad
-// La respuesta de nextApi.get<T> es { data: T }
-type ProductCollection = StrapiCollection<ProductDTO>;
-type ProductsApiResponse = { data: ProductCollection };
+import { findProducts } from "@/app/services/product-search.service";
+import type { PageProps } from "@/types/page-types";
+import type { ApiMeta } from "@/types/strapi/common";
+import {NamedError} from "@/lib/exceptions";
 
 type ProductsQuery = {
     searchParams: PageProps["searchParams"] & {
+        q?: string;
         cat?: string;
         page?: string;
+        pageSize?: string;
     };
 };
 
-// Helpers ---------------------------------------------------------------
+// --- Helpers ---------------------------------------------------
 function ensurePageInUrl(sp: Record<string, string | string[] | undefined>) {
     const hasPage = sp && Object.prototype.hasOwnProperty.call(sp, "page");
-    if (hasPage) return; // ya viene page (cualquier valor)
+    if (hasPage) return;
 
     const qp = new URLSearchParams();
     Object.entries(sp ?? {}).forEach(([k, v]) => {
@@ -40,13 +36,12 @@ function ensurePageInUrl(sp: Record<string, string | string[] | undefined>) {
         else qp.set(k, String(v));
     });
     qp.set("page", "1");
-    // Redirección relativa: mismo path + query con page=1
     redirect(`?${qp.toString()}`);
 }
 
 function buildPageHref(
     sp: Record<string, string | string[] | undefined>,
-    page: number
+    page: number,
 ): string {
     const qp = new URLSearchParams();
     Object.entries(sp ?? {}).forEach(([k, v]) => {
@@ -55,41 +50,45 @@ function buildPageHref(
         else qp.set(k, String(v));
     });
     qp.set("page", String(page));
-    return `?${qp.toString()}`; // relativo al path actual
+    return `?${qp.toString()}`;
 }
 
-// Página ---------------------------------------------------------------
+// --- Page ------------------------------------------------------
 export default async function ProductsPage({ searchParams }: ProductsQuery) {
-    const sp = await { ...(searchParams ?? {}) };
+    // Next 15: searchParams es Promise en Server Components
+    const sp = await searchParams;
 
-    // Si no viene page en el URL, fuerza page=1 en el cliente
+    if (!sp) notFound();
+
+    // Si no viene page en el URL, fuerza page=1
     ensurePageInUrl(sp);
 
+    const page = Number(sp.page ?? "1");
+    const pageSize = sp.pageSize ? Number(sp.pageSize) : 20;
+    const q = sp.q ?? "";
+    const cat = sp.cat?.trim() || undefined;
+
     try {
-        // Pedimos { data: ProductCollection }
-        const resp = await nextApi.get<ProductsApiResponse>("/api/product", {
-            query: sp,
+        // Servicio nuevo: si viene category, ignora q (misma regla que tenías)
+        const resp = await findProducts({
+            page,
+            pageSize,
+            q,
+            category: cat,
         });
 
-        console.log("raw response of /api/product/...", resp);
-
-        const collection: ProductCollection | undefined = resp?.data;
-
-        const products: ProductDTO[] = Array.isArray(collection?.data)
-            ? collection!.data
-            : [];
-
+        // resp tiene shape de Strapi: { data: ProductDTO[], meta: { pagination } }
+        const products = Array.isArray(resp?.data) ? resp.data : [];
         if (products.length === 0) notFound();
 
         const cards = products.map(toProductCard);
 
-        const pagination: ApiMeta["pagination"] | undefined = collection?.meta?.pagination;
-        const currentPage: number = pagination?.page ?? 1;
+        const pagination: ApiMeta["pagination"] | undefined = resp?.meta?.pagination;
+        const currentPage: number = pagination?.page ?? page;
         const pageCount: number = pagination?.pageCount ?? 1;
 
-        // Layout con flex para centrado horizontal y separación
         return (
-            <main className="flex-1 flex flex-col items-center px-4 py-6 md:py-10">
+            <div className="flex-1 flex flex-col items-center px-4 py-6 md:py-10">
                 <section className="w-full max-w-6xl flex flex-col gap-6">
                     <header className="flex items-center justify-between">
                         <h1 className="text-xl font-semibold tracking-tight">Resultados</h1>
@@ -144,7 +143,10 @@ export default async function ProductsPage({ searchParams }: ProductsQuery) {
                                         .filter((p) => p > 1 && p < pageCount)
                                         .map((p) => (
                                             <PaginationItem key={p}>
-                                                <PaginationLink href={buildPageHref(sp, p)} isActive={currentPage === p}>
+                                                <PaginationLink
+                                                    href={buildPageHref(sp, p)}
+                                                    isActive={currentPage === p}
+                                                >
                                                     {p}
                                                 </PaginationLink>
                                             </PaginationItem>
@@ -184,10 +186,12 @@ export default async function ProductsPage({ searchParams }: ProductsQuery) {
                         </div>
                     )}
                 </section>
-            </main>
+            </div>
         );
-    } catch (e: unknown) {
-        if (isHttpError(e) && e.status === 404) notFound();
-        throw e;
+    } catch (e) {
+        // Tus servicios lanzan ValidationError / NotFoundError
+        const namedErr = e as NamedError;
+        if (namedErr && namedErr.name === "NotFoundError") notFound();
+        else throw e;
     }
 }
