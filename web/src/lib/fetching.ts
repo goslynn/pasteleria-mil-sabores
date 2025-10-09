@@ -206,10 +206,7 @@ async function coreFetch<T>(fullUrl: string, opts: FetchOptions): Promise<T> {
     const data = (await parseBody(res, parse)) as T | string | null;
 
     if (!res.ok) {
-        const err = new HttpError<T>(res, data as T | string | null);
-        // Puedes mantener logs si quieres:
-        // console.log("HTTP ERROR: ", err.toString());
-        throw err;
+        throw new HttpError<T>(res, data as T | string | null);
     }
     return data as T;
 }

@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import {CarritoItem, CarritoPostBody, CarritoResponse} from "@/types/carrito";
 import {isPositiveNumber} from "@/lib/utils";
-import nextApi from "@/lib/fetching";
-import {ProductDTO} from "@/types/product";
 import {getSessionUserId} from "@/lib/auth";
-import {BasicHttpError} from "@/types/server";2
+import {BasicHttpError} from "@/types/server";
+import {getProductByCode} from "@/app/services/product.service";
+
+2
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -30,8 +31,7 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-        const res = await nextApi.get<{ data: { product: ProductDTO } }>(`/api/product/${code}`);
-        const product = res?.data?.product;
+        const product = await getProductByCode(code);
 
         if (!product?.code || !product.name || !product.price) {
             return NextResponse.json({ error: "Producto inválido" }, { status: 404 });
@@ -92,7 +92,7 @@ export async function GET(_req: NextRequest) {
                 idUsuarioFk: idUsuario,
                 carritoDetalle: [],
             };
-            return NextResponse.json(empty, { status: 200 });
+            return NextResponse.json({data: empty}, { status: 200 });
         }
 
         // Enriquecer cada ítem consultando el endpoint de productos
@@ -101,10 +101,7 @@ export async function GET(_req: NextRequest) {
             items = await Promise.all(
                 carrito.carritoDetalle.map(async (d) => {
                     try {
-                        const res = await nextApi.get<{ data: { product: ProductDTO } }>(
-                            `/api/product/${d.idProducto}`
-                        );
-                        const p = res?.data?.product;
+                        const p = await getProductByCode(d.idProducto);
 
                         // Chequeo básico del producto recibido
                         if (!p?.code || !p.name || typeof p.price !== "number") {
@@ -149,7 +146,7 @@ export async function GET(_req: NextRequest) {
             carritoDetalle: items,
         };
 
-        return NextResponse.json(response, { status: 200 });
+        return NextResponse.json({data : response}, { status: 200 });
     } catch (err) {
         console.error("Error en GET /carrito:", err);
         return NextResponse.json(
