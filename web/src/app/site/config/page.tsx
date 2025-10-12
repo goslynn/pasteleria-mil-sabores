@@ -1,9 +1,6 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/datamapping";
-import { UsuarioDTO } from "@/types/user";
-import { PasswInput } from "@/components/ui/passw-input";
-import { FaTrash } from "react-icons/fa"; // 🗑️ ícono de basura
-//import { validarDireccionGoogle } from "@/lib/google";
+
 import {getComunasByRegion, getDireccionesByUsuario, getRegiones} from "./action";
 import { ConfigPage } from "@/components/config-form";
 

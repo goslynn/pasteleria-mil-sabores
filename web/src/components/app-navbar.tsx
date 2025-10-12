@@ -9,6 +9,7 @@ import AppUserMenu from '@/components/ui/app-user-menu'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { GoToCartButton } from '@/components/ui/goto-carrito-button'
 import { Link } from '@/types/general'
+import {UserMenuProps} from "@/components/ui/user-menu";
 
 type AppNavbarProps = {
     searchAction: (formData: FormData) => void | Promise<void>
@@ -26,6 +27,14 @@ export function AppNavbar({ searchAction }: AppNavbarProps) {
         { link: footerRef, label: 'Contacto' },
     ]
 
+    const userMenuProps : UserMenuProps = {
+        loginHref: "/auth/login",
+        items: [
+            { key: 'profile', label: "Perfil", href: "/site/config/"},
+            { key: 'logout', label: "Cerrar sesión", href: "/auth/logout", destructive: true , separatorAbove: true}
+        ]
+    }
+
     return (
         <Navbar className="brand-scope">
             <Navbar.Icon>
@@ -38,7 +47,7 @@ export function AppNavbar({ searchAction }: AppNavbarProps) {
             </Navbar.Search>
 
             <Navbar.Actions>
-                <AppUserMenu />
+                <AppUserMenu {...userMenuProps} />
                 <ThemeToggle />
                 <GoToCartButton link="/site/carrito" />
             </Navbar.Actions>
